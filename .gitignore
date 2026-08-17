@@ -1,0 +1,59 @@
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+*.jar
+*.war
+*.zip
+*.tar.gz
+*.rar
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### Eclipse ###
+.metadata/
+.classpath
+.project
+.settings/
+.factorypath
+.springBeans
+
+### Sensitive files ###
+.env
+.env.local
+application-local.yaml
+application-prod.yaml
+application.yaml
+
+.DS_Store
+Thumbs.db
+desktop.ini
+jvm.crash.*

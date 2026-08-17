@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>InfoLink – Admin Search</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css"/>
+  <style>
+    /* ── Search panel ── */
+    .search-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .search-panel-title {
+      font-size: 0.97rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+    }
+
+    .search-row {
+      display: grid;
+      grid-template-columns: 1fr 260px;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-label { font-size: 0.8rem; font-weight: 500; color: var(--text-muted); }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-icon {
+      position: absolute; left: 14px;
+      color: var(--text-secondary); pointer-events: none; transition: color 0.2s;
+    }
+    .input-wrap:focus-within .input-icon { color: var(--accent); }
+    .input-icon svg { width: 16px; height: 16px; }
+
+    .search-input,
+    .group-select {
+      width: 100%;
+      padding: 12px 14px 12px 42px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .search-input:focus,
+    .group-select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    .search-input::placeholder { color: var(--text-secondary); }
+
+    .group-select { padding-left: 14px; cursor: pointer; }
+    .group-select option { background: #111827; }
+
+    /* Group badge count */
+    .select-wrap {
+      position: relative;
+    }
+    .group-count {
+      position: absolute;
+      right: 36px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--accent-light);
+      color: var(--accent);
+      font-size: 0.72rem;
+      font-weight: 700;
+      border-radius: 4px;
+      padding: 2px 6px;
+      pointer-events: none;
+    }
+    .select-chevron {
+      position: absolute;
+      right: 12px; top: 50%; transform: translateY(-50%);
+      pointer-events: none; color: var(--text-secondary);
+    }
+    .select-chevron svg { width: 14px; height: 14px; }
+
+    /* Action row */
+    .action-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .access-notice {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(59,130,246,0.08);
+      border: 1px solid rgba(59,130,246,0.2);
+      border-radius: 10px;
+      padding: 10px 16px;
+      flex: 1;
+    }
+    .access-notice svg { width: 18px; height: 18px; color: var(--info); flex-shrink: 0; }
+    .access-notice span { font-size: 0.84rem; color: var(--text-muted); }
+
+    .action-btns { display: flex; align-items: center; gap: 10px; }
+
+    .btn-filter {
+      display: flex; align-items: center; gap: 7px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      color: var(--text-muted);
+      font-size: 0.86rem; font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .btn-filter:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-filter svg { width: 15px; height: 15px; }
+
+    .btn-search {
+      display: flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+      border: none;
+      border-radius: 8px;
+      padding: 10px 22px;
+      color: #fff;
+      font-size: 0.9rem; font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 3px 16px var(--accent-glow);
+    }
+    .btn-search:hover { transform: translateY(-1px); box-shadow: 0 6px 24px var(--accent-glow); }
+    .btn-search:active { transform: translateY(0); }
+    .btn-search svg { width: 16px; height: 16px; }
+
+    /* ── Recent searches table ── */
+    .results-section { }
+    .results-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .results-title { font-size: 0.97rem; font-weight: 600; color: var(--text-primary); }
+
+    .search-again-btn {
+      background: none; border: none;
+      color: var(--accent);
+      font-size: 0.85rem; font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      padding: 4px 0;
+      transition: color 0.18s;
+    }
+    .search-again-btn:hover { color: #a78bfa; }
+
+    .results-count {
+      font-size: 0.82rem; color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    /* zero results badge */
+    .zero { color: var(--danger); font-weight: 600; }
+    .positive { color: var(--success); font-weight: 600; }
+
+    /* keyword mask */
+    .kw-masked { letter-spacing: 2px; }
+
+    /* ── Highlight effect on search ── */
+    @keyframes rowHighlight {
+      0%   { background: rgba(124,58,237,0.15); }
+      100% { background: transparent; }
+    }
+    .highlighted td { animation: rowHighlight 1.5s ease forwards; }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 8C10 8 14 8 16 12C18 16 22 16 22 16" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M10 16C10 16 14 16 16 20C18 24 22 24 22 24" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="10" cy="8" r="2.5" fill="#7c3aed"/>
+        <circle cx="22" cy="16" r="2.5" fill="#7c3aed"/>
+        <circle cx="10" cy="16" r="2.5" fill="#a78bfa"/>
+        <circle cx="22" cy="24" r="2.5" fill="#a78bfa"/>
+      </svg>
+      <span class="sidebar-logo-text">InfoLink</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+
+      <a href="dashboard.html" class="nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        Dashboard
+      </a>
+
+      <a href="search-admin.html" class="nav-item active">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        Search
+      </a>
+
+      <div class="nav-section-label">Management</div>
+
+      <a href="users.html" class="nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        Users
+      </a>
+
+      <a href="#" class="nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+        </svg>
+        Groups
+      </a>
+
+      <a href="#" class="nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+        </svg>
+        Logs
+      </a>
+
+      <div class="nav-section-label">Settings</div>
+
+      <a href="#" class="nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+        </svg>
+        Change Password
+      </a>
+    </nav>
+
+    <div class="sidebar-user">
+      <div class="user-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name">Admin</div>
+        <div class="user-role">System Administrator</div>
+      </div>
+    </div>
+    <div style="padding:0 14px 14px;">
+      <button class="btn-logout" id="logoutBtn" onclick="handleLogout()">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-title">
+        <h2>Admin Search</h2>
+        <p>Search all groups</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="theme-btn" title="Toggle theme">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+        <div class="profile-chip">
+          <div class="avatar">A</div>
+          <div>
+            <div class="name">Admin</div>
+            <div class="role">System Administrator</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="page-content">
+
+      <!-- Search Panel -->
+      <div class="search-panel">
+        <div class="search-panel-title">Find an internal record</div>
+
+        <div class="search-row">
+          <!-- Keyword input -->
+          <div class="form-group">
+            <label class="form-label">Search keyword</label>
+            <div class="input-wrap">
+              <span class="input-icon">
+                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+              </span>
+              <input
+                type="text"
+                id="searchInput"
+                class="search-input"
+                placeholder="National ID, phone number, address or filename"
+              />
+            </div>
+          </div>
+
+          <!-- Group select -->
+          <div class="form-group">
+            <label class="form-label">Group</label>
+            <div class="select-wrap">
+              <select class="group-select" id="groupSelect" style="padding-right: 80px; appearance: none; -webkit-appearance: none;">
+                <option value="all">All groups</option>
+                <option value="hr">HR – Employees</option>
+                <option value="sales">Sales – Customers</option>
+                <option value="finance">Finance – Payments</option>
+                <option value="mgmt">Management</option>
+                <option value="dm">Digital Marketing</option>
+                <option value="it">IT Team</option>
+                <option value="legal">Legal – Contracts</option>
+                <option value="ops">Operations</option>
+              </select>
+              <span class="group-count" id="groupCount">8</span>
+              <span class="select-chevron">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Access notice + actions -->
+        <div class="action-row">
+          <div class="access-notice">
+            <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <span>Full access: all groups are searchable.</span>
+          </div>
+          <div class="action-btns">
+            <button class="btn-filter" id="filterBtn">
+              <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+              </svg>
+              Filters
+            </button>
+            <button class="btn-search" id="searchBtn">
+              <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              Search records
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Searches Table -->
+      <div class="results-section">
+        <div class="results-header">
+          <div class="results-title" id="resultsTitle">Recent Searches</div>
+        </div>
+
+        <div class="card" style="padding:0;overflow:hidden;">
+          <table class="data-table" id="resultsTable">
+            <thead>
+              <tr>
+                <th>Keyword</th>
+                <th>Collection</th>
+                <th>Results</th>
+                <th>Date &amp; time</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="resultsBody">
+              <tr>
+                <td style="color:var(--text-primary);font-weight:500" class="kw-masked">2988••••</td>
+                <td>IT Team</td>
+                <td class="positive">8</td>
+                <td>Today, 09:42</td>
+                <td><button class="search-again-btn">Search again</button></td>
+              </tr>
+              <tr>
+                <td style="color:var(--text-primary);font-weight:500">Invoice 934</td>
+                <td>Finance Payments</td>
+                <td class="positive">3</td>
+                <td>Today, 09:12</td>
+                <td><button class="search-again-btn">Search again</button></td>
+              </tr>
+              <tr>
+                <td style="color:var(--text-primary);font-weight:500" class="kw-masked">0101••••</td>
+                <td>Sales Customers</td>
+                <td class="zero">0</td>
+                <td>Yesterday</td>
+                <td><button class="search-again-btn">Search again</button></td>
+              </tr>
+              <tr>
+                <td style="color:var(--text-primary);font-weight:500">Renewal 2026</td>
+                <td>Digital Marketing</td>
+                <td class="positive">12</td>
+                <td>Yesterday</td>
+                <td><button class="search-again-btn">Search again</button></td>
+              </tr>
+              <tr>
+                <td style="color:var(--text-primary);font-weight:500">Address: Cairo</td>
+                <td>All Groups</td>
+                <td class="positive">21</td>
+                <td>2 days ago</td>
+                <td><button class="search-again-btn">Search again</button></td>
+              </tr>
+              <tr>
+                <td style="color:var(--text-primary);font-weight:500">Invoice 934</td>
+                <td>Finance Payments</td>
+                <td class="positive">3</td>
+                <td>Today, 09:12</td>
+                <td><button class="search-again-btn">Search again</button></td>
+              </tr>
+              <tr>
+                <td style="color:var(--text-primary);font-weight:500" class="kw-masked">0101••••</td>
+                <td>Sales Customers</td>
+                <td class="zero">0</td>
+                <td>Yesterday</td>
+                <td><button class="search-again-btn">Search again</button></td>
+              </tr>
+              <tr>
+                <td style="color:var(--text-primary);font-weight:500">Renewal 2026</td>
+                <td>Digital Marketing</td>
+                <td class="positive">12</td>
+                <td>Yesterday</td>
+                <td><button class="search-again-btn">Search again</button></td>
+              </tr>
+              <tr>
+                <td style="color:var(--text-primary);font-weight:500">Address: Giza</td>
+                <td>All Groups</td>
+                <td class="positive">21</td>
+                <td>2 days ago</td>
+                <td><button class="search-again-btn">Search again</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  // Auth guard
+  if (!sessionStorage.getItem('infolink_role')) {
+    window.location.href = 'login.html';
+  }
+
+  // Logout handler
+  function handleLogout() {
+    sessionStorage.clear();
+    window.location.href = 'login.html';
+  }
+
+  // Update group count badge when selection changes
+  const groupSelect = document.getElementById('groupSelect');
+  const groupCount  = document.getElementById('groupCount');
+
+  groupSelect.addEventListener('change', () => {
+    groupCount.textContent = groupSelect.value === 'all' ? '8' : '1';
+  });
+
+  // Search button — demo: prepend new row
+  const searchBtn   = document.getElementById('searchBtn');
+  const searchInput = document.getElementById('searchInput');
+  const resultsTitle= document.getElementById('resultsTitle');
+  const resultsBody = document.getElementById('resultsBody');
+
+  searchBtn.addEventListener('click', performSearch);
+  searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') performSearch(); });
+
+  function performSearch() {
+    const kw = searchInput.value.trim();
+    if (!kw) {
+      searchInput.focus();
+      searchInput.style.borderColor = '#ef4444';
+      setTimeout(() => (searchInput.style.borderColor = ''), 1200);
+      return;
+    }
+
+    searchBtn.disabled = true;
+    searchBtn.innerHTML = `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="animation:spin 0.7s linear infinite"><circle cx="12" cy="12" r="10" stroke-opacity="0.3"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Searching…`;
+
+    setTimeout(() => {
+      searchBtn.disabled = false;
+      searchBtn.innerHTML = `<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="width:16px;height:16px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Search records`;
+
+      const groupLabel = groupSelect.options[groupSelect.selectedIndex].text;
+      const fakeCount  = Math.floor(Math.random() * 20);
+      const now        = new Date();
+      const timeStr    = `Today, ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+
+      resultsTitle.textContent = `Search Results`;
+
+      const tr = document.createElement('tr');
+      tr.classList.add('highlighted');
+      tr.innerHTML = `
+        <td style="color:var(--text-primary);font-weight:500">${escHtml(kw)}</td>
+        <td>${escHtml(groupLabel)}</td>
+        <td class="${fakeCount > 0 ? 'positive' : 'zero'}">${fakeCount}</td>
+        <td>${timeStr}</td>
+        <td><button class="search-again-btn">Search again</button></td>
+      `;
+      resultsBody.insertBefore(tr, resultsBody.firstChild);
+
+      // Wire "search again" on new row
+      tr.querySelector('.search-again-btn').addEventListener('click', () => {
+        searchInput.value = kw;
+        performSearch();
+      });
+    }, 900);
+  }
+
+  // Wire "search again" on existing rows
+  document.querySelectorAll('.search-again-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const kw = this.closest('tr').querySelector('td:first-child').textContent.replace(/•+/g, '').trim();
+      searchInput.value = kw;
+      performSearch();
+    });
+  });
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // Spin keyframe
+  const style = document.createElement('style');
+  style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+  document.head.appendChild(style);
+</script>
+</body>
+</html>

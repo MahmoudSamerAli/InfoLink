@@ -1,0 +1,5 @@
+_id,paymentId,customerId,paymentDate,amount,paymentMethod,paymentStatus,fileName,createdAt,updatedAt
+6a7c4f756129266d20e26ce5,PAY-1001,CUS-1001,2026-08-01,2500,Bank Transfer,Completed,Payment_1001.pdf,2026-08-01,2026-08-01
+6a7c4f896129266d20e26ce7,PAY-1002,CUS-1002,2026-08-02,1800,Credit Card,Pending,Payment_1002.pdf,2026-08-02,2026-08-02
+6a7c4f9c6129266d20e26ce9,PAY-1003,CUS-1003,2026-08-03,3200,Cash,Completed,Payment_1003.pdf,2026-08-03,2026-08-03
+6a7c4fb56129266d20e26ceb,PAY-1004,CUS-1004,2026-08-04,950,Bank Transfer,Failed,Payment_1004.pdf,2026-08-04,2026-08-04

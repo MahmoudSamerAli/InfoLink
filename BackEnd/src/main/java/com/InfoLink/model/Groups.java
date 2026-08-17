@@ -1,0 +1,43 @@
+package com.InfoLink.model;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "Groups")
+public class Groups {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) 
+    @Column(name = "GroupID", nullable = false, unique = true)
+    private Long groupID;
+
+    @Column(name = "GroupName", nullable = false, length = 100)
+    private String groupName;
+
+    @Column(name = "GroupDescription", length = 255)
+    private String groupDescription;
+
+    @Column(name = "IsActive", nullable = false)
+    private Boolean isActive;
+
+    public Groups() {}
+
+    public Groups(Long groupID, String groupName, String groupDescription, Boolean isActive) {
+        this.groupID = groupID;
+        this.groupName = groupName;
+        this.groupDescription = groupDescription;
+        this.isActive = isActive;
+    }
+
+    public Long getGroupID() { return groupID; }
+    public void setGroupID(Long groupID) { this.groupID = groupID; }
+
+    public String getGroupName() { return groupName; }
+    public void setGroupName(String groupName) { this.groupName = groupName; }
+
+    public String getGroupDescription() { return groupDescription; }
+    public void setGroupDescription(String groupDescription) { this.groupDescription = groupDescription; }
+
+    public Boolean getIsActive() { return isActive; }
+    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
+}

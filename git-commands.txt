@@ -1,0 +1,111 @@
+GIT COMMANDS REFERENCE
+======================
+
+SETUP & CONFIGURATION
+---------------------
+git init                          - Initialize a new Git repository in the current directory
+git init <directory>              - Initialize a new Git repository in a specific directory
+git config --global user.name     - Set the global user name for commits
+git config --global user.email    - Set the global email for commits
+git config --list                 - List all current Git configuration settings
+git config --global core.editor   - Set the default text editor for commit messages
+git clone <url>                   - Create a local copy of a remote repository
+git version                       - Display the installed Git version
+git help <command>                - Show help and usage for a specific command
+
+WORKING WITH CHANGES
+--------------------
+git status                        - Show the current state of the working directory and staging area
+git add <file>                    - Stage a specific file for the next commit
+git add .                         - Stage all new and modified files in the current directory
+git add -A                        - Stage all changes (including deletions) in the whole repository
+git add -p                        - Interactively stage parts (hunks) of a changed file
+git diff                          - Show unstaged changes between the working directory and staging area
+git diff --staged                 - Show changes between the staging area and the last commit
+git commit -m "<message>"         - Create a commit with the specified message
+git commit -am "<message>"        - Stage tracked changes and commit in one step
+git commit --amend                - Modify the most recent commit (message or add staged files)
+git restore <file>                - Discard unstaged changes to a file
+git restore --staged <file>       - Unstage a file while keeping its changes
+git reset <file>                  - Remove a file from the staging area
+git reset                         - Unstage all changes but keep them in the working directory
+git reset --hard                  - Discard all uncommitted changes (irreversible)
+git reset --soft <commit>         - Move HEAD to a commit, keeping changes staged
+git rm <file>                     - Remove a file from the repository and the working directory
+git mv <file> <destination>       - Rename or move a file in the repository
+git clean -f                      - Remove untracked files from the working directory
+
+BRANCHING & MERGING
+-------------------
+git branch                        - List all local branches (asterisk marks the current branch)
+git branch <name>                 - Create a new branch at the current commit
+git branch -d <name>              - Delete a local branch (only if merged)
+git branch -D <name>              - Force delete a branch regardless of merge status
+git branch -m <new-name>          - Rename the current branch
+git checkout <branch>             - Switch to an existing branch
+git checkout -b <name>            - Create a new branch and switch to it
+git switch <branch>               - Switch to an existing branch (modern alternative to checkout)
+git switch -c <name>              - Create a new branch and switch to it (modern alternative)
+git merge <branch>                - Merge the specified branch into the current branch
+git merge --abort                 - Cancel a merge that has conflicts
+git rebase <branch>               - Reapply current branch commits on top of another branch
+git rebase -i <commit>            - Interactively edit, reorder, or squash commits
+git rebase --abort                - Cancel an in-progress rebase
+
+REMOTE & COLLABORATION
+----------------------
+git remote -v                     - List configured remote repositories
+git remote add <name> <url>       - Add a new remote repository
+git remote remove <name>          - Remove a remote repository
+git remote rename <old> <new>     - Rename a remote repository
+git fetch <remote>                - Download objects and refs from a remote without merging
+git pull                          - Fetch and merge changes from the remote into the current branch
+git pull --rebase                 - Fetch changes and rebase local commits on top of remote ones
+git push                          - Upload local commits to the remote repository
+git push -u origin <branch>       - Push a branch and set the upstream tracking remote
+git push origin --delete <branch> - Delete a branch on the remote repository
+git push --tags                   - Push all local tags to the remote repository
+
+INSPECTION & HISTORY
+--------------------
+git log                           - Show the commit history of the current branch
+git log --oneline                 - Show commit history as a compact one-line list
+git log --graph                   - Show commit history as a text-based graph of branches
+git log -p                        - Show commit history along with the changes in each commit
+git log --stat                    - Show commit history with a summary of files changed
+git show <commit>                 - Display the details and changes of a specific commit
+git show HEAD                     - Show the details and changes of the latest commit
+git blame <file>                  - Show who last changed each line of a file and when
+git diff <branch1> <branch2>      - Show differences between two branches
+git diff <commit1> <commit2>      - Show differences between two commits
+git tag                           - List all tags
+git tag <name>                    - Create a tag at the current commit
+git tag -a <name> -m "<message>"  - Create an annotated tag with a message
+git tag -d <name>                 - Delete a local tag
+
+STASHING
+--------
+git stash                         - Temporarily save uncommitted changes and clean the working directory
+git stash list                    - List all saved stashes
+git stash pop                     - Restore the most recent stash and remove it from the list
+git stash apply                   - Restore the most recent stash without removing it from the list
+git stash drop                    - Delete the most recent stash
+git stash clear                   - Delete all stashes
+
+UNDOING & RECOVERY
+------------------
+git revert <commit>               - Create a new commit that undoes a previous commit's changes
+git cherry-pick <commit>          - Apply the changes of a specific commit to the current branch
+git reflog                        - Show a log of all HEAD movements (useful for recovery)
+git fsck --lost-found             - Check the repository for unreachable/dangling commits
+
+MISCELLANEOUS
+-------------
+git status --short                - Show repository status in a compact abbreviated format
+git shortlog                      - Summarize commit history by author
+git count-objects -v              - Show storage usage and repository housekeeping info
+git gc                            - Clean up the repository by optimizing and packing objects
+git archive                       - Create a tar/zip archive of the repository contents
+git submodule add <url>           - Add a submodule to the repository
+git worktree add <path> <branch>  - Add a new working tree linked to the repository
+git grep "<pattern>"              - Search the tracked files for a string pattern
