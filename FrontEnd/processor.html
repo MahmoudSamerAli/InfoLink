@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Processor</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Choices -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
+
+</head>
+
+<body>
+
+<div class="main">
+  <h2 class="title">Column Mapping</h2>
+  <p style="color: var(--subtext); margin-bottom: 20px;">
+    Upload your file and map the columns to the master output fields.
+  </p>
+
+  <div class="card">
+
+    <!-- 🔥 Upload Box -->
+    <div class="upload-box" id="dropArea">
+
+      <div class="upload-icon">⬆</div>
+
+      <p>Drag & drop your file here</p>
+      <small>Supports CSV, XLSX</small>
+
+      <br><br>
+
+      <input type="file" id="fileInput" hidden>
+
+      <label for="fileInput" class="btn btn-primary">
+        📁 Choose File
+      </label>
+
+      <p id="fileName" style="margin-top:10px; color: var(--subtext);">
+        No file chosen
+      </p>
+
+    </div>
+
+    <!-- 🔥 Mapping -->
+    <div class="mapping-grid">
+
+      <div>
+        <label>Name</label>
+        <select id="map_name" multiple></select>
+      </div>
+
+      <div>
+        <label>Number</label>
+        <select id="map_number" multiple></select>
+      </div>
+
+      <div>
+        <label>No.2</label>
+        <select id="map_number2" multiple></select>
+      </div>
+
+      <div>
+        <label>Address</label>
+        <select id="map_address" multiple></select>
+      </div>
+
+      <div>
+        <label>Branch</label>
+        <select id="map_branch" multiple></select>
+      </div>
+
+      <div>
+        <label>Area</label>
+        <select id="map_area" multiple></select>
+      </div>
+
+      <div>
+        <label>Date</label>
+        <select id="map_date" multiple></select>
+      </div>
+
+      <div>
+        <label>Identity ID</label>
+        <select id="map_id" multiple></select>
+      </div>
+
+    </div>
+    <div>
+  <label>Last Order</label>
+  <select id="map_last_order" multiple></select>
+</div>
+<div>
+  <label>Building No.</label>
+  <select id="map_building" multiple></select>
+</div>
+<div>
+  <label>Apartment No.</label>
+  <select id="map_apartment" multiple></select>
+</div>
+
+    <button class="btn btn-primary" onclick="run()">▶ Run</button>
+
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+<script>
+
+// ===== CHOICES =====
+const selects = [
+  "map_name",
+  "map_number",
+  "map_number2",
+  "map_address",
+  "map_branch",
+  "map_area",
+  "map_date",
+  "map_id",
+  "map_last_order",
+  "map_building",
+  "map_apartment"
+];
+
+let choicesInstances = {};
+
+selects.forEach(id => {
+  choicesInstances[id] = new Choices("#" + id, {
+    removeItemButton: true,
+    searchEnabled: true
+  });
+});
+
+// ===== FILE =====
+document.getElementById("fileInput").addEventListener("change", handleFile);
+
+function handleFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  document.getElementById("fileName").innerText = file.name;
+
+  const reader = new FileReader();
+
+  reader.onload = function(evt) {
+    const data = new Uint8Array(evt.target.result);
+    const workbook = XLSX.read(data, { type: "array" });
+
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+    const headers = json[0];
+
+    fillDropdowns(headers);
+  };
+
+  reader.readAsArrayBuffer(file);
+}
+
+// ===== FILL =====
+function fillDropdowns(headers) {
+  selects.forEach(id => {
+    choicesInstances[id].clearChoices();
+
+    choicesInstances[id].setChoices(
+      headers.map(h => ({ value: h, label: h })),
+      "value",
+      "label",
+      true
+    );
+  });
+}
+
+// ===== RUN =====
+function run() {
+  alert("Ready ✔");
+}
+
+</script>
+
+</body>
+</html>

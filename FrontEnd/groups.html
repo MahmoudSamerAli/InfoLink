@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>InfoLink – Groups</title>
+  <meta name="description" content="Admin Groups Management – view and manage system groups and their collection access."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css"/>
+  <style>
+    /* ── Toolbar ── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .search-wrap {
+      flex: 1; min-width: 200px; position: relative;
+    }
+    .search-wrap svg {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      width: 15px; height: 15px; color: var(--text-secondary); pointer-events: none;
+    }
+    .search-input {
+      width: 100%; background: var(--bg-input); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text-primary); font-size: 0.86rem;
+      font-family: 'Inter', sans-serif; padding: 9px 12px 9px 36px;
+      outline: none; transition: border-color 0.18s;
+    }
+    .search-input::placeholder { color: var(--text-secondary); }
+    .search-input:focus { border-color: var(--accent); }
+
+    /* ── Groups grid ── */
+    .groups-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .group-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+    .group-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #7c3aed, #4f46e5);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .group-card:hover {
+      border-color: rgba(124,58,237,0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.25);
+    }
+    .group-card:hover::before { opacity: 1; }
+
+    .group-card-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .group-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: rgba(124,58,237,0.15); color: #a78bfa;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .group-icon svg { width: 20px; height: 20px; }
+
+    .group-status-badge {
+      font-size: 0.75rem; font-weight: 600;
+      padding: 3px 10px; border-radius: 20px;
+    }
+    .badge-active   { color: var(--success); background: var(--success-bg); }
+    .badge-inactive { color: var(--danger);  background: var(--danger-bg);  }
+
+    .group-name {
+      font-size: 1rem; font-weight: 700;
+      color: var(--text-primary); margin-bottom: 4px;
+    }
+    .group-desc {
+      font-size: 0.83rem; color: var(--text-secondary);
+      line-height: 1.5; margin-bottom: 14px;
+    }
+
+    .group-collections-label {
+      font-size: 0.72rem; font-weight: 600;
+      color: var(--text-secondary); text-transform: uppercase;
+      letter-spacing: 0.5px; margin-bottom: 8px;
+    }
+    .coll-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+    .coll-tag {
+      background: var(--accent-light);
+      border: 1px solid rgba(124,58,237,0.25);
+      color: #a78bfa; font-size: 0.75rem; font-weight: 600;
+      padding: 3px 10px; border-radius: 20px;
+    }
+
+    .group-card-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .group-id { font-size: 0.75rem; color: var(--text-secondary); }
+    .group-actions { display: flex; gap: 8px; align-items: center; }
+
+    .action-link {
+      background: none; border: none;
+      font-size: 0.82rem; font-family: 'Inter', sans-serif;
+      font-weight: 600; cursor: pointer; padding: 0;
+      transition: opacity 0.18s;
+    }
+    .action-link:hover { opacity: 0.7; }
+    .action-edit   { color: var(--text-muted); }
+    .action-toggle { color: var(--warning); }
+    .action-delete { color: var(--danger); }
+    .action-users  { color: var(--info); }
+    .action-sep    { color: var(--border-light); margin: 0 4px; }
+
+    /* User count badge */
+    .user-count-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2);
+      color: #60a5fa; font-size: 0.72rem; font-weight: 600;
+      padding: 2px 8px; border-radius: 12px; cursor: pointer;
+      transition: all 0.18s;
+    }
+    .user-count-badge:hover { background: rgba(59,130,246,0.2); }
+    .user-count-badge svg { width: 11px; height: 11px; }
+
+    /* ── Summary bar ── */
+    .summary-bar {
+      display: flex; gap: 20px; align-items: center;
+      margin-bottom: 20px;
+    }
+    .summary-item {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.85rem; color: var(--text-secondary);
+    }
+    .summary-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+    }
+    .dot-active   { background: var(--success); box-shadow: 0 0 6px var(--success); }
+    .dot-inactive { background: var(--danger);  box-shadow: 0 0 6px var(--danger); }
+    .summary-count { font-weight: 700; color: var(--text-primary); }
+
+    /* Edit modal */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6); z-index: 200;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 30px 28px 24px;
+      width: 100%; max-width: 480px;
+      animation: fadeUp 0.22s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(16px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .modal-title { font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 20px; }
+    .modal-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .modal-label { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); }
+    .modal-input {
+      background: var(--bg-input); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text-primary);
+      font-size: 0.86rem; font-family: 'Inter', sans-serif;
+      padding: 9px 12px; outline: none; transition: border-color 0.18s;
+    }
+    .modal-input:focus { border-color: var(--accent); }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+    /* Users modal */
+    .users-modal-list { max-height: 280px; overflow-y: auto; margin: 16px 0; }
+    .user-modal-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+      font-size: 0.86rem;
+    }
+    .user-modal-item:last-child { border-bottom: none; }
+    .user-modal-name { color: var(--text-primary); font-weight: 600; }
+    .user-modal-username { color: var(--text-secondary); font-size: 0.78rem; }
+    .user-modal-status { font-size: 0.75rem; font-weight: 600; }
+    .status-active   { color: var(--success); }
+    .status-inactive { color: var(--danger); }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 8C10 8 14 8 16 12C18 16 22 16 22 16" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M10 16C10 16 14 16 16 20C18 24 22 24 22 24" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="10" cy="8"  r="2.5" fill="#7c3aed"/>
+        <circle cx="22" cy="16" r="2.5" fill="#7c3aed"/>
+        <circle cx="10" cy="16" r="2.5" fill="#a78bfa"/>
+        <circle cx="22" cy="24" r="2.5" fill="#a78bfa"/>
+      </svg>
+      <span class="sidebar-logo-text">InfoLink</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+
+      <a href="dashboard.html" class="nav-item" id="nav-dashboard">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        Dashboard
+      </a>
+
+      <a href="search-admin.html" class="nav-item" id="nav-search">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        Search
+      </a>
+
+      <div class="nav-section-label">Management</div>
+
+      <a href="users.html" class="nav-item" id="nav-users">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        Users
+      </a>
+
+      <a href="groups.html" class="nav-item active" id="nav-groups">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+        </svg>
+        Groups
+      </a>
+
+      <a href="logs.html" class="nav-item" id="nav-logs">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+        </svg>
+        Logs
+      </a>
+
+      <div class="nav-section-label">Settings</div>
+
+      <a href="change-password.html" class="nav-item" id="nav-change-pw">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+        </svg>
+        Change Password
+      </a>
+    </nav>
+
+    <div class="sidebar-user">
+      <div class="user-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name">Admin</div>
+        <div class="user-role">System Administrator</div>
+      </div>
+    </div>
+    <div style="padding:0 14px 14px;">
+      <button class="btn-logout" id="logoutBtn" onclick="handleLogout()">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <div class="main">
+
+    <header class="topbar">
+      <div class="topbar-title">
+        <h2>Groups</h2>
+        <p>Manage system groups and their collection access</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="theme-btn" title="Toggle theme" id="theme-toggle">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+        <div class="profile-chip">
+          <div class="avatar">A</div>
+          <div>
+            <div class="name">Admin</div>
+            <div class="role">System Administrator</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-content">
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input id="search-input" type="text" class="search-input" placeholder="Search groups…" autocomplete="off"/>
+        </div>
+        <button class="btn btn-primary" id="btn-add-group" style="margin-left:auto;" onclick="openAddModal()">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add Group
+        </button>
+      </div>
+
+      <!-- Summary -->
+      <div class="summary-bar">
+        <div class="summary-item">
+          <span class="summary-dot dot-active"></span>
+          <span class="summary-count" id="count-active">0</span> active
+        </div>
+        <div class="summary-item">
+          <span class="summary-dot dot-inactive"></span>
+          <span class="summary-count" id="count-inactive">0</span> inactive
+        </div>
+      </div>
+
+      <!-- Groups grid -->
+      <div class="groups-grid" id="groups-grid">
+        <!-- Rendered by JS -->
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Edit / Add Modal -->
+<div class="modal-overlay" id="group-modal">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">Edit Group</div>
+    <div class="modal-field">
+      <label class="modal-label">Group Name</label>
+      <input class="modal-input" id="modal-name" type="text" placeholder="Group name"/>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Description</label>
+      <input class="modal-input" id="modal-desc" type="text" placeholder="Short description"/>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Collections (comma-separated)</label>
+      <input class="modal-input" id="modal-cols" type="text" placeholder="e.g. HR Employees, Contracts"/>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" id="modal-cancel">Cancel</button>
+      <button class="btn btn-primary" id="modal-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Users in Group Modal -->
+<div class="modal-overlay" id="users-modal">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-title" id="users-modal-title">Users in Group</div>
+    <div class="users-modal-list" id="users-modal-list"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" id="users-modal-close">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="data-store.js"></script>
+<script>
+  // Auth guard
+  if (!InfoLinkStore.isLoggedIn() || !InfoLinkStore.isAdmin()) {
+    window.location.href = 'login.html';
+  }
+
+  // Show logged-in user
+  const cu = InfoLinkStore.getCurrentUser();
+  const dName = cu.fullname || cu.username || 'Admin';
+  const dRole = cu.role === 'admin' ? 'System Administrator' : 'User';
+  const dInit = dName.charAt(0).toUpperCase();
+  document.querySelector('.sidebar-user .user-name').textContent = dName;
+  document.querySelector('.sidebar-user .user-role').textContent = dRole;
+  document.querySelector('.sidebar-user .user-avatar').textContent = dInit;
+  document.querySelector('.profile-chip .name').textContent = dName;
+  document.querySelector('.profile-chip .role').textContent = dRole;
+  document.querySelector('.profile-chip .avatar').textContent = dInit;
+
+  function handleLogout() {
+    InfoLinkStore.clearSession();
+    window.location.href = 'login.html';
+  }
+
+  let editingIdx = -1; // -1 = new
+  let currentGroupList = []; // filtered view
+
+  function getUserCountForGroup(groupName) {
+    return InfoLinkStore.getUsers().filter(u => u.group === groupName).length;
+  }
+
+  function renderGroups(list) {
+    currentGroupList = list;
+    const grid = document.getElementById('groups-grid');
+    if (!list.length) {
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--text-secondary);font-size:0.9rem;">No groups found.</div>`;
+      return;
+    }
+    grid.innerHTML = list.map((g, i) => {
+      const userCount = getUserCountForGroup(g.name);
+      return `
+      <div class="group-card">
+        <div class="group-card-header">
+          <div class="group-icon">
+            <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <span class="group-status-badge ${g.isActive ? 'badge-active' : 'badge-inactive'}">
+            ${g.isActive ? 'Active' : 'Inactive'}
+          </span>
+        </div>
+        <div class="group-name">${g.name}</div>
+        <div class="group-desc">${g.description || '—'}</div>
+        <div class="group-collections-label">Collections</div>
+        <div class="coll-tags">
+          ${(g.collections || []).map(c => `<span class="coll-tag">${c}</span>`).join('')}
+        </div>
+        <div class="group-card-footer">
+          <button class="user-count-badge" onclick="openUsersModal('${g.name.replace(/'/g, "\\'")}')">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+            </svg>
+            ${userCount} user${userCount !== 1 ? 's' : ''}
+          </button>
+          <div class="group-actions">
+            <button class="action-link action-edit" onclick="openEditModal(${i})">Edit</button>
+            <span class="action-sep">|</span>
+            <button class="action-link action-toggle" onclick="toggleGroup(${i})">${g.isActive ? 'Deactivate' : 'Activate'}</button>
+            <span class="action-sep">|</span>
+            <button class="action-link action-delete" onclick="deleteGroup(${i})">Delete</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function refreshView(query = '') {
+    const all = InfoLinkStore.getGroups();
+    const filtered = query
+      ? all.filter(g => g.name.toLowerCase().includes(query) || (g.description || '').toLowerCase().includes(query))
+      : all;
+    renderGroups(filtered);
+    const active   = all.filter(g => g.isActive).length;
+    const inactive = all.length - active;
+    document.getElementById('count-active').textContent   = active;
+    document.getElementById('count-inactive').textContent = inactive;
+  }
+
+  function openAddModal() {
+    editingIdx = -1;
+    document.getElementById('modal-title').textContent = 'Add Group';
+    document.getElementById('modal-name').value = '';
+    document.getElementById('modal-desc').value = '';
+    document.getElementById('modal-cols').value = '';
+    document.getElementById('group-modal').classList.add('open');
+  }
+
+  function openEditModal(idx) {
+    const groups = InfoLinkStore.getGroups();
+    const g = groups[idx];
+    editingIdx = idx;
+    document.getElementById('modal-title').textContent = 'Edit Group';
+    document.getElementById('modal-name').value = g.name;
+    document.getElementById('modal-desc').value = g.description || '';
+    document.getElementById('modal-cols').value = (g.collections || []).join(', ');
+    document.getElementById('group-modal').classList.add('open');
+  }
+
+  function toggleGroup(idx) {
+    const groups = InfoLinkStore.getGroups();
+    groups[idx].isActive = !groups[idx].isActive;
+    InfoLinkStore.saveGroups(groups);
+    refreshView(document.getElementById('search-input').value.toLowerCase());
+  }
+
+  function deleteGroup(idx) {
+    const groups = InfoLinkStore.getGroups();
+    const g = groups[idx];
+    const userCount = getUserCountForGroup(g.name);
+    const msg = userCount > 0
+      ? `Delete group "${g.name}"? It has ${userCount} user(s). Users will lose their group assignment. This cannot be undone.`
+      : `Delete group "${g.name}"? This cannot be undone.`;
+    if (!confirm(msg)) return;
+    InfoLinkStore.deleteGroup(g.id);
+    refreshView(document.getElementById('search-input').value.toLowerCase());
+  }
+
+  function openUsersModal(groupName) {
+    const users = InfoLinkStore.getUsers().filter(u => u.group === groupName);
+    document.getElementById('users-modal-title').textContent = `Users in "${groupName}"`;
+    const list = document.getElementById('users-modal-list');
+    if (!users.length) {
+      list.innerHTML = `<div style="padding:24px;text-align:center;color:var(--text-secondary);font-size:0.87rem;">No users assigned to this group.</div>`;
+    } else {
+      list.innerHTML = users.map(u => `
+        <div class="user-modal-item">
+          <div>
+            <div class="user-modal-name">${u.name}</div>
+            <div class="user-modal-username">@${u.username}</div>
+          </div>
+          <span class="user-modal-status ${u.status === 'Active' ? 'status-active' : 'status-inactive'}">${u.status}</span>
+        </div>
+      `).join('');
+    }
+    document.getElementById('users-modal').classList.add('open');
+  }
+
+  document.getElementById('modal-cancel').addEventListener('click', () => {
+    document.getElementById('group-modal').classList.remove('open');
+  });
+  document.getElementById('group-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('group-modal'))
+      document.getElementById('group-modal').classList.remove('open');
+  });
+
+  document.getElementById('users-modal-close').addEventListener('click', () => {
+    document.getElementById('users-modal').classList.remove('open');
+  });
+  document.getElementById('users-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('users-modal'))
+      document.getElementById('users-modal').classList.remove('open');
+  });
+
+  document.getElementById('modal-save').addEventListener('click', () => {
+    const name = document.getElementById('modal-name').value.trim();
+    const desc = document.getElementById('modal-desc').value.trim();
+    const cols = document.getElementById('modal-cols').value.split(',').map(c => c.trim()).filter(Boolean);
+
+    if (!name) { alert('Group name is required.'); return; }
+
+    const groups = InfoLinkStore.getGroups();
+    if (editingIdx === -1) {
+      groups.push({ id: Date.now(), name, description: desc, collections: cols, isActive: true });
+    } else {
+      groups[editingIdx].name        = name;
+      groups[editingIdx].description = desc;
+      groups[editingIdx].collections = cols;
+    }
+    InfoLinkStore.saveGroups(groups);
+    document.getElementById('group-modal').classList.remove('open');
+    refreshView(document.getElementById('search-input').value.toLowerCase());
+  });
+
+  document.getElementById('search-input').addEventListener('input', function() {
+    refreshView(this.value.toLowerCase());
+  });
+
+  // Initial render
+  refreshView();
+</script>
+</body>
+</html>
