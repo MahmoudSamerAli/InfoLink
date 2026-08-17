@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="style.css">
+<div class="main">
+
+  <div class="title">Excel Converter</div>
+
+  <div class="card">
+
+    <!-- File Path -->
+    <label>Convert by File Path</label>
+    <div class="input-group">
+      <input type="text" id="filePath" placeholder="Enter Excel file path">
+      <button class="btn btn-primary" onclick="convertFile()">Convert</button>
+    </div>
+
+    <!-- Upload -->
+    <label style="margin-top:20px; display:block;">Upload Archive</label>
+    <div class="input-group">
+      <input type="file" id="archiveFile">
+      <button class="btn btn-secondary" onclick="uploadArchive()">Upload</button>
+    </div>
+
+    <!-- Status -->
+    <p id="status" style="margin-top:15px; color: var(--subtext);"></p>
+
+  </div>
+
+</div>

@@ -1,0 +1,403 @@
+<link rel="stylesheet" href="style.css">
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Change Password</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* --- Extra styles for this page's layout (topbar, icon sidebar, strength meter) --- */
+
+    body {
+      min-height: 100vh;
+    }
+
+    /* Sidebar overrides for icon nav + sections */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .sidebar-top .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      margin-bottom: 24px;
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+    }
+    .sidebar-section-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--subtext);
+      padding: 8px 12px 6px;
+      margin-top: 10px;
+    }
+    .sidebar a {
+      align-items: center;
+    }
+    .sidebar a svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+    .sidebar-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      border-top: 1px solid var(--border);
+    }
+    .sidebar-user .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #1f2937;
+      flex-shrink: 0;
+    }
+    .sidebar-user .name {
+      font-size: 13px;
+      color: var(--text);
+      font-weight: 600;
+    }
+    .sidebar-user .role {
+      font-size: 11px;
+      color: var(--subtext);
+    }
+    .sidebar-user .chevron {
+      margin-left: auto;
+      color: var(--subtext);
+    }
+
+    /* Topbar */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 30px;
+    }
+    .topbar .subtitle {
+      color: var(--subtext);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--subtext);
+      cursor: pointer;
+    }
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 6px 12px;
+    }
+    .user-chip .avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #1f2937;
+    }
+    .user-chip .name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .user-chip .role {
+      font-size: 11px;
+      color: var(--subtext);
+    }
+
+    /* Password card */
+    .password-card {
+      max-width: 520px;
+      margin: 0 auto;
+      text-align: center;
+      padding: 36px 32px;
+    }
+    .icon-badge {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(124, 58, 237, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 18px;
+      color: #22d3ee;
+    }
+    .icon-badge svg {
+      width: 34px;
+      height: 34px;
+    }
+    .password-card h2 {
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+    .password-card .hint {
+      color: var(--subtext);
+      font-size: 13px;
+      margin-bottom: 26px;
+    }
+    .field {
+      text-align: left;
+      margin-bottom: 18px;
+    }
+    .field label {
+      display: block;
+      font-size: 13px;
+      color: var(--subtext);
+      margin-bottom: 6px;
+    }
+    .field .input-wrap {
+      position: relative;
+    }
+    .field .input-wrap svg {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--subtext);
+    }
+    .field input {
+      width: 100%;
+      padding-left: 40px;
+    }
+    .field input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .strength-row {
+      text-align: left;
+      margin-bottom: 26px;
+    }
+    .strength-row label {
+      display: block;
+      font-size: 13px;
+      color: var(--subtext);
+      margin-bottom: 8px;
+    }
+    .strength-bars {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .strength-segments {
+      display: flex;
+      gap: 6px;
+      flex: 1;
+    }
+    .strength-segments div {
+      height: 6px;
+      border-radius: 4px;
+      flex: 1;
+      background: #1f2937;
+      transition: background 0.2s ease;
+    }
+    .strength-label {
+      font-size: 12px;
+      color: var(--subtext);
+      min-width: 46px;
+      text-align: right;
+    }
+
+    .btn-full {
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-top">
+    <div class="logo-row">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" width="22" height="22"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      InfoLink
+    </div>
+
+    <div class="sidebar-section-label">Main</div>
+    <a href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+      Dashboard
+    </a>
+    <a href="search-user.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      Search
+    </a>
+    <a href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
+      Groups
+    </a>
+    <a href="logs.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+      Logs
+    </a>
+
+    <div class="sidebar-section-label">Settings</div>
+    <a href="#" class="active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Change Password
+    </a>
+  </div>
+
+  <div class="sidebar-user">
+    <div class="avatar"></div>
+    <div>
+      <div class="name">Abdelrahman Mostafa</div>
+      <div class="role">Standard User</div>
+    </div>
+    <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="m9 18 6-6-6-6"/></svg>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="title" style="font-size:22px;">Change Password</div>
+      <div class="subtitle">Update your sign-in credentials securely</div>
+    </div>
+    <div class="topbar-right">
+      <div class="icon-btn" id="themeToggle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+      </div>
+      <div class="user-chip">
+        <div class="avatar"></div>
+        <div>
+          <div class="name">Abdelrahman Mostafa</div>
+          <div class="role">Standard User</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card password-card">
+    <div class="icon-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+    </div>
+    <h2>Create a new password</h2>
+    <div class="hint">Use a strong password that you do not reuse elsewhere.</div>
+
+    <div class="field">
+      <label>Current password</label>
+      <div class="input-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <input id="currentPassword" type="password" placeholder="Enter current password">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>New password</label>
+      <div class="input-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <input id="newPassword" type="password" placeholder="At least 12 characters">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Confirm new password</label>
+      <div class="input-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <input id="confirmPassword" type="password" placeholder="Repeat new password">
+      </div>
+    </div>
+
+    <div class="strength-row">
+      <label>Password strength</label>
+      <div class="strength-bars">
+        <div class="strength-segments">
+          <div id="seg1"></div>
+          <div id="seg2"></div>
+          <div id="seg3"></div>
+          <div id="seg4"></div>
+        </div>
+        <div class="strength-label" id="strengthLabel">—</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-full" id="updateBtn" type="button">Update Password</button>
+  </div>
+</div>
+
+<script>
+  const newPasswordInput = document.getElementById("newPassword");
+  const confirmPasswordInput = document.getElementById("confirmPassword");
+  const currentPasswordInput = document.getElementById("currentPassword");
+  const segs = [
+    document.getElementById("seg1"),
+    document.getElementById("seg2"),
+    document.getElementById("seg3"),
+    document.getElementById("seg4")
+  ];
+  const strengthLabel = document.getElementById("strengthLabel");
+
+  const colors = ["#ef4444", "#f97316", "#eab308", "#22c55e"];
+  const labels = ["Weak", "Fair", "Good", "Strong"];
+
+  function scorePassword(pw) {
+    let score = 0;
+    if (pw.length >= 8) score++;
+    if (pw.length >= 12) score++;
+    if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+    if (/\d/.test(pw) && /[^A-Za-z0-9]/.test(pw)) score++;
+    return Math.min(score, 4);
+  }
+
+  function updateStrength() {
+    const pw = newPasswordInput.value;
+    const score = pw.length === 0 ? 0 : scorePassword(pw);
+
+    segs.forEach((seg, i) => {
+      seg.style.background = i < score ? colors[Math.max(score - 1, 0)] : "#1f2937";
+    });
+
+    strengthLabel.textContent = pw.length === 0 ? "—" : labels[Math.max(score - 1, 0)];
+  }
+
+  newPasswordInput.addEventListener("input", updateStrength);
+
+  document.getElementById("updateBtn").addEventListener("click", () => {
+    if (!currentPasswordInput.value) {
+      alert("Please enter your current password.");
+      return;
+    }
+    if (newPasswordInput.value.length < 12) {
+      alert("New password must be at least 12 characters.");
+      return;
+    }
+    if (newPasswordInput.value !== confirmPasswordInput.value) {
+      alert("New password and confirmation do not match.");
+      return;
+    }
+    alert("Password updated successfully.");
+  });
+
+  // Simple dark/light toggle placeholder (page is dark by default to match design)
+  document.getElementById("themeToggle").addEventListener("click", () => {
+    document.body.classList.toggle("light-mode");
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Logs</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="logo">
+    <img src="logo.png" width="120">
+  </div>
+  <a href="#">Dashboard</a>
+  <a href="#">Search (Admin)</a>
+  <a href="search-user.html">Search (User)</a>
+  <br>
+  <a href="#">Users</a>
+  <a href="#">Groups</a>
+  <a href="#" class="active">Logs</a>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <div class="title">View Logs</div>
+  <div class="table">
+    <table>
+      <thead>
+        <tr>
+          <th>Keyword</th>
+          <th>Group</th>
+          <th>Results</th>
+          <th>Date &amp; Time</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="logTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Script -->
+<script>
+  let logs = [
+    { keyword: "Invoice 934", group: "Finance – Payments", results: 3, time: "Today 09:12" },
+    { keyword: "HR File", group: "HR – Employees", results: 5, time: "Today 10:00" },
+    { keyword: "Customer List", group: "Sales – Customers", results: 2, time: "Yesterday" }
+  ];
+
+  const table = document.getElementById("logTable");
+
+  function renderLogs() {
+    table.innerHTML = "";
+    logs.forEach(log => {
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${escapeHtml(log.keyword)}</td>
+        <td>${escapeHtml(log.group)}</td>
+        <td>${log.results}</td>
+        <td>${escapeHtml(log.time)}</td>
+        <td><button type="button" class="btn btn-secondary">Search again</button></td>
+      `;
+
+      tr.querySelector("button").addEventListener("click", () => {
+        searchAgain(log.keyword, log.group);
+      });
+
+      table.appendChild(tr);
+    });
+  }
+
+  function searchAgain(keyword, group) {
+    const url = "search-users.html"
+      + "?keyword=" + encodeURIComponent(keyword)
+      + "&group=" + encodeURIComponent(group);
+    window.location.href = url;
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  renderLogs();
+</script>
+
+</body>
+</html>
