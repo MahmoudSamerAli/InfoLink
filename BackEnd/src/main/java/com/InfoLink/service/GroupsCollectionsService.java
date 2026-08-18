@@ -1,6 +1,8 @@
 package com.InfoLink.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
+
+import com.InfoLink.model.Groups;
 import com.InfoLink.model.GroupsCollections;
 import com.InfoLink.repository.GroupsCollectionsRepository;
 
@@ -14,11 +16,11 @@ public class GroupsCollectionsService {
     }
 
     public List<GroupsCollections> getCollectionsForGroup(Long groupId) {
-        return repo.findByGroupID(groupId);
+        return repo.findByGroup_GroupID(groupId);
     }
 
-    public GroupsCollections getCollectionForGroup(String collectionName, Long groupId) {
-        return repo.findByCollectionNameAndGroupID(collectionName, groupId)
+    public GroupsCollections getCollectionForGroup(String collectionName, Groups group) {
+        return repo.findByCollectionNameAndGroup(collectionName, group)
                    .orElseThrow(() -> new RuntimeException("Collection not accessible for this group"));
     }
 }

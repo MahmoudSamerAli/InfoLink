@@ -8,7 +8,6 @@ import jakarta.persistence.*;
 public class Log {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Log_ID", nullable = false, unique = true)
     private Long logID;
 

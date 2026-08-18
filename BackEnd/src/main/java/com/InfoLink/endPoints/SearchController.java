@@ -15,6 +15,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.InfoLink.model.Groups;
 import com.InfoLink.model.GroupsCollections;
 import com.InfoLink.model.Log;
 import com.InfoLink.security.CustomUserDetails;
@@ -45,8 +46,8 @@ public class SearchController {
                                  HttpServletRequest request) {
         CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
                 .getContext().getAuthentication().getPrincipal();
-        Long groupId = userDetails.getGroupId();
-        GroupsCollections gc = groupsCollectionsService.getCollectionForGroup(collection, groupId);
+        Groups group = userDetails.getUser().getGroup();
+        GroupsCollections gc = groupsCollectionsService.getCollectionForGroup(collection, group);
         Query query = new Query(Criteria.where(field).regex(keyword, "i"));
         List<Document> results = mongoTemplate.find(query, Document.class, collection);
         Log log = new Log();
