@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import com.InfoLink.dto.AddUserRequest;
 import com.InfoLink.dto.PatchUserRequest;
 import com.InfoLink.dto.UsersResponse;
-import com.InfoLink.model.User;
 import com.InfoLink.service.UserService;
 
 import jakarta.validation.Valid;
