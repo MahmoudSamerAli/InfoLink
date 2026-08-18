@@ -1,0 +1,1672 @@
+================================================================================
+THE EVERYTHING CHEAT SHEET
+Gamer / Linux User / CS Student / Software Engineer / Git & GitHub CLI
+================================================================================
+Covers: Git, GitHub CLI (gh), Linux/Bash, Windows CMD, PowerShell, WSL, Docker,
+Python, Node/npm, SSH/networking, databases, compilers & debuggers, vim, tmux,
+package managers, compression, system monitoring, and PC gaming on Linux/Windows.
+
+TABLE OF CONTENTS
+-----------------
+ 1. GIT COMMANDS
+ 2. GITHUB CLI (gh)
+ 3. LINUX / BASH ESSENTIALS
+ 4. TEXT PROCESSING (grep, sed, awk, find)
+ 5. LINUX PACKAGE MANAGERS
+ 6. LINUX SYSTEM & PROCESS MONITORING
+ 7. LINUX NETWORKING
+ 8. SSH, SCP & RSYNC
+ 9. COMPRESSION & ARCHIVES
+10. WINDOWS CMD
+11. WINDOWS POWERSHELL
+12. WINDOWS PACKAGE MANAGERS (winget/choco/scoop)
+13. WSL (Windows Subsystem for Linux)
+14. VIM ESSENTIALS
+15. TMUX / SCREEN
+16. DOCKER
+17. PYTHON / PIP / VENV
+18. NODE.JS / NPM / YARN / PNPM
+19. COMPILERS, BUILD TOOLS & DEBUGGERS (C/C++/Java)
+20. DATABASES (psql, mysql, sqlite, redis, mongo)
+21. GAMING ON LINUX (Steam, Proton, Wine, Lutris, MangoHud, GameMode)
+22. GAMING ON WINDOWS (Steam, DirectX diag, drivers, perf)
+23. EMULATION & RETRO GAMING
+24. GPU / HARDWARE DIAGNOSTICS
+25. KEYBOARD SHORTCUTS (terminal, vim, tmux, browser, IDE)
+26. REGEX QUICK REFERENCE
+27. MARKDOWN QUICK REFERENCE
+28. HTTP STATUS CODES & CURL RECIPES
+29. MISC PRODUCTIVITY / DOTFILES
+
+================================================================================
+SECTION 1: GIT COMMANDS
+================================================================================
+SETUP & CONFIGURATION
+---------------------
+git init                          - Initialize a new Git repository in the current directory
+git init <directory>              - Initialize a new Git repository in a specific directory
+git config --global user.name     - Set the global user name for commits
+git config --global user.email    - Set the global email for commits
+git config --list                 - List all current Git configuration settings
+git config --global core.editor   - Set the default text editor for commit messages
+git config --global init.defaultBranch <name> - Set the default branch name for new repos (e.g. main)
+git config --global alias.<a> "<cmd>" - Create a shortcut alias for a git command (e.g. alias.co "checkout")
+git config --global --edit        - Open the global config file directly in your editor
+git clone <url>                   - Create a local copy of a remote repository
+git clone --depth 1 <url>         - Shallow clone: only the latest commit, faster for large repos
+git clone -b <branch> <url>       - Clone and check out a specific branch directly
+git version                       - Display the installed Git version
+git help <command>                - Show help and usage for a specific command
+
+WORKING WITH CHANGES
+--------------------
+git status                        - Show the current state of the working directory and staging area
+git add <file>                    - Stage a specific file for the next commit
+git add .                         - Stage all new and modified files in the current directory
+git add -A                        - Stage all changes (including deletions) in the whole repository
+git add -p                        - Interactively stage parts (hunks) of a changed file
+git diff                          - Show unstaged changes between the working directory and staging area
+git diff --staged                 - Show changes between the staging area and the last commit
+git diff --stat                   - Show a summary of changed files instead of full diffs
+git commit -m "<message>"         - Create a commit with the specified message
+git commit -am "<message>"        - Stage tracked changes and commit in one step
+git commit --amend                - Modify the most recent commit (message or add staged files)
+git commit --amend --no-edit      - Add staged changes to the last commit without changing its message
+git commit --allow-empty -m "<message>" - Create a commit with no changes (useful for triggering CI)
+git restore <file>                - Discard unstaged changes to a file
+git restore --staged <file>       - Unstage a file while keeping its changes
+git reset <file>                  - Remove a file from the staging area
+git reset                         - Unstage all changes but keep them in the working directory
+git reset --hard                  - Discard all uncommitted changes (irreversible)
+git reset --hard <commit>         - Reset branch and working directory to a specific commit (irreversible)
+git reset --soft <commit>         - Move HEAD to a commit, keeping changes staged
+git rm <file>                     - Remove a file from the repository and the working directory
+git rm --cached <file>            - Stop tracking a file but keep it on disk
+git mv <file> <destination>       - Rename or move a file in the repository
+git clean -f                      - Remove untracked files from the working directory
+git clean -fd                     - Remove untracked files AND untracked directories
+git clean -n                      - Dry run: preview what git clean would delete without deleting
+
+BRANCHING & MERGING
+-------------------
+git branch                        - List all local branches (asterisk marks the current branch)
+git branch -a                     - List all branches, both local and remote-tracking
+git branch -r                     - List only remote-tracking branches
+git branch -vv                    - List local branches with their tracked remote and ahead/behind status
+git branch <name>                 - Create a new branch at the current commit
+git branch -d <name>              - Delete a local branch (only if merged)
+git branch -D <name>              - Force delete a branch regardless of merge status
+git branch -m <new-name>          - Rename the current branch
+git branch -m <old> <new>         - Rename a specific (non-current) branch
+git checkout <branch>             - Switch to an existing branch
+git checkout -b <name>            - Create a new branch and switch to it
+git checkout -b <name> <remote>/<branch> - Create a local branch tracking a specific remote branch
+git checkout -- <file>            - Discard changes in a file (legacy; prefer git restore)
+git switch <branch>               - Switch to an existing branch (modern alternative to checkout)
+git switch -c <name>              - Create a new branch and switch to it (modern alternative)
+git switch -                      - Switch back to the previously checked-out branch
+git merge <branch>                - Merge the specified branch into the current branch
+git merge --no-ff <branch>        - Merge while always creating a merge commit (preserves branch history)
+git merge --abort                 - Cancel a merge that has conflicts
+git merge --squash <branch>       - Combine all commits from a branch into one set of staged changes
+git rebase <branch>               - Reapply current branch commits on top of another branch
+git rebase -i <commit>            - Interactively edit, reorder, or squash commits
+git rebase --continue             - Continue a rebase after resolving conflicts
+git rebase --abort                - Cancel an in-progress rebase
+git rebase --onto <newbase> <since> <branch> - Move a range of commits onto a different base
+
+REMOTE & COLLABORATION
+----------------------
+git remote -v                     - List configured remote repositories
+git remote add <name> <url>       - Add a new remote repository
+git remote remove <name>          - Remove a remote repository
+git remote rename <old> <new>     - Rename a remote repository
+git remote set-url <name> <url>   - Change the URL of an existing remote
+git remote show <name>            - Show detailed info about a remote, including tracked branches
+git remote prune <name>           - Remove local references to branches deleted on the remote
+git fetch <remote>                - Download objects and refs from a remote without merging
+git fetch --all                   - Fetch updates from all configured remotes
+git fetch --prune                 - Fetch and clean up stale remote-tracking branches in one step
+git pull                          - Fetch and merge changes from the remote into the current branch
+git pull --rebase                 - Fetch changes and rebase local commits on top of remote ones
+git pull --tags                   - Fetch and merge changes, also downloading tags
+git push                          - Upload local commits to the remote repository
+git push -u origin <branch>       - Push a branch and set the upstream tracking remote
+git push origin --delete <branch> - Delete a branch on the remote repository
+git push --tags                   - Push all local tags to the remote repository
+git push --force-with-lease       - Force-push safely, aborting if the remote has new commits you don't have
+git push --force                  - Force-push, overwriting the remote branch (use with caution)
+
+INSPECTION & HISTORY
+--------------------
+git log                           - Show the commit history of the current branch
+git log --oneline                 - Show commit history as a compact one-line list
+git log --graph                   - Show commit history as a text-based graph of branches
+git log --graph --oneline --all   - Compact visual graph of all branches at once
+git log -p                        - Show commit history along with the changes in each commit
+git log --stat                    - Show commit history with a summary of files changed
+git log -n <number>                - Limit output to the last N commits
+git log --author="<name>"         - Filter commit history by author
+git log --since="<date>" --until="<date>" - Filter commits within a date range
+git log -- <file>                 - Show commit history affecting a specific file
+git log --grep="<text>"           - Search commit messages for matching text
+git show <commit>                 - Display the details and changes of a specific commit
+git show HEAD                     - Show the details and changes of the latest commit
+git blame <file>                  - Show who last changed each line of a file and when
+git diff <branch1> <branch2>      - Show differences between two branches
+git diff <commit1> <commit2>      - Show differences between two commits
+git tag                           - List all tags
+git tag <name>                    - Create a tag at the current commit
+git tag -a <name> -m "<message>"  - Create an annotated tag with a message
+git tag -d <name>                 - Delete a local tag
+git describe --tags               - Show the nearest tag reachable from the current commit
+
+STASHING
+--------
+git stash                         - Temporarily save uncommitted changes and clean the working directory
+git stash -u                      - Stash changes including untracked files
+git stash push -m "<message>"     - Stash changes with a custom description
+git stash list                    - List all saved stashes
+git stash show -p stash@{0}       - Show the full diff contained in a specific stash
+git stash pop                     - Restore the most recent stash and remove it from the list
+git stash apply                   - Restore the most recent stash without removing it from the list
+git stash apply stash@{n}         - Restore a specific stash by index
+git stash branch <name>           - Create a new branch from a stash and apply it there
+git stash drop                    - Delete the most recent stash
+git stash clear                   - Delete all stashes
+
+UNDOING & RECOVERY
+------------------
+git revert <commit>               - Create a new commit that undoes a previous commit's changes
+git revert -n <commit>            - Revert changes into the working directory without auto-committing
+git cherry-pick <commit>          - Apply the changes of a specific commit to the current branch
+git cherry-pick <commit1>..<commit2> - Apply a range of commits to the current branch
+git reflog                        - Show a log of all HEAD movements (useful for recovery)
+git reflog expire --expire=now --all - Clear reflog history (rarely needed; frees space)
+git fsck --lost-found             - Check the repository for unreachable/dangling commits
+git checkout <commit> -- <file>   - Restore a specific file's contents from an older commit
+
+CONFLICT RESOLUTION
+--------------------
+git status                        - Shows which files have conflicts during a merge/rebase
+git diff                          - Shows conflict markers in unresolved files
+git checkout --ours <file>        - Keep your version of a conflicted file
+git checkout --theirs <file>      - Keep the incoming version of a conflicted file
+git add <file>                    - Mark a conflict as resolved after editing the file
+git mergetool                     - Launch a configured visual merge tool to resolve conflicts
+
+SUBMODULES & WORKTREES
+------------------------
+git submodule add <url>           - Add a submodule to the repository
+git submodule update --init --recursive - Initialize and fetch all submodules after cloning
+git submodule update --remote     - Update submodules to their latest remote commit
+git submodule foreach <command>   - Run a command across all submodules
+git worktree add <path> <branch>  - Add a new working tree linked to the repository
+git worktree list                 - List all working trees attached to the repository
+git worktree remove <path>        - Remove a linked working tree
+
+IGNORING FILES
+--------------
+git check-ignore -v <file>        - Show which .gitignore rule is (or isn't) matching a file
+git ls-files --others --ignored --exclude-standard - List all currently ignored files
+git rm -r --cached .              - Untrack all files (use after updating .gitignore, then re-add)
+
+BISECTING (FINDING A BAD COMMIT)
+---------------------------------
+git bisect start                  - Begin a binary search for the commit that introduced a bug
+git bisect bad                    - Mark the current commit as bad (contains the bug)
+git bisect good <commit>          - Mark a known-good commit as the search's starting boundary
+git bisect reset                  - End the bisect session and return to the original branch
+
+PATCHES & EMAIL WORKFLOWS
+--------------------------
+git diff > changes.patch          - Save the current unstaged diff as a patch file
+git apply changes.patch           - Apply a patch file to the working directory
+git apply --check changes.patch   - Test whether a patch would apply cleanly without applying it
+git format-patch -1 <commit>      - Create a patch file (with commit message) from a single commit
+git format-patch <branch>         - Create one patch file per commit ahead of the given branch
+git am < changes.patch            - Apply a patch file as a full commit (from format-patch output)
+
+HOOKS
+-----
+ls .git/hooks/                    - List available hook script templates in the repository
+cp .git/hooks/pre-commit.sample .git/hooks/pre-commit - Enable a sample hook (then edit and chmod +x it)
+git commit --no-verify            - Skip pre-commit and commit-msg hooks for a single commit
+git config core.hooksPath <dir>   - Use a custom shared directory for hook scripts
+
+SPARSE CHECKOUT & PARTIAL CLONES (large repos)
+------------------------------------------------
+git sparse-checkout init --cone   - Enable sparse checkout in cone mode for a large repo
+git sparse-checkout set <dir1> <dir2> - Limit the working directory to only the given folders
+git sparse-checkout list          - Show which paths are currently included
+git sparse-checkout disable       - Restore the full working directory
+git clone --filter=blob:none <url> - Clone without downloading file contents until needed (partial clone)
+git clone --filter=tree:0 <url>   - Clone without downloading trees or blobs until needed (fastest partial clone)
+
+SIGNING & VERIFICATION
+------------------------
+git commit -S -m "<message>"      - Create a GPG-signed commit
+git config --global commit.gpgsign true - Sign all commits automatically by default
+git config --global user.signingkey <key-id> - Set which GPG key to sign with
+git log --show-signature           - Show commits along with their signature verification status
+git tag -s <name> -m "<message>"  - Create a signed, annotated tag
+
+LARGE FILES (Git LFS)
+-----------------------
+git lfs install                   - Set up Git LFS for the current user account
+git lfs track "<pattern>"         - Track files matching a pattern (e.g. "*.psd") with LFS
+git lfs ls-files                  - List files currently tracked by LFS in the repository
+git lfs pull                      - Download the actual LFS file contents for the current checkout
+git lfs status                    - Show which LFS files are staged, modified, or need syncing
+
+SEARCH & DIAGNOSTICS
+-----------------------
+git log -S"<string>"              - Find commits that added or removed an exact string (pickaxe search)
+git log -G"<regex>"               - Find commits where a diff matches a regex pattern
+git log --follow -- <file>        - Show history of a file even across renames
+git blame -L <start>,<end> <file> - Show blame info for only a specific line range
+git bugreport                     - Generate a diagnostic report for filing a Git bug
+git range-diff <base1>..<tip1> <base2>..<tip2> - Compare two versions of a rebased/rewritten branch
+
+MISCELLANEOUS
+-------------
+git status --short                - Show repository status in a compact abbreviated format
+git shortlog                      - Summarize commit history by author
+git shortlog -sn                  - Summarize commit counts per author, sorted by number of commits
+git count-objects -v              - Show storage usage and repository housekeeping info
+git gc                            - Clean up the repository by optimizing and packing objects
+git gc --aggressive               - More thorough repository optimization (slower, run occasionally)
+git archive --format=zip -o out.zip HEAD - Export the current commit's files as a zip archive
+git submodule add <url>           - Add a submodule to the repository
+git worktree add <path> <branch>  - Add a new working tree linked to the repository
+git grep "<pattern>"              - Search the tracked files for a string pattern
+git grep -n "<pattern>"           - Same as above, but include line numbers in the results
+git maintenance start             - Enable background scheduled repository maintenance
+git update-index --assume-unchanged <file> - Temporarily hide local-only edits to a tracked file from status/diff
+git update-index --no-assume-unchanged <file> - Undo the above, resume tracking changes to the file
+
+================================================================================
+SECTION 2: GITHUB CLI (gh)
+================================================================================
+
+SETUP & AUTH
+------------
+gh auth login                     - Authenticate with a GitHub account (interactive)
+gh auth logout                    - Log out of a GitHub account
+gh auth status                    - Show current authentication status
+gh auth token                     - Print the active auth token
+gh auth refresh                   - Refresh stored auth credentials/scopes
+gh config get <key>                - Get a gh configuration value
+gh config set <key> <value>        - Set a gh configuration value
+gh --version                       - Show installed gh CLI version
+
+REPOSITORIES
+------------
+gh repo create <name>             - Create a new GitHub repository
+gh repo create <name> --public --clone - Create public repo and clone it locally
+gh repo clone <owner>/<repo>       - Clone a repository
+gh repo fork <owner>/<repo>        - Fork a repository
+gh repo fork --clone               - Fork and clone in one step
+gh repo view                       - View details of the current repo
+gh repo view --web                 - Open the current repo in the browser
+gh repo list <owner>                - List repos for a user/org
+gh repo delete <owner>/<repo>       - Delete a repository (careful!)
+gh repo rename <new-name>           - Rename the current repository
+gh repo archive <owner>/<repo>      - Archive a repository
+gh repo sync                        - Sync a fork with its upstream repo
+gh repo set-default                 - Set the default repo for gh commands in this dir
+
+ISSUES
+------
+gh issue list                      - List issues in the current repo
+gh issue list --state all           - List issues regardless of state
+gh issue list --assignee @me        - List issues assigned to you
+gh issue view <number>              - View a specific issue
+gh issue view <number> --web        - Open an issue in the browser
+gh issue create                     - Create a new issue (interactive)
+gh issue create -t "<title>" -b "<body>" - Create an issue with title & body directly
+gh issue close <number>             - Close an issue
+gh issue reopen <number>            - Reopen a closed issue
+gh issue comment <number> -b "<text>" - Add a comment to an issue
+gh issue edit <number> --add-label "<label>" - Add a label to an issue
+gh issue pin <number>               - Pin an issue
+
+PULL REQUESTS
+-------------
+gh pr list                          - List pull requests
+gh pr list --author @me             - List your own PRs
+gh pr view <number>                 - View a specific pull request
+gh pr view --web                    - Open the current branch's PR in browser
+gh pr create                        - Create a PR from the current branch (interactive)
+gh pr create --fill                 - Create a PR using the commit title/body automatically
+gh pr create -t "<title>" -b "<body>" -B <base> - Create PR with explicit title, body, base branch
+gh pr checkout <number>             - Check out a PR locally by number
+gh pr diff <number>                 - View the diff of a PR
+gh pr merge <number>                - Merge a pull request
+gh pr merge <number> --squash       - Squash-merge a pull request
+gh pr merge <number> --rebase       - Rebase-merge a pull request
+gh pr review <number> --approve     - Approve a pull request
+gh pr review <number> --request-changes -b "<text>" - Request changes with a comment
+gh pr close <number>                - Close a pull request without merging
+gh pr ready <number>                - Mark a draft PR as ready for review
+gh pr comment <number> -b "<text>"  - Comment on a pull request
+gh pr status                        - Show PR status relevant to the current branch
+
+ACTIONS / WORKFLOWS
+--------------------
+gh workflow list                    - List GitHub Actions workflows
+gh workflow view <workflow>          - View details of a workflow
+gh workflow run <workflow>           - Manually trigger a workflow
+gh workflow enable <workflow>        - Enable a disabled workflow
+gh workflow disable <workflow>       - Disable a workflow
+gh run list                          - List recent workflow runs
+gh run view <run-id>                  - View details of a specific run
+gh run view <run-id> --log            - View full logs of a run
+gh run watch <run-id>                 - Watch a run live until it completes
+gh run rerun <run-id>                 - Re-run a workflow run
+gh run cancel <run-id>                - Cancel an in-progress run
+gh run download <run-id>              - Download artifacts from a run
+
+RELEASES & GISTS
+-----------------
+gh release list                       - List releases
+gh release view <tag>                  - View a specific release
+gh release create <tag>                - Create a new release
+gh release create <tag> ./file.zip     - Create a release and upload an asset
+gh release download <tag>              - Download release assets
+gh release delete <tag>                - Delete a release
+gh gist create <file>                  - Create a gist from a file
+gh gist list                           - List your gists
+gh gist view <id>                      - View a gist
+gh gist edit <id>                      - Edit a gist
+
+CODESPACES & EXTENSIONS
+-------------------------
+gh codespace list                      - List your Codespaces
+gh codespace create                    - Create a new Codespace
+gh codespace ssh                       - SSH into a Codespace
+gh codespace stop                      - Stop a running Codespace
+gh codespace delete                    - Delete a Codespace
+gh extension list                      - List installed gh extensions
+gh extension install <owner>/<repo>    - Install a gh extension
+gh extension upgrade --all             - Upgrade all installed extensions
+
+MISC
+----
+gh browse                              - Open the current repo in a browser
+gh browse <file>                       - Open a specific file in the browser
+gh search repos <query>                 - Search GitHub repositories
+gh search issues <query>                - Search GitHub issues
+gh search prs <query>                   - Search GitHub pull requests
+gh api <endpoint>                       - Call the GitHub API directly (e.g. gh api user)
+gh alias set <name> '<expansion>'       - Create a custom gh alias
+gh label list                           - List labels in the current repo
+gh label create "<name>" --color "<hex>" - Create a new label
+gh secret set <name>                    - Set a repository secret for Actions
+gh secret list                          - List repository secrets (names only)
+
+================================================================================
+SECTION 3: LINUX / BASH ESSENTIALS
+================================================================================
+
+NAVIGATION & FILES
+-------------------
+pwd                                - Print current working directory
+ls -la                             - List all files (incl. hidden) with details
+ls -lh                             - List files with human-readable sizes
+cd <dir>                           - Change directory
+cd ..                              - Go up one directory
+cd -                               - Go to the previous directory
+cd ~                               - Go to home directory
+mkdir <dir>                        - Create a directory
+mkdir -p <a/b/c>                   - Create nested directories at once
+rmdir <dir>                        - Remove an empty directory
+rm <file>                          - Remove a file
+rm -r <dir>                        - Remove a directory recursively
+rm -rf <dir>                       - Force remove recursively (careful, irreversible!)
+cp <src> <dest>                    - Copy a file
+cp -r <src> <dest>                 - Copy a directory recursively
+mv <src> <dest>                    - Move or rename a file/directory
+touch <file>                       - Create an empty file or update its timestamp
+cat <file>                         - Print file contents to stdout
+tac <file>                         - Print file contents reversed line-by-line
+less <file>                        - View file contents page by page
+head <file>                        - Show the first 10 lines of a file
+head -n 50 <file>                  - Show the first 50 lines
+tail <file>                        - Show the last 10 lines of a file
+tail -f <file>                     - Follow a file live as it grows (e.g. logs)
+tail -n 100 <file>                 - Show the last 100 lines
+wc -l <file>                       - Count lines in a file
+wc -c <file>                       - Count bytes in a file
+file <file>                        - Detect the type of a file
+stat <file>                        - Show detailed file metadata
+tree                               - Show directory structure as a tree
+tree -L 2                          - Limit tree depth to 2 levels
+ln -s <target> <linkname>          - Create a symbolic link
+readlink -f <file>                 - Resolve the absolute path of a symlink
+realpath <file>                    - Print the absolute path of a file
+basename <path>                    - Print just the filename of a path
+dirname <path>                     - Print just the directory of a path
+which <command>                    - Show the path of an executable
+type <command>                     - Show how a command would be interpreted
+whereis <command>                  - Locate binary, source, and man page for a command
+
+PERMISSIONS & OWNERSHIP
+-------------------------
+chmod +x <file>                    - Make a file executable
+chmod 755 <file>                   - Set rwxr-xr-x permissions
+chmod 644 <file>                   - Set rw-r--r-- permissions
+chmod -R 755 <dir>                 - Apply permissions recursively
+chown user:group <file>            - Change owner and group of a file
+chown -R user:group <dir>          - Change ownership recursively
+sudo <command>                     - Run a command as root/superuser
+sudo -i                            - Start an interactive root shell
+sudo su -                          - Switch to root user
+sudo !!                            - Re-run the previous command with sudo
+umask                              - Show/set default permission mask for new files
+passwd                             - Change your password
+groups                             - Show groups the current user belongs to
+id                                 - Show current user's UID, GID, and groups
+
+USERS & GROUPS
+---------------
+whoami                             - Print the current username
+who                                - Show who is logged in
+useradd <name>                     - Add a new user (low-level)
+adduser <name>                     - Add a new user (interactive, friendlier)
+usermod -aG <group> <user>         - Add a user to a group
+deluser <name>                     - Remove a user
+groupadd <name>                    - Create a new group
+su - <user>                        - Switch to another user's shell
+
+DISK & STORAGE
+---------------
+df -h                               - Show disk space usage in human-readable form
+du -sh <dir>                        - Show total size of a directory
+du -sh * | sort -h                  - Show sizes of items in current dir, sorted
+lsblk                               - List block devices (disks/partitions)
+mount                               - Show mounted filesystems
+mount <device> <mountpoint>         - Mount a device to a path
+umount <mountpoint>                 - Unmount a filesystem
+fdisk -l                            - List disk partition tables
+mkfs.ext4 <device>                  - Format a device with ext4 filesystem
+fsck <device>                       - Check and repair a filesystem
+
+ENVIRONMENT & SHELL
+---------------------
+echo $PATH                          - Print the PATH environment variable
+export VAR=value                    - Set an environment variable for the session
+env                                  - List all environment variables
+printenv VAR                        - Print a specific environment variable
+source ~/.bashrc                    - Reload shell configuration
+alias ll='ls -la'                   - Create a command alias
+unalias ll                          - Remove an alias
+history                             - Show command history
+history | grep <term>               - Search command history
+!!                                   - Repeat the last command
+!<n>                                 - Run command number n from history
+Ctrl+R                              - Reverse-search command history interactively
+clear                               - Clear the terminal screen
+exit                                 - Close the current shell session
+man <command>                       - Show the manual page for a command
+--help                               - Common flag to show usage help for most CLI tools
+tldr <command>                      - Show simplified community-driven examples (needs tldr installed)
+
+JOB & PROCESS CONTROL
+------------------------
+command &                           - Run a command in the background
+jobs                                 - List background jobs in the current shell
+fg                                   - Bring the most recent background job to foreground
+fg %<n>                              - Bring job number n to foreground
+bg %<n>                              - Resume a stopped job in the background
+Ctrl+Z                              - Suspend the current foreground process
+Ctrl+C                              - Interrupt (kill) the current foreground process
+nohup <command> &                   - Run a command immune to hangups after logout
+disown                              - Remove a job from the shell's job table
+
+SCRIPTING BASICS
+------------------
+#!/bin/bash                         - Shebang line to mark a bash script
+chmod +x script.sh && ./script.sh   - Make and run a script executable
+if [ condition ]; then ...; fi       - Basic if statement
+for i in 1 2 3; do echo $i; done     - Basic for loop
+while [ condition ]; do ...; done    - Basic while loop
+function name() { ...; }             - Define a function
+$1 $2 $@                             - Positional and all script arguments
+$?                                    - Exit status of the last command
+$$                                    - PID of the current shell
+read -p "Prompt: " var                - Read user input into a variable
+
+================================================================================
+SECTION 4: TEXT PROCESSING (grep, sed, awk, find)
+================================================================================
+
+GREP
+----
+grep "<pattern>" <file>            - Search for a pattern in a file
+grep -i "<pattern>" <file>          - Case-insensitive search
+grep -r "<pattern>" <dir>           - Recursively search a directory
+grep -n "<pattern>" <file>          - Show line numbers with matches
+grep -v "<pattern>" <file>          - Invert match (show non-matching lines)
+grep -c "<pattern>" <file>          - Count matching lines
+grep -l "<pattern>" *               - List filenames that contain the pattern
+grep -w "<word>" <file>             - Match whole words only
+grep -E "<regex>"                   - Use extended regex (egrep)
+grep -A 3 -B 3 "<pattern>" <file>   - Show 3 lines after/before each match
+
+SED
+---
+sed 's/foo/bar/' <file>             - Replace first occurrence of foo with bar per line
+sed 's/foo/bar/g' <file>            - Replace ALL occurrences of foo with bar
+sed -i 's/foo/bar/g' <file>         - Replace in-place (edits the file directly)
+sed -n '5,10p' <file>               - Print only lines 5 through 10
+sed '/pattern/d' <file>             - Delete lines matching a pattern
+sed -e 's/a/b/' -e 's/c/d/' <file>  - Apply multiple sed expressions
+
+AWK
+---
+awk '{print $1}' <file>             - Print the first column/field of each line
+awk -F, '{print $2}' <file>         - Use comma as field separator, print 2nd field
+awk '{print NR, $0}' <file>         - Print line number alongside each line
+awk '$3 > 100 {print}' <file>       - Print lines where field 3 is greater than 100
+awk '{sum += $1} END {print sum}'   - Sum a column of numbers
+
+FIND
+----
+find . -name "<pattern>"            - Find files by name pattern in current dir
+find . -iname "<pattern>"           - Case-insensitive name search
+find . -type f                      - Find only regular files
+find . -type d                      - Find only directories
+find . -mtime -7                    - Find files modified in the last 7 days
+find . -size +100M                  - Find files larger than 100 MB
+find . -name "*.log" -delete        - Find and delete matching files
+find . -name "*.tmp" -exec rm {} \; - Find and run a command on each match
+find . -empty                       - Find empty files and directories
+
+SORT & UNIQ
+------------
+sort <file>                          - Sort lines alphabetically
+sort -n <file>                       - Sort lines numerically
+sort -r <file>                       - Sort in reverse order
+sort -u <file>                       - Sort and remove duplicate lines
+uniq <file>                          - Remove adjacent duplicate lines (use after sort)
+uniq -c <file>                       - Count occurrences of each unique line
+sort <file> | uniq -c | sort -nr     - Common pattern: frequency count, most common first
+
+CUT, TR & XARGS
+-----------------
+cut -d, -f1,3 <file>                 - Extract fields 1 and 3 using comma delimiter
+tr 'a-z' 'A-Z' < <file>              - Translate lowercase to uppercase
+tr -d ' '                            - Delete all spaces from input
+tr -s ' '                            - Squeeze repeated spaces into one
+xargs                                - Build and execute commands from stdin
+find . -name "*.txt" | xargs grep "x" - Pipe found files into grep
+echo "a b c" | xargs -n1 echo         - Run command once per argument
+
+================================================================================
+SECTION 5: LINUX PACKAGE MANAGERS
+================================================================================
+
+APT (Debian/Ubuntu)
+--------------------
+sudo apt update                     - Refresh the list of available packages
+sudo apt upgrade                    - Upgrade all installed packages
+sudo apt full-upgrade                - Upgrade, handling dependency changes/removals
+sudo apt install <package>           - Install a package
+sudo apt remove <package>            - Remove a package (keep config files)
+sudo apt purge <package>             - Remove a package and its config files
+sudo apt autoremove                  - Remove unused dependency packages
+sudo apt search <term>               - Search for a package by name/description
+apt list --installed                 - List all installed packages
+apt show <package>                   - Show detailed info about a package
+sudo apt-get clean                   - Clear the local package cache
+
+DNF/YUM (Fedora/RHEL/CentOS)
+-------------------------------
+sudo dnf update                      - Update all packages
+sudo dnf install <package>           - Install a package
+sudo dnf remove <package>            - Remove a package
+dnf search <term>                    - Search for a package
+dnf list installed                   - List installed packages
+sudo dnf autoremove                  - Remove unneeded dependencies
+
+PACMAN (Arch Linux)
+---------------------
+sudo pacman -Syu                     - Sync repos and upgrade the whole system
+sudo pacman -S <package>             - Install a package
+sudo pacman -R <package>             - Remove a package
+sudo pacman -Rns <package>           - Remove a package and its unneeded deps/config
+pacman -Ss <term>                    - Search for a package
+pacman -Q                            - List installed packages
+pacman -Qdt                          - List orphaned packages (unneeded dependencies)
+yay -S <package>                     - Install from AUR (using yay helper)
+
+SNAP & FLATPAK (universal Linux packages)
+--------------------------------------------
+sudo snap install <package>          - Install a snap package
+sudo snap remove <package>           - Remove a snap package
+snap list                            - List installed snaps
+snap refresh                         - Update all snaps
+flatpak install <app>                - Install a flatpak application
+flatpak run <app>                    - Run a flatpak application
+flatpak update                       - Update all flatpak apps
+flatpak list                         - List installed flatpak apps
+flatpak uninstall <app>              - Remove a flatpak application
+
+HOMEBREW (macOS / Linux)
+---------------------------
+brew install <package>               - Install a package
+brew uninstall <package>             - Remove a package
+brew update                          - Update Homebrew itself and formula list
+brew upgrade                         - Upgrade all installed packages
+brew search <term>                   - Search for a package
+brew list                            - List installed packages
+brew cleanup                         - Remove old versions of installed packages
+brew doctor                          - Diagnose common Homebrew problems
+
+SECTION 6: LINUX SYSTEM & PROCESS MONITORING
+================================================================================
+
+top                                  - Live view of running processes and resource use
+htop                                 - Improved interactive process viewer (if installed)
+btop                                 - Modern graphical resource monitor (if installed)
+ps aux                               - List all running processes, detailed
+ps aux | grep <name>                 - Find processes matching a name
+kill <pid>                           - Terminate a process by PID (SIGTERM)
+kill -9 <pid>                        - Force-kill a process (SIGKILL)
+killall <name>                       - Kill all processes matching a name
+pkill -f "<pattern>"                 - Kill processes whose command line matches pattern
+pgrep -f "<pattern>"                 - Find PIDs matching a pattern
+free -h                              - Show memory usage in human-readable form
+uptime                               - Show system uptime and load averages
+uname -a                             - Show kernel and system information
+lscpu                                - Show detailed CPU information
+lsusb                                - List connected USB devices
+lspci                                - List PCI devices (GPU, network cards, etc.)
+nproc                                - Show number of available CPU cores
+vmstat 1                             - Show virtual memory stats, refreshing every second
+iostat                               - Show CPU and disk I/O statistics
+sensors                              - Show hardware temperature sensors (lm-sensors)
+nvidia-smi                           - Show NVIDIA GPU status, usage, and processes
+watch -n 1 <command>                 - Re-run a command every second, showing live output
+dmesg                                - Show kernel ring buffer messages (hardware/boot logs)
+journalctl                           - View systemd logs
+journalctl -u <service>              - View logs for a specific systemd service
+journalctl -f                        - Follow the systemd journal live
+journalctl -b                        - Show logs since the last boot
+
+SYSTEMD SERVICE MANAGEMENT
+------------------------------
+systemctl status <service>           - Show status of a service
+systemctl start <service>            - Start a service
+systemctl stop <service>             - Stop a service
+systemctl restart <service>          - Restart a service
+systemctl enable <service>           - Enable a service to start on boot
+systemctl disable <service>          - Disable a service from starting on boot
+systemctl list-units --type=service  - List all active services
+sudo systemctl daemon-reload         - Reload systemd unit files after editing them
+systemctl --failed                   - Show services that failed to start
+
+================================================================================
+SECTION 7: LINUX NETWORKING
+================================================================================
+
+ip a                                 - Show all network interfaces and IP addresses
+ip addr show <iface>                 - Show details for a specific interface
+ip route                             - Show the routing table
+ifconfig                             - Legacy tool to show/configure network interfaces
+ping <host>                          - Send ICMP echo requests to test connectivity
+ping -c 4 <host>                     - Ping 4 times then stop
+traceroute <host>                    - Show the network path (hops) to a host
+mtr <host>                           - Combined ping + traceroute, live updating
+curl <url>                           - Fetch a URL and print the response
+curl -I <url>                        - Fetch only the response headers
+curl -o file <url>                   - Download a URL and save it to a file
+curl -X POST -d '<data>' <url>       - Send a POST request with data
+wget <url>                           - Download a file from a URL
+wget -c <url>                        - Resume an interrupted download
+netstat -tulnp                       - Show listening ports and their owning processes
+ss -tulnp                            - Modern replacement for netstat, show listening sockets
+lsof -i :<port>                      - Show what process is using a specific port
+nmap <host>                          - Scan a host for open ports
+nmap -sV <host>                      - Scan and detect service versions on open ports
+dig <domain>                         - Query DNS records for a domain
+nslookup <domain>                    - Look up the IP address of a domain
+host <domain>                        - Simple DNS lookup utility
+whois <domain>                       - Look up domain registration information
+hostname                             - Print the system hostname
+hostname -I                          - Print the machine's IP addresses
+nc -zv <host> <port>                 - Test if a specific port is open (netcat)
+nc -l -p <port>                      - Listen on a port with netcat
+iwconfig                             - Show wireless network interface settings
+nmcli device wifi list               - List available Wi-Fi networks (NetworkManager)
+nmcli device wifi connect "<ssid>" password "<pw>" - Connect to a Wi-Fi network
+ufw status                           - Show firewall (uncomplicated firewall) status
+ufw allow <port>                     - Allow traffic on a port through the firewall
+ufw enable                           - Enable the firewall
+
+================================================================================
+SECTION 8: SSH, SCP & RSYNC
+================================================================================
+
+ssh user@host                        - Connect to a remote machine via SSH
+ssh -p <port> user@host              - Connect using a non-default SSH port
+ssh -i <keyfile> user@host           - Connect using a specific private key
+ssh-keygen -t ed25519 -C "<email>"   - Generate a new SSH keypair (modern, recommended)
+ssh-keygen -t rsa -b 4096            - Generate an RSA keypair (4096-bit)
+ssh-copy-id user@host                - Copy your public key to a remote host's authorized_keys
+ssh-add <keyfile>                    - Add a private key to the SSH agent
+ssh-add -l                           - List keys currently loaded in the SSH agent
+eval "$(ssh-agent -s)"               - Start the SSH agent in the current shell
+cat ~/.ssh/config                    - View your SSH client configuration (Host aliases)
+scp <file> user@host:<path>          - Copy a file to a remote host
+scp user@host:<path> <local>         - Copy a file from a remote host
+scp -r <dir> user@host:<path>        - Copy a directory recursively over SSH
+rsync -avz <src> <dest>              - Sync files/directories, archive mode with compression
+rsync -avz --delete <src> <dest>     - Sync and delete files in dest not present in src
+rsync -avzP <src> user@host:<dest>   - Sync with progress display over SSH
+rsync -avz -e "ssh -p <port>" <src> <dest> - Rsync over SSH using a custom port
+
+================================================================================
+SECTION 9: COMPRESSION & ARCHIVES
+================================================================================
+
+tar -cvf archive.tar <dir>           - Create an uncompressed tar archive
+tar -xvf archive.tar                 - Extract a tar archive
+tar -czvf archive.tar.gz <dir>       - Create a gzip-compressed tar archive
+tar -xzvf archive.tar.gz             - Extract a gzip-compressed tar archive
+tar -cjvf archive.tar.bz2 <dir>      - Create a bzip2-compressed tar archive
+tar -xjvf archive.tar.bz2            - Extract a bzip2-compressed tar archive
+tar -tvf archive.tar                 - List contents of a tar archive without extracting
+zip -r archive.zip <dir>             - Create a zip archive from a directory
+unzip archive.zip                    - Extract a zip archive
+unzip -l archive.zip                 - List contents of a zip archive without extracting
+gzip <file>                          - Compress a file (creates file.gz, removes original)
+gunzip <file>.gz                     - Decompress a .gz file
+7z a archive.7z <dir>                - Create a 7-zip archive
+7z x archive.7z                      - Extract a 7-zip archive
+
+================================================================================
+SECTION 10: WINDOWS CMD
+================================================================================
+
+NAVIGATION & FILES
+--------------------
+dir                                   - List files and folders in current directory
+dir /a                                - List all files, including hidden ones
+cd <path>                             - Change directory
+cd ..                                 - Go up one directory
+cd \                                  - Go to the root of the current drive
+<drive>:                              - Switch to a different drive (e.g. D:)
+mkdir <dir>                           - Create a directory
+rmdir <dir>                           - Remove an empty directory
+rmdir /s /q <dir>                     - Remove a directory and all contents, no prompt
+del <file>                            - Delete a file
+del /f /q <file>                      - Force delete a file without confirmation
+copy <src> <dest>                     - Copy a file
+xcopy <src> <dest> /E /H /C /I        - Copy directories including hidden files
+robocopy <src> <dest> /E              - Robust file copy, mirrors directory trees
+move <src> <dest>                     - Move or rename a file/folder
+ren <old> <new>                       - Rename a file
+type <file>                           - Print file contents to the console
+more <file>                           - View file contents one page at a time
+cls                                   - Clear the screen
+tree                                  - Display directory structure as a tree
+attrib +h <file>                      - Set a file as hidden
+attrib -h <file>                      - Unhide a file
+
+SYSTEM & DIAGNOSTICS
+-----------------------
+systeminfo                            - Show detailed system configuration info
+tasklist                              - List all running processes
+taskkill /IM <name>.exe /F            - Force kill a process by name
+taskkill /PID <pid> /F                - Force kill a process by PID
+whoami                                - Show the current logged-in user
+hostname                              - Show the computer's hostname
+ver                                   - Show the Windows version
+shutdown /s /t 0                      - Shut down the computer immediately
+shutdown /r /t 0                      - Restart the computer immediately
+shutdown /a                           - Abort a scheduled shutdown
+sfc /scannow                          - Scan and repair protected system files
+chkdsk C: /f                          - Check and fix errors on the C: drive
+driverquery                           - List all installed device drivers
+
+NETWORKING
+------------
+ipconfig                              - Show network configuration
+ipconfig /all                         - Show detailed network configuration
+ipconfig /release                     - Release the current DHCP IP lease
+ipconfig /renew                       - Renew the DHCP IP lease
+ipconfig /flushdns                    - Clear the local DNS resolver cache
+ping <host>                           - Test connectivity to a host
+tracert <host>                        - Trace the network route to a host
+netstat -ano                          - Show active connections and owning process IDs
+nslookup <domain>                     - Look up DNS info for a domain
+telnet <host> <port>                  - Test a TCP connection to a host/port (if enabled)
+netsh wlan show profiles              - List saved Wi-Fi network profiles
+netsh wlan show profile "<name>" key=clear - Show saved Wi-Fi password
+
+USERS & PERMISSIONS
+----------------------
+net user                              - List local user accounts
+net user <name> <password> /add      - Create a new local user account
+net localgroup administrators <user> /add - Add a user to the administrators group
+icacls <file>                         - View/modify file permissions (ACLs)
+runas /user:<username> <command>      - Run a command as a different user
+
+FIND & SEARCH
+---------------
+findstr "<pattern>" <file>            - Search for text in a file (like grep)
+findstr /s /i "<pattern>" *.*         - Recursive, case-insensitive search
+where <command>                       - Locate the executable for a command
+
+================================================================================
+SECTION 11: WINDOWS POWERSHELL
+================================================================================
+
+NAVIGATION & FILES
+--------------------
+Get-ChildItem (ls / dir)             - List items in the current directory
+Set-Location <path> (cd)             - Change directory
+New-Item -ItemType Directory <name>  - Create a new directory
+New-Item -ItemType File <name>       - Create a new empty file
+Remove-Item <path>                   - Delete a file or folder
+Remove-Item <path> -Recurse -Force   - Force-delete a folder and its contents
+Copy-Item <src> <dest>               - Copy a file or folder
+Copy-Item <src> <dest> -Recurse      - Copy a folder recursively
+Move-Item <src> <dest>               - Move or rename a file/folder
+Rename-Item <old> <new>              - Rename a file or folder
+Get-Content <file> (cat)             - Print file contents
+Get-Content <file> -Tail 20          - Show the last 20 lines of a file
+Get-Content <file> -Wait             - Follow a file live (like tail -f)
+Select-String "<pattern>" <file>     - Search text in a file (like grep)
+Test-Path <path>                     - Check whether a path exists
+
+SYSTEM & PROCESSES
+---------------------
+Get-Process (ps)                     - List running processes
+Get-Process <name>                   - Get info about a specific process
+Stop-Process -Name <name> -Force     - Force-stop a process by name
+Stop-Process -Id <pid> -Force        - Force-stop a process by PID
+Get-Service                          - List all Windows services
+Get-Service <name>                   - Get status of a specific service
+Start-Service <name>                 - Start a service
+Stop-Service <name>                  - Stop a service
+Restart-Service <name>               - Restart a service
+Get-ComputerInfo                     - Show detailed system information
+Get-EventLog -LogName System -Newest 20 - Show latest 20 System event log entries
+Restart-Computer                     - Restart the computer
+Stop-Computer                        - Shut down the computer
+
+NETWORKING
+------------
+Get-NetIPAddress                     - Show IP address configuration
+Get-NetAdapter                       - List network adapters
+Test-Connection <host>               - Ping a host (PowerShell equivalent of ping)
+Test-NetConnection <host> -Port <p>  - Test TCP connectivity to a specific port
+Resolve-DnsName <domain>             - Perform a DNS lookup
+Clear-DnsClientCache                 - Flush the local DNS cache
+Invoke-WebRequest <url>              - Fetch a URL (like curl/wget)
+Invoke-RestMethod <url>              - Fetch and auto-parse a REST API response (e.g. JSON)
+
+PACKAGE MANAGEMENT & MODULES
+--------------------------------
+winget install <package>             - Install a package via winget
+Install-Module <name>                - Install a PowerShell module
+Import-Module <name>                 - Load a module into the current session
+Get-Module -ListAvailable            - List all available modules
+Update-Module <name>                 - Update an installed PowerShell module
+
+VARIABLES, PIPES & SCRIPTING
+--------------------------------
+$var = "value"                       - Assign a variable
+Write-Output "<text>" (echo)          - Print text to the console
+$env:VAR = "value"                    - Set an environment variable for the session
+[Environment]::SetEnvironmentVariable("VAR","value","User") - Set a persistent user env var
+Get-ChildItem | Where-Object {...}    - Filter pipeline objects (like grep on objects)
+Get-Process | Sort-Object CPU -Descending | Select-Object -First 5 - Top 5 CPU processes
+ForEach-Object { <script> }           - Loop over pipeline input
+if ($condition) { ... } else { ... }  - Basic conditional
+Get-Help <cmdlet> -Examples           - Show usage examples for a cmdlet
+Get-Command                           - List all available cmdlets/functions
+Set-ExecutionPolicy RemoteSigned      - Allow running local unsigned scripts (admin)
+./script.ps1                          - Run a PowerShell script
+
+PROFILE & CUSTOMIZATION
+---------------------------
+$PROFILE                              - Path to your PowerShell profile script
+notepad $PROFILE                      - Open your profile script for editing
+Set-Alias ll Get-ChildItem            - Create a command alias
+
+================================================================================
+SECTION 12: WINDOWS PACKAGE MANAGERS (winget / choco / scoop)
+================================================================================
+
+WINGET (built into Windows 10/11)
+-------------------------------------
+winget search <name>                 - Search for a package
+winget install <name>                - Install a package
+winget uninstall <name>              - Uninstall a package
+winget upgrade                       - List packages with available upgrades
+winget upgrade --all                 - Upgrade all installed packages
+winget list                          - List installed packages
+winget show <name>                   - Show details about a package
+
+CHOCOLATEY
+------------
+choco install <package>              - Install a package
+choco uninstall <package>            - Uninstall a package
+choco upgrade <package>              - Upgrade a specific package
+choco upgrade all                    - Upgrade all installed packages
+choco list --local-only              - List installed packages
+choco search <term>                  - Search for a package
+
+SCOOP
+-------
+scoop install <package>              - Install a package
+scoop uninstall <package>            - Uninstall a package
+scoop update <package>               - Update a specific package
+scoop update *                       - Update all installed packages
+scoop list                           - List installed packages
+scoop search <term>                  - Search for a package
+scoop bucket add <name>              - Add an additional package bucket/repo
+
+================================================================================
+SECTION 13: WSL (WINDOWS SUBSYSTEM FOR LINUX)
+================================================================================
+
+wsl --install                        - Install WSL with the default Linux distro
+wsl --install -d <distro>            - Install a specific distro (e.g. Ubuntu-22.04)
+wsl --list --online                  - List distros available to install
+wsl -l -v                            - List installed distros and their WSL version
+wsl --set-default <distro>           - Set the default distro
+wsl --set-version <distro> 2         - Convert a distro to use WSL 2
+wsl                                  - Launch the default WSL distro
+wsl -d <distro>                      - Launch a specific distro
+wsl --shutdown                       - Shut down all running WSL instances
+wsl --terminate <distro>             - Terminate a specific running distro
+wsl --export <distro> <file>.tar     - Export a distro to a tar file (backup)
+wsl --import <name> <install-dir> <file>.tar - Import a distro from a tar file
+explorer.exe .                       - Open the current WSL folder in Windows Explorer
+code .                                - Open the current folder in VS Code (with WSL extension)
+/mnt/c/Users/<name>/                 - Path to access Windows C: drive files from WSL
+wsl.conf                             - Config file to customize WSL distro behavior (in /etc/)
+
+================================================================================
+SECTION 14: VIM ESSENTIALS
+================================================================================
+
+MODES
+-----
+i                                    - Enter insert mode before the cursor
+a                                    - Enter insert mode after the cursor
+o                                    - Insert a new line below and enter insert mode
+O                                    - Insert a new line above and enter insert mode
+Esc                                  - Return to normal mode
+v                                    - Enter visual (character selection) mode
+V                                    - Enter visual line mode
+Ctrl+v                               - Enter visual block mode
+:                                    - Enter command mode
+
+SAVING & QUITTING
+--------------------
+:w                                   - Save the file
+:q                                   - Quit (fails if unsaved changes)
+:q!                                  - Quit without saving
+:wq  or  :x                          - Save and quit
+:wq!                                 - Force save and quit
+ZZ                                   - Save and quit (normal mode shortcut)
+
+MOVEMENT
+---------
+h j k l                              - Left, down, up, right
+w / b                                - Jump forward / backward by word
+0 / $                                - Jump to start / end of line
+gg / G                               - Jump to first / last line of file
+:<n>                                 - Jump to line number n
+Ctrl+d / Ctrl+u                      - Scroll half page down / up
+%                                    - Jump to matching bracket/parenthesis
+
+EDITING
+--------
+x                                    - Delete character under cursor
+dd                                   - Delete (cut) the current line
+dw                                   - Delete to the end of the current word
+yy                                   - Yank (copy) the current line
+p / P                                - Paste after / before cursor
+u                                    - Undo
+Ctrl+r                               - Redo
+.                                    - Repeat the last change
+r<char>                              - Replace a single character
+cw                                   - Change to end of word (delete + insert mode)
+>> / <<                              - Indent / unindent the current line
+
+SEARCH & REPLACE
+-------------------
+/pattern                             - Search forward for a pattern
+?pattern                             - Search backward for a pattern
+n / N                                - Repeat search forward / backward
+:%s/old/new/g                        - Replace all occurrences in the file
+:%s/old/new/gc                       - Replace all occurrences, confirming each
+
+MULTIPLE FILES / WINDOWS
+----------------------------
+:sp <file>                           - Split window horizontally, open a file
+:vsp <file>                          - Split window vertically, open a file
+Ctrl+w w                             - Switch between split windows
+:tabnew <file>                       - Open a file in a new tab
+gt / gT                              - Next / previous tab
+
+================================================================================
+SECTION 15: TMUX / SCREEN
+================================================================================
+
+TMUX (terminal multiplexer)
+------------------------------
+tmux                                 - Start a new tmux session
+tmux new -s <name>                   - Start a new named session
+tmux ls                              - List all tmux sessions
+tmux attach -t <name>                - Attach to an existing named session
+tmux kill-session -t <name>          - Kill a specific session
+Ctrl+b d                             - Detach from the current session
+Ctrl+b c                             - Create a new window
+Ctrl+b ,                             - Rename the current window
+Ctrl+b n / p                         - Switch to next / previous window
+Ctrl+b <n>                           - Switch to window number n
+Ctrl+b %                             - Split window vertically
+Ctrl+b "                             - Split window horizontally
+Ctrl+b arrow                         - Move between panes
+Ctrl+b z                             - Zoom/unzoom the current pane
+Ctrl+b x                             - Kill the current pane
+Ctrl+b [                             - Enter scroll/copy mode (q to exit)
+
+GNU SCREEN
+------------
+screen                               - Start a new screen session
+screen -S <name>                     - Start a new named session
+screen -ls                           - List active screen sessions
+screen -r <name>                     - Reattach to a named session
+Ctrl+a d                             - Detach from the current session
+Ctrl+a c                             - Create a new window
+Ctrl+a n / p                         - Switch to next / previous window
+Ctrl+a "                             - List and select windows
+Ctrl+a k                             - Kill the current window
+
+================================================================================
+SECTION 16: DOCKER
+================================================================================
+
+IMAGES
+------
+docker pull <image>                  - Download an image from a registry
+docker images                        - List local images
+docker build -t <tag> .              - Build an image from a Dockerfile in current dir
+docker rmi <image>                   - Remove a local image
+docker tag <image> <newtag>          - Tag an image with a new name
+docker push <image>                  - Push an image to a registry
+docker history <image>               - Show the layer history of an image
+
+CONTAINERS
+----------
+docker run <image>                   - Create and start a container from an image
+docker run -it <image> bash          - Run a container interactively with a shell
+docker run -d <image>                - Run a container in detached (background) mode
+docker run -p 8080:80 <image>        - Map host port 8080 to container port 80
+docker run -v <host>:<container> <image> - Mount a host directory into the container
+docker run --name <name> <image>     - Run a container with a custom name
+docker run --rm <image>              - Automatically remove the container on exit
+docker ps                            - List running containers
+docker ps -a                         - List all containers, including stopped ones
+docker start <container>             - Start a stopped container
+docker stop <container>              - Gracefully stop a running container
+docker restart <container>           - Restart a container
+docker kill <container>              - Force-stop a running container
+docker rm <container>                - Remove a stopped container
+docker rm -f <container>             - Force remove a running container
+docker exec -it <container> bash     - Open a shell inside a running container
+docker logs <container>              - Show logs from a container
+docker logs -f <container>           - Follow container logs live
+docker inspect <container>           - Show detailed info about a container
+docker cp <container>:<path> <local> - Copy a file out of a container
+docker stats                         - Show live resource usage of running containers
+
+DOCKER COMPOSE
+-----------------
+docker compose up                    - Build and start all services defined in compose file
+docker compose up -d                 - Start services in detached mode
+docker compose down                  - Stop and remove containers, networks
+docker compose down -v               - Also remove named volumes
+docker compose ps                    - List running compose services
+docker compose logs -f               - Follow logs from all compose services
+docker compose build                 - Build/rebuild service images
+docker compose restart <service>     - Restart a specific service
+docker compose exec <service> bash   - Open a shell in a running service container
+
+CLEANUP & SYSTEM
+-------------------
+docker system prune                  - Remove unused containers, networks, dangling images
+docker system prune -a               - Also remove all unused images, not just dangling
+docker volume ls                     - List volumes
+docker volume rm <volume>            - Remove a volume
+docker network ls                    - List networks
+docker network create <name>         - Create a custom network
+
+================================================================================
+SECTION 17: PYTHON / PIP / VENV
+================================================================================
+
+python3 --version                    - Show installed Python version
+python3 script.py                    - Run a Python script
+python3 -m venv env                  - Create a virtual environment named "env"
+source env/bin/activate              - Activate a virtual environment (Linux/macOS)
+env\Scripts\activate                 - Activate a virtual environment (Windows CMD)
+env\Scripts\Activate.ps1             - Activate a virtual environment (PowerShell)
+deactivate                           - Deactivate the current virtual environment
+pip install <package>                - Install a Python package
+pip install -r requirements.txt      - Install all packages listed in a requirements file
+pip uninstall <package>              - Uninstall a package
+pip freeze > requirements.txt        - Save installed packages to a requirements file
+pip list                             - List installed packages
+pip list --outdated                  - List packages with available updates
+pip install --upgrade <package>      - Upgrade a specific package
+pip install --upgrade pip            - Upgrade pip itself
+pip show <package>                   - Show details about an installed package
+python3 -m pip                       - Run pip via the Python module system (avoids PATH issues)
+python3 -c "<code>"                  - Run a one-line Python snippet directly
+python3 -i script.py                 - Run a script then drop into interactive shell
+python3 -m http.server 8000          - Quickly serve current directory over HTTP
+pytest                               - Run tests discovered in the current project
+pytest -v                            - Run tests with verbose output
+pytest <file>::<test_name>           - Run a single specific test
+black .                              - Auto-format Python code in current directory (if installed)
+flake8 .                             - Lint Python code for style issues (if installed)
+mypy .                               - Run static type checking (if installed)
+poetry install                       - Install dependencies defined in pyproject.toml
+poetry add <package>                 - Add a new dependency with Poetry
+poetry shell                         - Activate the Poetry-managed virtual environment
+conda create -n <env> python=3.11    - Create a new conda environment
+conda activate <env>                 - Activate a conda environment
+conda install <package>              - Install a package with conda
+
+================================================================================
+SECTION 18: NODE.JS / NPM / YARN / PNPM
+================================================================================
+
+node --version                       - Show installed Node.js version
+node script.js                       - Run a Node.js script
+node                                  - Start the Node.js interactive REPL
+npm init                              - Create a new package.json interactively
+npm init -y                          - Create a package.json with default values
+npm install                          - Install all dependencies from package.json
+npm install <package>                - Install and add a package as a dependency
+npm install -D <package>             - Install a package as a dev dependency
+npm install -g <package>             - Install a package globally
+npm uninstall <package>              - Remove a package
+npm update                           - Update all packages to latest allowed versions
+npm outdated                         - Show packages with newer versions available
+npm run <script>                     - Run a script defined in package.json
+npm start                            - Run the "start" script
+npm test                             - Run the "test" script
+npm run build                        - Run the "build" script
+npm list                             - List installed packages and their dependency tree
+npm list -g --depth=0                - List globally installed top-level packages
+npm audit                            - Check dependencies for known vulnerabilities
+npm audit fix                        - Automatically fix vulnerable dependencies
+npx <package>                        - Run a package binary without installing globally
+nvm install <version>                - Install a specific Node.js version (via nvm)
+nvm use <version>                    - Switch to a specific Node.js version
+nvm ls                               - List installed Node.js versions
+
+YARN
+----
+yarn init                            - Create a new package.json
+yarn add <package>                   - Add a dependency
+yarn add -D <package>                - Add a dev dependency
+yarn remove <package>                - Remove a dependency
+yarn install                         - Install all dependencies
+yarn upgrade                         - Upgrade all dependencies
+yarn run <script>                    - Run a script from package.json
+yarn global add <package>            - Install a package globally
+
+PNPM
+----
+pnpm install                         - Install all dependencies
+pnpm add <package>                   - Add a dependency
+pnpm add -D <package>                - Add a dev dependency
+pnpm remove <package>                - Remove a dependency
+pnpm run <script>                    - Run a script from package.json
+pnpm dlx <package>                   - Run a package binary without a permanent install
+
+================================================================================
+SECTION 19: COMPILERS, BUILD TOOLS & DEBUGGERS (C/C++/Java)
+================================================================================
+
+C / C++ (GCC / Clang)
+------------------------
+gcc file.c -o out                    - Compile a C file into an executable
+gcc -Wall -Wextra file.c -o out      - Compile with helpful extra warnings enabled
+gcc -g file.c -o out                 - Compile with debug symbols (for gdb)
+gcc -O2 file.c -o out                - Compile with level-2 optimizations
+g++ file.cpp -o out                  - Compile a C++ file into an executable
+g++ -std=c++20 file.cpp -o out       - Compile using the C++20 standard
+clang file.c -o out                  - Compile using the Clang compiler
+./out                                - Run the compiled executable (Linux/macOS)
+
+MAKE
+----
+make                                  - Build the project using the default Makefile target
+make <target>                        - Build a specific target
+make clean                           - Run the "clean" target (usually removes build files)
+make -j4                             - Build using 4 parallel jobs
+
+CMAKE
+-----
+cmake -B build                       - Generate build files into a "build" directory
+cmake --build build                  - Build the project using generated files
+cmake --build build --target <name>  - Build a specific target
+cmake -DCMAKE_BUILD_TYPE=Release -B build - Configure a release build
+
+GDB (GNU Debugger)
+---------------------
+gdb ./program                        - Start debugging a compiled program
+run <args>                           - Start execution, optionally with arguments
+break <file>:<line>                  - Set a breakpoint at a specific line
+break <function>                     - Set a breakpoint at a function
+next / n                             - Step over the next line
+step / s                             - Step into the next line (enters functions)
+continue / c                         - Continue execution until next breakpoint
+print <var>                          - Print the value of a variable
+backtrace / bt                       - Show the current call stack
+list                                  - Show source code around the current line
+watch <var>                          - Break whenever a variable's value changes
+quit                                  - Exit gdb
+
+VALGRIND
+--------
+valgrind ./program                    - Run a program under Valgrind's default memcheck tool
+valgrind --leak-check=full ./program  - Run with detailed memory leak reporting
+
+JAVA
+----
+javac File.java                       - Compile a Java source file
+java File                             - Run a compiled Java class
+java File.java                        - Compile and run a Java file in one step (JDK 11+)
+jar cf app.jar *.class                - Package compiled classes into a JAR file
+java -jar app.jar                     - Run an application from a JAR file
+mvn clean install                     - Build a Maven project, running clean then install
+mvn test                              - Run tests in a Maven project
+gradle build                          - Build a Gradle project
+gradle test                           - Run tests in a Gradle project
+
+================================================================================
+SECTION 20: DATABASES (psql, mysql, sqlite, redis, mongo)
+================================================================================
+
+POSTGRESQL (psql)
+--------------------
+psql -U <user> -d <database>          - Connect to a database as a specific user
+\l                                    - List all databases
+\c <database>                         - Connect to a different database
+\dt                                   - List tables in the current database
+\d <table>                            - Describe a table's schema
+\du                                   - List database roles/users
+\q                                    - Quit psql
+pg_dump <database> > backup.sql       - Export a database to a SQL file
+psql <database> < backup.sql          - Import a SQL file into a database
+CREATE DATABASE <name>;               - SQL: create a new database
+DROP DATABASE <name>;                 - SQL: delete a database
+
+MYSQL / MARIADB
+------------------
+mysql -u <user> -p                    - Connect to MySQL, prompting for password
+SHOW DATABASES;                       - List all databases
+USE <database>;                       - Switch to a database
+SHOW TABLES;                          - List tables in the current database
+DESCRIBE <table>;                     - Show a table's schema
+mysqldump -u <user> -p <db> > backup.sql - Export a database to a file
+mysql -u <user> -p <db> < backup.sql  - Import a SQL file into a database
+
+SQLITE
+------
+sqlite3 <file>.db                     - Open (or create) a SQLite database file
+.tables                               - List tables in the database
+.schema <table>                       - Show the schema of a table
+.headers on                           - Show column headers in query results
+.mode column                          - Format query output as aligned columns
+.quit                                 - Exit the sqlite3 shell
+
+REDIS
+-----
+redis-cli                             - Start the Redis command-line client
+PING                                  - Test the connection to the Redis server
+SET <key> <value>                     - Set a key's value
+GET <key>                             - Get a key's value
+DEL <key>                             - Delete a key
+KEYS *                                - List all keys (avoid in production, slow)
+EXPIRE <key> <seconds>                - Set a TTL on a key
+FLUSHALL                              - Delete all keys in all databases (careful!)
+
+MONGODB
+-------
+mongosh                               - Start the MongoDB shell
+show dbs                              - List databases
+use <database>                        - Switch to (or create) a database
+show collections                      - List collections in the current database
+db.<collection>.find()                - Query all documents in a collection
+db.<collection>.insertOne({...})      - Insert a single document
+db.<collection>.updateOne({...},{...})- Update a single document
+db.<collection>.deleteOne({...})      - Delete a single document
+mongodump --db <db> --out <dir>       - Export a database's data to files
+mongorestore --db <db> <dir>          - Restore a database from exported files
+
+================================================================================
+SECTION 21: GAMING ON LINUX (Steam, Proton, Wine, Lutris, MangoHud, GameMode)
+================================================================================
+
+STEAM & PROTON
+-----------------
+steam                                 - Launch the Steam client
+steam steam://open/console            - Open Steam's built-in developer console
+steam -console                        - Launch Steam directly into console mode
+PROTON_LOG=1 %command%                - Steam launch option: enable Proton logging to file
+DXVK_HUD=1 %command%                  - Steam launch option: show DXVK performance overlay
+gamemoderun %command%                 - Steam launch option: run the game under GameMode
+PROTON_USE_WINED3D=1 %command%        - Force Proton to use WineD3D instead of DXVK
+protontricks <appid> <verb>           - Run winetricks verbs against a Proton prefix
+protontricks --gui                    - Launch protontricks in GUI mode to pick a game
+protontricks-launch --appid <id> <exe>- Launch an arbitrary exe inside a game's Proton prefix
+
+WINE
+----
+wine <installer>.exe                  - Run a Windows installer/executable via Wine
+winecfg                               - Open the Wine configuration GUI
+wineboot                              - Reboot/reinitialize the current Wine prefix
+WINEPREFIX=<path> wine <exe>          - Run an app in a specific (isolated) Wine prefix
+WINEARCH=win32 WINEPREFIX=<path> winecfg - Create a new 32-bit Wine prefix
+winetricks <verb>                     - Install Windows components/libs into a Wine prefix
+winetricks corefonts vcrun2019        - Example: install common fonts and VC++ redistributables
+
+LUTRIS
+------
+lutris                                - Launch the Lutris game manager GUI
+lutris -l                             - List installed games from the terminal
+lutris <game-slug>                    - Launch a specific game by its Lutris slug
+
+PERFORMANCE OVERLAYS & TOOLS
+--------------------------------
+mangohud %command%                    - Steam launch option: show MangoHud performance overlay
+mangohud --dlsym <game>               - Launch a non-Steam game with MangoHud overlay
+MANGOHUD_CONFIG="fps_limit=144" mangohud %command% - Set a MangoHud option inline
+gamemoded -t                          - Test whether GameMode is active and working
+gamemoded -s                          - Show current GameMode status
+vkcube                                - Run a simple Vulkan test cube (check Vulkan works)
+glxgears                              - Run a simple OpenGL test (check GL rendering works)
+vulkaninfo                            - Show detailed Vulkan driver/device information
+vainfo                                - Show available VA-API hardware video decode/encode info
+
+CONTROLLERS & INPUT
+-----------------------
+jstest /dev/input/js0                 - Test a connected joystick/gamepad's input
+evtest                                - Low-level input event testing tool (needs sudo usually)
+antimicrox                            - GUI to map gamepad input to keyboard/mouse
+sc-controller                         - Steam Controller / gamepad configuration tool
+
+GAME SERVERS (SELF-HOSTING)
+--------------------------------
+steamcmd +login anonymous +app_update <id> validate +quit - Download/update a dedicated server via SteamCMD
+screen -S gameserver ./server_binary  - Run a game server in a detachable screen session
+
+================================================================================
+SECTION 22: GAMING ON WINDOWS (Steam, DirectX diag, drivers, performance)
+================================================================================
+
+STEAM (WINDOWS)
+------------------
+steam://open/console                  - URL to open Steam's console (paste into Run/browser)
+steam://validate/<appid>              - URL to trigger a game's file integrity validation
+steam://updatenews/<appid>            - URL to open a game's news page in Steam
+-console                              - Steam shortcut launch flag: start in console mode
+-cef-force-metal / -no-cef-sandbox    - Steam launch flags for troubleshooting UI issues
+
+DIAGNOSTICS
+-------------
+dxdiag                                - Open the DirectX Diagnostic Tool (GPU/audio/system info)
+msinfo32                              - Open the System Information tool
+winver                                - Show the current Windows version/build in a dialog
+perfmon                               - Open Windows Performance Monitor
+resmon                                - Open Windows Resource Monitor
+Win+G                                 - Open the Xbox Game Bar overlay (FPS counter, capture)
+Win+Alt+R                             - Start/stop recording with Game Bar
+Win+Alt+G                             - Save the last 30 seconds of gameplay (Game Bar)
+
+GPU DRIVERS & PERFORMANCE
+-----------------------------
+Device Manager > Display adapters     - Locate and update GPU drivers manually
+nvidia-smi                            - (with NVIDIA drivers) show GPU usage/status from CLI
+Win+R > dxdiag > Save All Information - Export a full system diagnostic report to text
+powercfg /list                        - List available Windows power plans
+powercfg /setactive <GUID>            - Switch to a specific power plan (e.g. High Performance)
+powercfg /energy                      - Generate a power efficiency diagnostic report
+
+NETWORK TROUBLESHOOTING FOR GAMING
+--------------------------------------
+ping -t <server>                      - Continuously ping a game server to check for lag spikes
+tracert <server>                      - Trace the route to a game server to spot bottlenecks
+netsh int tcp show global             - Show current TCP settings (e.g. autotuning)
+netsh winsock reset                   - Reset network sockets (fixes some connectivity issues)
+ipconfig /flushdns                    - Clear DNS cache (helpful after server IP changes)
+
+================================================================================
+SECTION 23: EMULATION & RETRO GAMING
+================================================================================
+
+RetroArch                             - Multi-system emulator frontend (cores for many consoles)
+retroarch -L <core> <rom>             - Launch a ROM with a specific core from the terminal
+PCSX2                                 - PlayStation 2 emulator
+Dolphin                               - GameCube / Wii emulator
+Cemu                                  - Wii U emulator
+RPCS3                                 - PlayStation 3 emulator
+Yuzu / Ryujinx                        - Nintendo Switch emulators
+DuckStation                           - PlayStation 1 emulator
+PPSSPP                                - PlayStation Portable emulator
+melonDS                               - Nintendo DS emulator
+mGBA                                  - Game Boy / Game Boy Advance emulator
+Citra                                 - Nintendo 3DS emulator
+BizHawk                               - Multi-system emulator popular for speedrunning/TAS
+EmulationStation                      - Frontend/launcher for organizing emulator libraries
+lr-mupen64plus                        - RetroArch core for Nintendo 64 emulation
+vkd3d-proton                          - Translation layer: DirectX 12 to Vulkan (used by Proton)
+dxvk                                  - Translation layer: DirectX 9/10/11 to Vulkan (used by Wine/Proton)
+
+================================================================================
+SECTION 24: GPU / HARDWARE DIAGNOSTICS
+================================================================================
+
+nvidia-smi                            - NVIDIA GPU status, memory, utilization, processes
+nvidia-smi -l 1                       - Refresh GPU stats every second, live
+nvidia-settings                       - GUI for NVIDIA driver settings (Linux)
+radeontop                             - Live AMD GPU utilization monitor (Linux)
+glxinfo | grep "OpenGL"                - Show OpenGL renderer/version info (Linux)
+vulkaninfo --summary                  - Concise summary of Vulkan capabilities
+sensors                               - CPU/GPU/motherboard temperatures (lm-sensors, Linux)
+lm_sensors                            - Package providing the "sensors" temperature tool
+inxi -Fxz                             - Full, detailed system hardware summary (Linux)
+hwinfo --short                        - Quick hardware inventory summary (Linux)
+lshw                                  - Detailed hardware listing (Linux, needs sudo for full info)
+cpu-z / gpu-z                         - Windows GUI tools for CPU/GPU hardware detail
+HWiNFO64                              - Windows GUI tool for full sensor/hardware monitoring
+MSI Afterburner                       - Windows GPU overclocking & monitoring overlay tool
+memtest86+                            - Boot-time tool to test RAM for errors
+stress-ng --cpu 4 --timeout 60s       - Stress-test 4 CPU cores for 60 seconds (Linux)
+
+================================================================================
+SECTION 25: KEYBOARD SHORTCUTS (terminal, vim, tmux, browser, IDE)
+================================================================================
+
+GENERAL TERMINAL (bash/zsh readline)
+----------------------------------------
+Ctrl+A                                - Move cursor to start of line
+Ctrl+E                                - Move cursor to end of line
+Ctrl+U                                - Delete from cursor to start of line
+Ctrl+K                                - Delete from cursor to end of line
+Ctrl+W                                - Delete the word before the cursor
+Ctrl+L                                - Clear the screen (like "clear")
+Ctrl+R                                - Reverse search command history
+Ctrl+C                                - Cancel/interrupt the current command
+Ctrl+D                                - Exit the shell / send EOF
+Alt+.                                 - Insert the last argument of the previous command
+Tab                                   - Auto-complete commands/paths
+
+VS CODE (common defaults)
+-----------------------------
+Ctrl+P                                - Quick open a file by name
+Ctrl+Shift+P                          - Open the command palette
+Ctrl+`                                - Toggle the integrated terminal
+Ctrl+B                                - Toggle the sidebar
+Ctrl+/                                - Toggle line comment
+Ctrl+D                                - Select the next occurrence of the current word
+Alt+Click                             - Add an additional cursor
+Ctrl+Shift+F                          - Search across all files in the project
+F12                                   - Go to definition
+Shift+F12                             - Find all references
+Ctrl+Space                            - Trigger autocomplete suggestions
+
+BROWSER (Chrome/Firefox common)
+-----------------------------------
+Ctrl+T                                - Open a new tab
+Ctrl+W                                - Close the current tab
+Ctrl+Shift+T                          - Reopen the last closed tab
+Ctrl+Tab                              - Switch to the next tab
+Ctrl+L / Alt+D                        - Focus the address bar
+F12                                   - Open developer tools
+Ctrl+Shift+I                          - Open developer tools (alternative)
+Ctrl+Shift+J                          - Open the JavaScript console directly
+Ctrl+F                                - Find on the current page
+Ctrl+Shift+N                          - Open a new incognito/private window
+
+================================================================================
+SECTION 26: REGEX QUICK REFERENCE
+================================================================================
+
+.                                     - Matches any single character
+*                                     - Zero or more of the preceding element
++                                     - One or more of the preceding element
+?                                     - Zero or one of the preceding element (optional)
+^                                     - Anchors to the start of a line/string
+$                                     - Anchors to the end of a line/string
+[abc]                                 - Matches any one character in the set (a, b, or c)
+[^abc]                                - Matches any character NOT in the set
+[a-z]                                 - Matches any character in the range a to z
+(abc)                                 - Grouping; also captures the match for later reference
+a|b                                   - Alternation: matches "a" or "b"
+{n}                                   - Exactly n repetitions of the preceding element
+{n,}                                  - n or more repetitions
+{n,m}                                 - Between n and m repetitions
+\d                                    - Matches a digit (0-9)
+\D                                    - Matches a non-digit
+\w                                    - Matches a word character (letters, digits, underscore)
+\W                                    - Matches a non-word character
+\s                                    - Matches a whitespace character
+\S                                    - Matches a non-whitespace character
+\b                                    - Matches a word boundary
+\B                                    - Matches a non-word-boundary
+(?:abc)                               - Non-capturing group
+(?=abc)                               - Positive lookahead
+(?!abc)                               - Negative lookahead
+(?<=abc)                              - Positive lookbehind
+(?<!abc)                              - Negative lookbehind
+\1 \2                                 - Backreference to capture group 1, 2, etc.
+
+================================================================================
+SECTION 27: MARKDOWN QUICK REFERENCE
+================================================================================
+
+# Heading 1                          - Largest heading
+## Heading 2                         - Second-level heading
+### Heading 3                        - Third-level heading
+**bold text**                        - Renders as bold
+*italic text*                        - Renders as italic
+~~strikethrough~~                    - Renders with a line through the text
+`inline code`                        - Renders as inline monospace code
+\`\`\`                                 - Fenced code block (open/close with three backticks)
+> quote                              - Renders as a blockquote
+- item                               - Unordered list item
+1. item                              - Ordered list item
+[text](url)                          - A hyperlink
+![alt text](url)                     - An embedded image
+| a | b |                            - Table row (header separator uses |---|---|)
+---                                  - Horizontal rule
+- [ ] task                           - Unchecked task list item
+- [x] task                           - Checked task list item
+
+================================================================================
+SECTION 28: HTTP STATUS CODES & CURL RECIPES
+================================================================================
+
+COMMON HTTP STATUS CODES
+----------------------------
+200 OK                                - Request succeeded
+201 Created                           - Resource successfully created
+204 No Content                        - Success, but no content to return
+301 Moved Permanently                 - Resource permanently moved to a new URL
+302 Found                             - Resource temporarily at a different URL
+304 Not Modified                      - Cached version is still valid
+400 Bad Request                       - Client sent an invalid request
+401 Unauthorized                      - Authentication required or failed
+403 Forbidden                         - Authenticated but not permitted
+404 Not Found                         - Resource does not exist
+405 Method Not Allowed                - HTTP method not supported on this route
+409 Conflict                          - Request conflicts with current state of resource
+422 Unprocessable Entity              - Request well-formed but semantically invalid
+429 Too Many Requests                 - Rate limit exceeded
+500 Internal Server Error             - Generic server-side failure
+502 Bad Gateway                       - Upstream server returned an invalid response
+503 Service Unavailable               - Server temporarily unable to handle the request
+504 Gateway Timeout                   - Upstream server took too long to respond
+
+CURL RECIPES
+--------------
+curl -s <url>                         - Silent mode: fetch without progress meter
+curl -v <url>                         - Verbose mode: show request/response details
+curl -L <url>                         - Follow redirects automatically
+curl -H "Authorization: Bearer <tok>" <url> - Send a request with an auth header
+curl -X GET/POST/PUT/DELETE <url>     - Specify the HTTP method explicitly
+curl -d '{"key":"val"}' -H "Content-Type: application/json" <url> - Send a JSON POST body
+curl -F "file=@path.jpg" <url>        - Upload a file as multipart form data
+curl -u user:pass <url>               - Send basic authentication credentials
+curl -o out.json <url>                - Save the response body to a file
+curl -w "%{http_code}" -o /dev/null -s <url> - Print only the HTTP status code
+curl --cookie "name=value" <url>      - Send a specific cookie with the request
+
+================================================================================
+SECTION 29: MISC PRODUCTIVITY / DOTFILES
+================================================================================
+
+~/.bashrc                             - Bash config loaded for interactive non-login shells
+~/.bash_profile / ~/.profile          - Bash config loaded for login shells
+~/.zshrc                              - Zsh shell configuration file
+~/.gitconfig                          - Global git configuration file
+~/.ssh/config                         - Per-host SSH client configuration (aliases, keys, ports)
+~/.vimrc                              - Vim editor configuration file
+~/.tmux.conf                          - Tmux configuration file
+.editorconfig                         - Project-level file to standardize editor formatting
+.gitignore                            - List of files/patterns Git should not track
+.env                                  - Common convention for local environment variables (don't commit!)
+crontab -e                            - Edit the current user's scheduled cron jobs
+crontab -l                            - List the current user's cron jobs
+* * * * * <command>                   - Cron syntax: minute hour day month weekday
+alias gs='git status'                 - Example shell alias for a frequently used command
+chsh -s $(which zsh)                  - Change your default login shell to zsh
+stow <package>                        - Symlink dotfiles from a stow directory (dotfile management)
+direnv allow                          - Approve and auto-load a project-local .envrc file
+tldr <command>                        - Community-driven simplified command examples
+cheat <command>                       - Community cheat-sheet lookup tool
+fzf                                   - Fuzzy finder, great for piping into other commands
+ripgrep (rg) "<pattern>"              - Extremely fast recursive text search, respects .gitignore
+bat <file>                            - "cat" with syntax highlighting and line numbers
+exa / eza -la                         - Modern replacement for "ls" with icons/colors
+z <partial-dir-name>                  - Jump to a frequently used directory (zoxide/autojump)
+
+================================================================================
+END OF CHEAT SHEET
+================================================================================
