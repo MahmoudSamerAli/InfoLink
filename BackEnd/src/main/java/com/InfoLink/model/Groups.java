@@ -7,7 +7,6 @@ import jakarta.persistence.*;
 public class Groups {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) 
     @Column(name = "Group_ID", nullable = false, unique = true)
     private Long groupID;
 

@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public class User {
 
     @Id
-    @Column(name = "User_Idd", nullable = false, unique = true, length = 36)
+    @Column(name = "User_Idd", nullable = false, unique = true, length = 14)
     private String userID;
 
     @Column(name = "Username", nullable = false, length = 50, unique = true)
@@ -22,7 +22,7 @@ public class User {
     private String fullName;
 
     @ManyToOne(fetch = FetchType.LAZY) // lazy load group to save memory
-    @JoinColumn(name = "Group_ID", referencedColumnName = "GroupID")
+    @JoinColumn(name = "Group_ID", referencedColumnName = "Group_ID")
     private Groups group;
 
     @Enumerated(EnumType.STRING)

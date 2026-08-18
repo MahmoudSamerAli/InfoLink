@@ -9,7 +9,12 @@ git config --global user.name     - Set the global user name for commits
 git config --global user.email    - Set the global email for commits
 git config --list                 - List all current Git configuration settings
 git config --global core.editor   - Set the default text editor for commit messages
+git config --global init.defaultBranch <name> - Set the default branch name for new repos (e.g. main)
+git config --global alias.<a> "<cmd>" - Create a shortcut alias for a git command (e.g. alias.co "checkout")
+git config --global --edit        - Open the global config file directly in your editor
 git clone <url>                   - Create a local copy of a remote repository
+git clone --depth 1 <url>         - Shallow clone: only the latest commit, faster for large repos
+git clone -b <branch> <url>       - Clone and check out a specific branch directly
 git version                       - Display the installed Git version
 git help <command>                - Show help and usage for a specific command
 
@@ -22,35 +27,53 @@ git add -A                        - Stage all changes (including deletions) in t
 git add -p                        - Interactively stage parts (hunks) of a changed file
 git diff                          - Show unstaged changes between the working directory and staging area
 git diff --staged                 - Show changes between the staging area and the last commit
+git diff --stat                   - Show a summary of changed files instead of full diffs
 git commit -m "<message>"         - Create a commit with the specified message
 git commit -am "<message>"        - Stage tracked changes and commit in one step
 git commit --amend                - Modify the most recent commit (message or add staged files)
+git commit --amend --no-edit      - Add staged changes to the last commit without changing its message
+git commit --allow-empty -m "<message>" - Create a commit with no changes (useful for triggering CI)
 git restore <file>                - Discard unstaged changes to a file
 git restore --staged <file>       - Unstage a file while keeping its changes
 git reset <file>                  - Remove a file from the staging area
 git reset                         - Unstage all changes but keep them in the working directory
 git reset --hard                  - Discard all uncommitted changes (irreversible)
+git reset --hard <commit>         - Reset branch and working directory to a specific commit (irreversible)
 git reset --soft <commit>         - Move HEAD to a commit, keeping changes staged
 git rm <file>                     - Remove a file from the repository and the working directory
+git rm --cached <file>            - Stop tracking a file but keep it on disk
 git mv <file> <destination>       - Rename or move a file in the repository
 git clean -f                      - Remove untracked files from the working directory
+git clean -fd                     - Remove untracked files AND untracked directories
+git clean -n                      - Dry run: preview what git clean would delete without deleting
 
 BRANCHING & MERGING
 -------------------
 git branch                        - List all local branches (asterisk marks the current branch)
+git branch -a                     - List all branches, both local and remote-tracking
+git branch -r                     - List only remote-tracking branches
+git branch -vv                    - List local branches with their tracked remote and ahead/behind status
 git branch <name>                 - Create a new branch at the current commit
 git branch -d <name>              - Delete a local branch (only if merged)
 git branch -D <name>              - Force delete a branch regardless of merge status
 git branch -m <new-name>          - Rename the current branch
+git branch -m <old> <new>         - Rename a specific (non-current) branch
 git checkout <branch>             - Switch to an existing branch
 git checkout -b <name>            - Create a new branch and switch to it
+git checkout -b <name> <remote>/<branch> - Create a local branch tracking a specific remote branch
+git checkout -- <file>            - Discard changes in a file (legacy; prefer git restore)
 git switch <branch>               - Switch to an existing branch (modern alternative to checkout)
 git switch -c <name>              - Create a new branch and switch to it (modern alternative)
+git switch -                      - Switch back to the previously checked-out branch
 git merge <branch>                - Merge the specified branch into the current branch
+git merge --no-ff <branch>        - Merge while always creating a merge commit (preserves branch history)
 git merge --abort                 - Cancel a merge that has conflicts
+git merge --squash <branch>       - Combine all commits from a branch into one set of staged changes
 git rebase <branch>               - Reapply current branch commits on top of another branch
 git rebase -i <commit>            - Interactively edit, reorder, or squash commits
+git rebase --continue             - Continue a rebase after resolving conflicts
 git rebase --abort                - Cancel an in-progress rebase
+git rebase --onto <newbase> <since> <branch> - Move a range of commits onto a different base
 
 REMOTE & COLLABORATION
 ----------------------
@@ -58,21 +81,35 @@ git remote -v                     - List configured remote repositories
 git remote add <name> <url>       - Add a new remote repository
 git remote remove <name>          - Remove a remote repository
 git remote rename <old> <new>     - Rename a remote repository
+git remote set-url <name> <url>   - Change the URL of an existing remote
+git remote show <name>            - Show detailed info about a remote, including tracked branches
+git remote prune <name>           - Remove local references to branches deleted on the remote
 git fetch <remote>                - Download objects and refs from a remote without merging
+git fetch --all                   - Fetch updates from all configured remotes
+git fetch --prune                 - Fetch and clean up stale remote-tracking branches in one step
 git pull                          - Fetch and merge changes from the remote into the current branch
 git pull --rebase                 - Fetch changes and rebase local commits on top of remote ones
+git pull --tags                   - Fetch and merge changes, also downloading tags
 git push                          - Upload local commits to the remote repository
 git push -u origin <branch>       - Push a branch and set the upstream tracking remote
 git push origin --delete <branch> - Delete a branch on the remote repository
 git push --tags                   - Push all local tags to the remote repository
+git push --force-with-lease       - Force-push safely, aborting if the remote has new commits you don't have
+git push --force                  - Force-push, overwriting the remote branch (use with caution)
 
 INSPECTION & HISTORY
 --------------------
 git log                           - Show the commit history of the current branch
 git log --oneline                 - Show commit history as a compact one-line list
 git log --graph                   - Show commit history as a text-based graph of branches
+git log --graph --oneline --all   - Compact visual graph of all branches at once
 git log -p                        - Show commit history along with the changes in each commit
 git log --stat                    - Show commit history with a summary of files changed
+git log -n <number>                - Limit output to the last N commits
+git log --author="<name>"         - Filter commit history by author
+git log --since="<date>" --until="<date>" - Filter commits within a date range
+git log -- <file>                 - Show commit history affecting a specific file
+git log --grep="<text>"           - Search commit messages for matching text
 git show <commit>                 - Display the details and changes of a specific commit
 git show HEAD                     - Show the details and changes of the latest commit
 git blame <file>                  - Show who last changed each line of a file and when
@@ -82,30 +119,128 @@ git tag                           - List all tags
 git tag <name>                    - Create a tag at the current commit
 git tag -a <name> -m "<message>"  - Create an annotated tag with a message
 git tag -d <name>                 - Delete a local tag
+git describe --tags               - Show the nearest tag reachable from the current commit
 
 STASHING
 --------
 git stash                         - Temporarily save uncommitted changes and clean the working directory
+git stash -u                      - Stash changes including untracked files
+git stash push -m "<message>"     - Stash changes with a custom description
 git stash list                    - List all saved stashes
+git stash show -p stash@{0}       - Show the full diff contained in a specific stash
 git stash pop                     - Restore the most recent stash and remove it from the list
 git stash apply                   - Restore the most recent stash without removing it from the list
+git stash apply stash@{n}         - Restore a specific stash by index
+git stash branch <name>           - Create a new branch from a stash and apply it there
 git stash drop                    - Delete the most recent stash
 git stash clear                   - Delete all stashes
 
 UNDOING & RECOVERY
 ------------------
 git revert <commit>               - Create a new commit that undoes a previous commit's changes
+git revert -n <commit>            - Revert changes into the working directory without auto-committing
 git cherry-pick <commit>          - Apply the changes of a specific commit to the current branch
+git cherry-pick <commit1>..<commit2> - Apply a range of commits to the current branch
 git reflog                        - Show a log of all HEAD movements (useful for recovery)
+git reflog expire --expire=now --all - Clear reflog history (rarely needed; frees space)
 git fsck --lost-found             - Check the repository for unreachable/dangling commits
+git checkout <commit> -- <file>   - Restore a specific file's contents from an older commit
+
+CONFLICT RESOLUTION
+--------------------
+git status                        - Shows which files have conflicts during a merge/rebase
+git diff                          - Shows conflict markers in unresolved files
+git checkout --ours <file>        - Keep your version of a conflicted file
+git checkout --theirs <file>      - Keep the incoming version of a conflicted file
+git add <file>                    - Mark a conflict as resolved after editing the file
+git mergetool                     - Launch a configured visual merge tool to resolve conflicts
+
+SUBMODULES & WORKTREES
+------------------------
+git submodule add <url>           - Add a submodule to the repository
+git submodule update --init --recursive - Initialize and fetch all submodules after cloning
+git submodule update --remote     - Update submodules to their latest remote commit
+git submodule foreach <command>   - Run a command across all submodules
+git worktree add <path> <branch>  - Add a new working tree linked to the repository
+git worktree list                 - List all working trees attached to the repository
+git worktree remove <path>        - Remove a linked working tree
+
+IGNORING FILES
+--------------
+git check-ignore -v <file>        - Show which .gitignore rule is (or isn't) matching a file
+git ls-files --others --ignored --exclude-standard - List all currently ignored files
+git rm -r --cached .              - Untrack all files (use after updating .gitignore, then re-add)
+
+BISECTING (FINDING A BAD COMMIT)
+---------------------------------
+git bisect start                  - Begin a binary search for the commit that introduced a bug
+git bisect bad                    - Mark the current commit as bad (contains the bug)
+git bisect good <commit>          - Mark a known-good commit as the search's starting boundary
+git bisect reset                  - End the bisect session and return to the original branch
+
+PATCHES & EMAIL WORKFLOWS
+--------------------------
+git diff > changes.patch          - Save the current unstaged diff as a patch file
+git apply changes.patch           - Apply a patch file to the working directory
+git apply --check changes.patch   - Test whether a patch would apply cleanly without applying it
+git format-patch -1 <commit>      - Create a patch file (with commit message) from a single commit
+git format-patch <branch>         - Create one patch file per commit ahead of the given branch
+git am < changes.patch            - Apply a patch file as a full commit (from format-patch output)
+
+HOOKS
+-----
+ls .git/hooks/                    - List available hook script templates in the repository
+cp .git/hooks/pre-commit.sample .git/hooks/pre-commit - Enable a sample hook (then edit and chmod +x it)
+git commit --no-verify            - Skip pre-commit and commit-msg hooks for a single commit
+git config core.hooksPath <dir>   - Use a custom shared directory for hook scripts
+
+SPARSE CHECKOUT & PARTIAL CLONES (large repos)
+------------------------------------------------
+git sparse-checkout init --cone   - Enable sparse checkout in cone mode for a large repo
+git sparse-checkout set <dir1> <dir2> - Limit the working directory to only the given folders
+git sparse-checkout list          - Show which paths are currently included
+git sparse-checkout disable       - Restore the full working directory
+git clone --filter=blob:none <url> - Clone without downloading file contents until needed (partial clone)
+git clone --filter=tree:0 <url>   - Clone without downloading trees or blobs until needed (fastest partial clone)
+
+SIGNING & VERIFICATION
+------------------------
+git commit -S -m "<message>"      - Create a GPG-signed commit
+git config --global commit.gpgsign true - Sign all commits automatically by default
+git config --global user.signingkey <key-id> - Set which GPG key to sign with
+git log --show-signature           - Show commits along with their signature verification status
+git tag -s <name> -m "<message>"  - Create a signed, annotated tag
+
+LARGE FILES (Git LFS)
+-----------------------
+git lfs install                   - Set up Git LFS for the current user account
+git lfs track "<pattern>"         - Track files matching a pattern (e.g. "*.psd") with LFS
+git lfs ls-files                  - List files currently tracked by LFS in the repository
+git lfs pull                      - Download the actual LFS file contents for the current checkout
+git lfs status                    - Show which LFS files are staged, modified, or need syncing
+
+SEARCH & DIAGNOSTICS
+-----------------------
+git log -S"<string>"              - Find commits that added or removed an exact string (pickaxe search)
+git log -G"<regex>"               - Find commits where a diff matches a regex pattern
+git log --follow -- <file>        - Show history of a file even across renames
+git blame -L <start>,<end> <file> - Show blame info for only a specific line range
+git bugreport                     - Generate a diagnostic report for filing a Git bug
+git range-diff <base1>..<tip1> <base2>..<tip2> - Compare two versions of a rebased/rewritten branch
 
 MISCELLANEOUS
 -------------
 git status --short                - Show repository status in a compact abbreviated format
 git shortlog                      - Summarize commit history by author
+git shortlog -sn                  - Summarize commit counts per author, sorted by number of commits
 git count-objects -v              - Show storage usage and repository housekeeping info
 git gc                            - Clean up the repository by optimizing and packing objects
-git archive                       - Create a tar/zip archive of the repository contents
+git gc --aggressive               - More thorough repository optimization (slower, run occasionally)
+git archive --format=zip -o out.zip HEAD - Export the current commit's files as a zip archive
 git submodule add <url>           - Add a submodule to the repository
 git worktree add <path> <branch>  - Add a new working tree linked to the repository
 git grep "<pattern>"              - Search the tracked files for a string pattern
+git grep -n "<pattern>"           - Same as above, but include line numbers in the results
+git maintenance start             - Enable background scheduled repository maintenance
+git update-index --assume-unchanged <file> - Temporarily hide local-only edits to a tracked file from status/diff
+git update-index --no-assume-unchanged <file> - Undo the above, resume tracking changes to the file

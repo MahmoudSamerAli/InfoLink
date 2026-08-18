@@ -12,7 +12,7 @@ public class Log {
     private Long logID;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "User_Idd", referencedColumnName = "UserID")
+    @JoinColumn(name = "User_Idd", referencedColumnName = "User_Idd")
     private User user;
 
     @Column(name = "Collection_Name", nullable = false)
