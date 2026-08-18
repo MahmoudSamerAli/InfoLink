@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>InfoLink – User Dashboard</title>
+  <meta name="description" content="Your assigned access and recent searches on InfoLink."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css"/>
+  <style>
+    /* ── Welcome banner ── */
+    .welcome-banner {
+      background: linear-gradient(135deg, rgba(124,58,237,0.12) 0%, rgba(79,70,229,0.08) 100%);
+      border: 1px solid rgba(124,58,237,0.2);
+      border-radius: 14px;
+      padding: 24px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .welcome-banner::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #7c3aed, #4f46e5, #a78bfa);
+    }
+    .welcome-left h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+    .welcome-left p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+    .group-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .group-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: rgba(124,58,237,0.18);
+      color: #a78bfa;
+      border: 1px solid rgba(124,58,237,0.25);
+      transition: all 0.2s;
+    }
+    .group-badge:hover {
+      background: rgba(124,58,237,0.28);
+      border-color: rgba(124,58,237,0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-start-search {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 20px rgba(124,58,237,0.35);
+      text-decoration: none;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .btn-start-search:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(124,58,237,0.45);
+    }
+    .btn-start-search:active { transform: translateY(0); }
+    .btn-start-search svg { width: 16px; height: 16px; }
+
+    /* ── Stats grid ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.25s, transform 0.25s;
+      cursor: default;
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      border-radius: 14px 14px 0 0;
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+    .stat-card:hover {
+      border-color: rgba(124,58,237,0.3);
+      transform: translateY(-3px);
+    }
+    .stat-card:hover::before {
+      opacity: 1;
+      background: linear-gradient(90deg, #7c3aed, #4f46e5);
+    }
+
+    .stat-icon {
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .stat-icon svg { width: 20px; height: 20px; }
+    .stat-icon-purple { background: rgba(124,58,237,0.15); color: #a78bfa; }
+    .stat-icon-green  { background: rgba(16,185,129,0.15); color: #34d399; }
+    .stat-icon-teal   { background: rgba(20,184,166,0.15); color: #2dd4bf; }
+    .stat-icon-rose   { background: rgba(244,63,94,0.15); color: #fb7185; }
+
+    .stat-bottom {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+    .stat-delta {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .stat-delta-up {
+      color: var(--success);
+      background: var(--success-bg);
+    }
+    .stat-delta-info {
+      color: var(--info);
+      background: var(--info-bg);
+    }
+
+    /* ── Bottom row: Recent Searches + Your Access ── */
+    .bottom-row {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 16px;
+    }
+
+    /* ── Recent Searches card ── */
+    .recent-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0;
+      overflow: hidden;
+    }
+    .recent-header {
+      padding: 22px 24px 0;
+      margin-bottom: 8px;
+    }
+    .recent-title {
+      font-size: 0.97rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .search-list {
+      padding: 0;
+    }
+    .search-item {
+      display: flex;
+      align-items: center;
+      padding: 14px 24px;
+      transition: background 0.18s;
+      cursor: default;
+      border-bottom: 1px solid var(--border);
+    }
+    .search-item:last-child { border-bottom: none; }
+    .search-item:hover { background: var(--bg-row-hover); }
+
+    .search-icon-wrap {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: rgba(124,58,237,0.12);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-right: 14px;
+      color: #a78bfa;
+    }
+    .search-icon-wrap svg { width: 16px; height: 16px; }
+
+    .search-info { flex: 1; min-width: 0; }
+    .search-keyword {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .search-group {
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .search-meta {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-shrink: 0;
+    }
+    .search-time {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    .search-results-count {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    /* ── Your Access card ── */
+    .access-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .access-header {
+      width: 100%;
+      text-align: left;
+      margin-bottom: 20px;
+    }
+    .access-header-title {
+      font-size: 0.97rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .access-shield {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(79,70,229,0.1));
+      border: 2px solid rgba(124,58,237,0.25);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px;
+      position: relative;
+      animation: shieldPulse 3s ease-in-out infinite;
+    }
+    @keyframes shieldPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(124,58,237,0.15); }
+      50% { box-shadow: 0 0 0 10px rgba(124,58,237,0); }
+    }
+    .access-shield svg { width: 38px; height: 38px; }
+
+    .access-groups-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .access-groups-sub {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    .access-need {
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .access-need-sub {
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .btn-contact {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 22px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 0.84rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-contact:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-light);
+      transform: translateY(-1px);
+    }
+
+    /* ── Responsive adjustments ── */
+    @media (max-width: 1100px) {
+      .bottom-row {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (max-width: 900px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .welcome-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 8C10 8 14 8 16 12C18 16 22 16 22 16" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M10 16C10 16 14 16 16 20C18 24 22 24 22 24" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="10" cy="8" r="2.5" fill="#7c3aed"/>
+        <circle cx="22" cy="16" r="2.5" fill="#7c3aed"/>
+        <circle cx="10" cy="16" r="2.5" fill="#a78bfa"/>
+        <circle cx="22" cy="24" r="2.5" fill="#a78bfa"/>
+      </svg>
+      <span class="sidebar-logo-text">InfoLink</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+
+      <a href="dashboard-user.html" class="nav-item active" id="nav-dashboard">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        Dashboard
+      </a>
+
+      <a href="search-user.html" class="nav-item" id="nav-search">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        Search
+      </a>
+
+      <div class="nav-section-label">Settings</div>
+
+      <a href="change-password.html" class="nav-item" id="nav-password">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+        </svg>
+        Change Password
+      </a>
+    </nav>
+
+    <div class="sidebar-user">
+      <div class="user-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name">Abdelrahman Mostafa</div>
+        <div class="user-role">Standard User</div>
+      </div>
+    </div>
+    <div style="padding:0 14px 14px;">
+      <button class="btn-logout" id="logoutBtn" onclick="handleLogout()">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-title">
+        <h1 style="font-size:1.2rem;font-weight:700;color:var(--text-primary);line-height:1.2;">User Dashboard</h1>
+        <p>Your assigned access and recent searches</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="theme-btn" title="Toggle theme" id="themeToggle">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+        <div class="profile-chip">
+          <div class="avatar">A</div>
+          <div>
+            <div class="name">Abdelrahman Mostafa</div>
+            <div class="role">Standard User</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="page-content">
+
+      <!-- Welcome Banner -->
+      <div class="welcome-banner" id="welcomeBanner">
+        <div class="welcome-left">
+          <h3 id="greetingText">Good morning, Abdelrahman</h3>
+          <p>You can search records from the Digital Marketing and IT Team.</p>
+          <div class="group-badges">
+            <span class="group-badge">Digital Marketing</span>
+            <span class="group-badge">IT Team</span>
+          </div>
+        </div>
+        <a href="search-user.html" class="btn-start-search" id="startSearchBtn">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          Start a search
+        </a>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <!-- Searches Today -->
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-purple">
+            <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </div>
+          <div>
+            <div class="stat-label">Your Searches Today</div>
+            <div class="stat-bottom">
+              <div class="stat-value" id="searchesToday">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Accessed Groups -->
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-green">
+            <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <div>
+            <div class="stat-label">Accessed Groups</div>
+            <div class="stat-bottom">
+              <div class="stat-value">2</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Successful Results -->
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-teal">
+            <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div>
+            <div class="stat-label">Successful Results</div>
+            <div class="stat-bottom">
+              <div class="stat-value">16</div>
+              <span class="stat-delta stat-delta-up">+89%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Last Login -->
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-rose">
+            <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <div>
+            <div class="stat-label">Last Login</div>
+            <div class="stat-bottom">
+              <div class="stat-value" id="lastLogin">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Row: Recent Searches + Your Access -->
+      <div class="bottom-row">
+
+        <!-- Recent Searches -->
+        <div class="recent-card">
+          <div class="recent-header">
+            <div class="recent-title">Recent Searches</div>
+          </div>
+          <div class="search-list" id="searchList">
+            <!-- Item 1 -->
+            <div class="search-item">
+              <div class="search-icon-wrap">
+                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+              </div>
+              <div class="search-info">
+                <div class="search-keyword">About AIB</div>
+                <div class="search-group">IT Team</div>
+              </div>
+              <div class="search-meta">
+                <span class="search-time">5 minutes ago</span>
+                <span class="search-results-count">8 results</span>
+              </div>
+            </div>
+            <!-- Item 2 -->
+            <div class="search-item">
+              <div class="search-icon-wrap">
+                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+              </div>
+              <div class="search-info">
+                <div class="search-keyword">AIB FB Post</div>
+                <div class="search-group">Digital Marketing</div>
+              </div>
+              <div class="search-meta">
+                <span class="search-time">Yesterday</span>
+                <span class="search-results-count">1 result</span>
+              </div>
+            </div>
+            <!-- Item 3 -->
+            <div class="search-item">
+              <div class="search-icon-wrap">
+                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+              </div>
+              <div class="search-info">
+                <div class="search-keyword">AIB Insta Post</div>
+                <div class="search-group">Digital Marketing</div>
+              </div>
+              <div class="search-meta">
+                <span class="search-time">2 days ago</span>
+                <span class="search-results-count">3 results</span>
+              </div>
+            </div>
+            <!-- Item 4 -->
+            <div class="search-item">
+              <div class="search-icon-wrap">
+                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+              </div>
+              <div class="search-info">
+                <div class="search-keyword">Landing Page</div>
+                <div class="search-group">IT Team</div>
+              </div>
+              <div class="search-meta">
+                <span class="search-time">3 days ago</span>
+                <span class="search-results-count">12 results</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Your Access -->
+        <div class="access-card">
+          <div class="access-header">
+            <div class="access-header-title">Your Access</div>
+          </div>
+
+          <div class="access-shield">
+            <svg fill="none" viewBox="0 0 24 24">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#a78bfa" stroke-width="1.5" fill="rgba(124,58,237,0.1)"/>
+              <polyline points="9 12 11 14 15 10" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+
+          <div class="access-groups-title">Groups : Digital Marketing & IT Team</div>
+          <div class="access-groups-sub">Groups You Have Access to Search</div>
+
+          <div class="access-need">Need another group?</div>
+          <div class="access-need-sub">Contact an administrator to update group access.</div>
+
+          <button class="btn-contact" id="contactAdminBtn">Contact Administrator</button>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script src="data-store.js"></script>
+<script>
+  // Auth guard
+  if (!InfoLinkStore.isLoggedIn()) {
+    window.location.href = 'login.html';
+  }
+
+  // Show logged-in user info
+  const currentUser = InfoLinkStore.getCurrentUser();
+  const displayName = currentUser.fullname || currentUser.username || 'User';
+  const displayRole = currentUser.role === 'admin' ? 'System Administrator' : 'User';
+  const displayInitial = displayName.charAt(0).toUpperCase();
+  const userGroup = currentUser.group || 'No Group';
+
+  document.querySelector('.sidebar-user .user-name').textContent = displayName;
+  document.querySelector('.sidebar-user .user-role').textContent = displayRole;
+  document.querySelector('.sidebar-user .user-avatar').textContent = displayInitial;
+  if (document.querySelector('.profile-chip .name')) {
+    document.querySelector('.profile-chip .name').textContent = displayName;
+    document.querySelector('.profile-chip .role').textContent = displayRole;
+    document.querySelector('.profile-chip .avatar').textContent = displayInitial;
+  }
+
+  // Update access card with real group info
+  const accessGroupTitle = document.querySelector('.access-groups-title');
+  if (accessGroupTitle) {
+    const userCols = InfoLinkStore.getGroupCollections(userGroup);
+    accessGroupTitle.textContent = `Group : ${userGroup || 'None'}`;
+    // Update welcome banner collections
+    const badgesEl = document.querySelector('.group-badges');
+    if (badgesEl && userGroup) {
+      badgesEl.innerHTML = userCols.length > 0
+        ? userCols.map(c => `<span class="group-badge">${c}</span>`).join('')
+        : `<span class="group-badge">${userGroup}</span>`;
+    }
+    // Update welcome text
+    const welcomeP = document.querySelector('.welcome-left p');
+    if (welcomeP && userGroup) {
+      const colText = userCols.length > 0 ? userCols.join(', ') : userGroup;
+      welcomeP.textContent = `You can search records from: ${colText}.`;
+    }
+  }
+
+  // Dynamic stats
+  document.getElementById('searchesToday').textContent = InfoLinkStore.getTodayLogCountForUser(currentUser.username);
+  document.getElementById('lastLogin').textContent     = InfoLinkStore.getLoginTime();
+
+  // Successful searches count
+  const userLogs = InfoLinkStore.getLogsForUser(currentUser.username);
+  const successCount = userLogs.filter(l => l.status !== 'Failed').length;
+  const successEl = document.querySelector('.stat-value:nth-of-type(3)');
+  // Update via ID is safer:
+  document.querySelectorAll('.stat-value')[2] && (document.querySelectorAll('.stat-value')[2].textContent = successCount);
+
+  // Logout handler
+  function handleLogout() {
+    InfoLinkStore.clearSession();
+    window.location.href = 'login.html';
+  }
+
+  // Dynamic greeting based on time of day
+  (function() {
+    const hour = new Date().getHours();
+    let greeting = 'Good morning';
+    if (hour >= 12 && hour < 17) greeting = 'Good afternoon';
+    else if (hour >= 17) greeting = 'Good evening';
+    const firstName = displayName.split(' ')[0];
+    document.getElementById('greetingText').textContent = greeting + ', ' + firstName;
+  })();
+
+  // Active nav highlight
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+      if (!this.href || this.href === '#') return;
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
+  // Subtle entrance animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.stat-card, .recent-card, .access-card, .welcome-banner').forEach((el, i) => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(16px)';
+    el.style.transition = `opacity 0.5s ease ${i * 0.08}s, transform 0.5s ease ${i * 0.08}s, border-color 0.25s, box-shadow 0.25s`;
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
+

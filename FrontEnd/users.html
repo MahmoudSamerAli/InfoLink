@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>InfoLink – User Management</title>
+  <meta name="description" content="Admin User Management – create, edit, deactivate and review system users."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css"/>
+  <style>
+    /* ── Toolbar ── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .search-wrap {
+      flex: 1;
+      min-width: 200px;
+      position: relative;
+    }
+    .search-wrap svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 15px; height: 15px;
+      color: var(--text-secondary);
+      pointer-events: none;
+    }
+    .search-input {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 0.86rem;
+      font-family: 'Inter', sans-serif;
+      padding: 9px 12px 9px 36px;
+      outline: none;
+      transition: border-color 0.18s;
+    }
+    .search-input::placeholder { color: var(--text-secondary); }
+    .search-input:focus { border-color: var(--accent); }
+
+    .filter-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 0.84rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      padding: 9px 14px;
+      cursor: pointer;
+      transition: all 0.18s;
+      white-space: nowrap;
+    }
+    .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .filter-btn svg { width: 14px; height: 14px; }
+
+    /* ── Table container ── */
+    .table-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .table-scroll { overflow-x: auto; }
+
+    .data-table thead th:first-child { padding-left: 22px; }
+    .data-table tbody td:first-child { padding-left: 22px; }
+
+    /* User cell */
+    .user-cell {
+      font-size: 0.87rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Role badge */
+    .role-badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    /* Status */
+    .status-active   { color: var(--success); font-weight: 600; font-size: 0.85rem; }
+    .status-inactive { color: var(--danger);  font-weight: 600; font-size: 0.85rem; }
+
+    /* Actions */
+    .action-link {
+      background: none;
+      border: none;
+      font-size: 0.83rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0;
+      transition: opacity 0.18s;
+    }
+    .action-link:hover { opacity: 0.75; }
+    .action-edit    { color: var(--text-muted); }
+    .action-disable { color: var(--text-muted); }
+    .action-delete  { color: var(--danger); }
+    .action-sep     { color: var(--border-light); margin: 0 4px; }
+
+    /* Footer */
+    .table-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 22px;
+      border-top: 1px solid var(--border);
+    }
+    .table-count { font-size: 0.82rem; color: var(--text-secondary); }
+
+    .pagination { display: flex; align-items: center; gap: 6px; }
+    .page-btn {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .page-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .page-num {
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 7px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    /* Modal overlay */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 30px 28px 24px;
+      width: 100%;
+      max-width: 420px;
+      animation: fadeUp 0.22s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(16px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .modal-icon {
+      width: 52px; height: 52px;
+      background: var(--danger-bg);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 18px;
+    }
+    .modal-icon svg { width: 26px; height: 26px; color: var(--danger); }
+    .modal-title { font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+    .modal-body  { font-size: 0.87rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 24px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 8C10 8 14 8 16 12C18 16 22 16 22 16" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M10 16C10 16 14 16 16 20C18 24 22 24 22 24" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="10" cy="8"  r="2.5" fill="#7c3aed"/>
+        <circle cx="22" cy="16" r="2.5" fill="#7c3aed"/>
+        <circle cx="10" cy="16" r="2.5" fill="#a78bfa"/>
+        <circle cx="22" cy="24" r="2.5" fill="#a78bfa"/>
+      </svg>
+      <span class="sidebar-logo-text">InfoLink</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+
+      <a href="dashboard.html" class="nav-item" id="nav-dashboard">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        Dashboard
+      </a>
+
+      <a href="search-admin.html" class="nav-item" id="nav-search-admin">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        Search
+      </a>
+
+      <div class="nav-section-label">Management</div>
+
+      <a href="users.html" class="nav-item active" id="nav-users">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        Users
+      </a>
+
+      <a href="groups.html" class="nav-item" id="nav-groups">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+        </svg>
+        Groups
+      </a>
+
+      <a href="logs.html" class="nav-item" id="nav-logs">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+        </svg>
+        Logs
+      </a>
+
+      <div class="nav-section-label">Settings</div>
+
+      <a href="change-password.html" class="nav-item" id="nav-change-pw">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+        </svg>
+        Change Password
+      </a>
+    </nav>
+
+    <div class="sidebar-user">
+      <div class="user-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name">Admin</div>
+        <div class="user-role">System Administrator</div>
+      </div>
+    </div>
+    <div style="padding:0 14px 14px;">
+      <button class="btn-logout" id="logoutBtn" onclick="handleLogout()">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-title">
+        <h2>User Management</h2>
+        <p>Create, edit, deactivate and review system users</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="theme-btn" title="Toggle theme" id="theme-toggle">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+        <div class="profile-chip">
+          <div class="avatar">A</div>
+          <div>
+            <div class="name">Admin</div>
+            <div class="role">System Administrator</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="page-content">
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input id="search-input" type="text" class="search-input" placeholder="Search name or username" autocomplete="off"/>
+        </div>
+
+        <button class="filter-btn" id="filter-role" title="Filter by Role">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+          </svg>
+          Role
+        </button>
+
+        <button class="filter-btn" id="filter-group" title="Filter by Group">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+          </svg>
+          Group
+        </button>
+
+        <button class="filter-btn" id="filter-status" title="Filter by Status">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+          </svg>
+          Status
+        </button>
+
+        <a href="add-user.html" class="btn btn-primary" id="btn-add-user" style="margin-left:auto;">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add User
+        </a>
+      </div>
+
+      <!-- Table -->
+      <div class="table-card">
+        <div class="table-scroll">
+          <table class="data-table" id="users-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Group</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody">
+              <!-- Rows injected by JS -->
+            </tbody>
+          </table>
+        </div>
+        <div class="table-footer">
+          <span class="table-count" id="table-count">248 users total</span>
+          <div class="pagination">
+            <button class="page-btn" id="btn-prev" disabled>Previous</button>
+            <div class="page-num" id="page-num">1</div>
+            <button class="page-btn" id="btn-next">Next</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal-overlay" id="delete-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-box">
+    <div class="modal-icon">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+        <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+        <path d="M10 11v6"/><path d="M14 11v6"/>
+        <path d="M9 6V4h6v2"/>
+      </svg>
+    </div>
+    <div class="modal-title" id="modal-title">Delete User</div>
+    <div class="modal-body" id="modal-body">Are you sure you want to permanently delete this user? This action cannot be undone.</div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" id="modal-cancel">Cancel</button>
+      <button class="btn" style="background:var(--danger);color:#fff;" id="modal-confirm">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script src="data-store.js"></script>
+<script>
+  // Auth guard
+  if (!InfoLinkStore.isLoggedIn()) {
+    window.location.href = 'login.html';
+  }
+
+  // Show logged-in user info
+  const currentUser = InfoLinkStore.getCurrentUser();
+  const displayName = currentUser.fullname || currentUser.username || 'Admin';
+  const displayRole = currentUser.role === 'admin' ? 'System Administrator' : 'User';
+  const displayInitial = displayName.charAt(0).toUpperCase();
+
+  document.querySelector('.sidebar-user .user-name').textContent = displayName;
+  document.querySelector('.sidebar-user .user-role').textContent = displayRole;
+  document.querySelector('.sidebar-user .user-avatar').textContent = displayInitial;
+  document.querySelector('.profile-chip .name').textContent = displayName;
+  document.querySelector('.profile-chip .role').textContent = displayRole;
+  document.querySelector('.profile-chip .avatar').textContent = displayInitial;
+
+  // Logout handler
+  function handleLogout() {
+    InfoLinkStore.clearSession();
+    window.location.href = 'login.html';
+  }
+
+  /* ── User storage (via InfoLinkStore) ── */
+  let ALL_USERS = InfoLinkStore.getUsers();
+
+  const PAGE_SIZE = 12;
+  let currentPage = 1;
+  let filtered = [...ALL_USERS];
+  let pendingDeleteIdx = -1;
+
+  const tbody      = document.getElementById('users-tbody');
+  const countEl    = document.getElementById('table-count');
+  const pageNumEl  = document.getElementById('page-num');
+  const btnPrev    = document.getElementById('btn-prev');
+  const btnNext    = document.getElementById('btn-next');
+  const deleteModal = document.getElementById('delete-modal');
+
+  function renderPage() {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const slice = filtered.slice(start, start + PAGE_SIZE);
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px 16px;color:var(--text-secondary);font-size:0.9rem;">
+        No users yet. Click <strong>Add User</strong> to create one.
+      </td></tr>`;
+    } else {
+      tbody.innerHTML = slice.map((u, i) => {
+        const globalIdx = start + i;
+        const isInactive = u.status === 'Inactive';
+        const actions = isInactive
+          ? `<button class="action-link action-edit" onclick="editUser(${globalIdx})">Edit</button>
+             <span class="action-sep">|</span>
+             <button class="action-link action-delete" onclick="confirmDelete(${globalIdx})">Delete</button>`
+          : `<button class="action-link action-edit" onclick="editUser(${globalIdx})">Edit</button>
+             <span class="action-sep">|</span>
+             <button class="action-link action-disable" onclick="disableUser(${globalIdx})">Disable</button>`;
+        return `<tr>
+          <td class="user-cell">${u.name}</td>
+          <td>${u.username}</td>
+          <td class="role-badge">${u.role}</td>
+          <td>${u.group}</td>
+          <td><span class="${u.status==='Active'?'status-active':'status-inactive'}">${u.status}</span></td>
+          <td>${u.created}</td>
+          <td>${actions}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+    countEl.textContent = `${filtered.length} users total`;
+    pageNumEl.textContent = currentPage;
+    btnPrev.disabled = currentPage === 1;
+    btnNext.disabled = currentPage >= totalPages;
+  }
+
+  function editUser(idx) {
+    // Find the real index in ALL_USERS based on the filtered user
+    const user = filtered[idx];
+    const realIdx = ALL_USERS.findIndex(u => u.id === user.id || (u.username === user.username && u.created === user.created));
+    window.location.href = `edit-user.html?idx=${realIdx >= 0 ? realIdx : idx}`;
+  }
+
+  function disableUser(idx) {
+    const user = filtered[idx];
+    const realIdx = ALL_USERS.findIndex(u => u.id === user.id || (u.username === user.username && u.created === user.created));
+    if (realIdx >= 0) {
+      ALL_USERS[realIdx].status = 'Inactive';
+      InfoLinkStore.saveUsers(ALL_USERS);
+      filtered[idx].status = 'Inactive';
+    }
+    renderPage();
+  }
+
+  function confirmDelete(idx) {
+    pendingDeleteIdx = idx;
+    document.getElementById('modal-body').textContent =
+      `Are you sure you want to permanently delete "${filtered[idx].name}"? This action cannot be undone.`;
+    deleteModal.classList.add('open');
+  }
+
+  document.getElementById('modal-cancel').addEventListener('click', () => {
+    deleteModal.classList.remove('open');
+    pendingDeleteIdx = -1;
+  });
+
+  document.getElementById('modal-confirm').addEventListener('click', () => {
+    if (pendingDeleteIdx >= 0) {
+      const user = filtered[pendingDeleteIdx];
+      const realIdx = ALL_USERS.findIndex(u => u.id === user.id || (u.username === user.username && u.created === user.created));
+      if (realIdx >= 0) {
+        ALL_USERS.splice(realIdx, 1);
+        InfoLinkStore.saveUsers(ALL_USERS);
+      }
+      filtered.splice(pendingDeleteIdx, 1);
+      if ((currentPage - 1) * PAGE_SIZE >= filtered.length && currentPage > 1) currentPage--;
+      renderPage();
+    }
+    deleteModal.classList.remove('open');
+    pendingDeleteIdx = -1;
+  });
+
+  deleteModal.addEventListener('click', e => {
+    if (e.target === deleteModal) { deleteModal.classList.remove('open'); pendingDeleteIdx = -1; }
+  });
+
+  btnPrev.addEventListener('click', () => { currentPage--; renderPage(); });
+  btnNext.addEventListener('click', () => { currentPage++; renderPage(); });
+
+  document.getElementById('search-input').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    filtered = ALL_USERS.filter(u =>
+      u.name.toLowerCase().includes(q) || u.username.toLowerCase().includes(q)
+    );
+    currentPage = 1;
+    renderPage();
+  });
+
+  // Initial render
+  renderPage();
+</script>
+</body>
+</html>

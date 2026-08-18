@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>InfoLink – User Search</title>
+  <meta name="description" content="Search records within your assigned collections."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css"/>
+  <style>
+    /* ── Search panel ── */
+    .search-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .search-panel-title {
+      font-size: 0.97rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+    }
+
+    .search-row {
+      display: grid;
+      grid-template-columns: 1fr 260px;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-label { font-size: 0.8rem; font-weight: 500; color: var(--text-muted); }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-icon {
+      position: absolute; left: 14px;
+      color: var(--text-secondary); pointer-events: none; transition: color 0.2s;
+    }
+    .input-wrap:focus-within .input-icon { color: var(--accent); }
+    .input-icon svg { width: 16px; height: 16px; }
+
+    .search-input,
+    .group-select {
+      width: 100%;
+      padding: 12px 14px 12px 42px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .search-input:focus,
+    .group-select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    .search-input::placeholder { color: var(--text-secondary); }
+
+    .group-select { padding-left: 14px; cursor: pointer; }
+    .group-select option { background: #111827; }
+
+    .select-wrap { position: relative; }
+    .group-count {
+      position: absolute;
+      right: 36px; top: 50%; transform: translateY(-50%);
+      background: var(--accent-light);
+      color: var(--accent);
+      font-size: 0.72rem; font-weight: 700;
+      border-radius: 4px; padding: 2px 6px;
+      pointer-events: none;
+    }
+    .select-chevron {
+      position: absolute;
+      right: 12px; top: 50%; transform: translateY(-50%);
+      pointer-events: none; color: var(--text-secondary);
+    }
+    .select-chevron svg { width: 14px; height: 14px; }
+
+    /* Action row */
+    .action-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .access-notice {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(245,158,11,0.08);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-radius: 10px;
+      padding: 10px 16px;
+      flex: 1;
+    }
+    .access-notice svg { width: 18px; height: 18px; color: var(--warning); flex-shrink: 0; }
+    .access-notice span { font-size: 0.84rem; color: var(--text-muted); }
+
+    .action-btns { display: flex; align-items: center; gap: 10px; }
+
+    .btn-search {
+      display: flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+      border: none;
+      border-radius: 8px;
+      padding: 10px 22px;
+      color: #fff;
+      font-size: 0.9rem; font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 3px 16px var(--accent-glow);
+    }
+    .btn-search:hover { transform: translateY(-1px); box-shadow: 0 6px 24px var(--accent-glow); }
+    .btn-search:active { transform: translateY(0); }
+    .btn-search svg { width: 16px; height: 16px; }
+
+    /* ── Results table ── */
+    .results-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .results-title { font-size: 0.97rem; font-weight: 600; color: var(--text-primary); }
+
+    .search-again-btn {
+      background: none; border: none;
+      color: var(--accent);
+      font-size: 0.85rem; font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      padding: 4px 0;
+      transition: color 0.18s;
+    }
+    .search-again-btn:hover { color: #a78bfa; }
+
+    .zero { color: var(--danger); font-weight: 600; }
+    .positive { color: var(--success); font-weight: 600; }
+    .kw-masked { letter-spacing: 2px; }
+
+    @keyframes rowHighlight {
+      0%   { background: rgba(124,58,237,0.15); }
+      100% { background: transparent; }
+    }
+    .highlighted td { animation: rowHighlight 1.5s ease forwards; }
+
+    /* Access Denied section */
+    .access-denied-section {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 56px 24px;
+      text-align: center;
+      animation: fadeUp .25s ease;
+    }
+    .access-denied-section.visible { display: flex; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+    .lock-circle {
+      width: 88px; height: 88px; border-radius: 50%;
+      background: rgba(239,68,68,0.1); border: 2px solid rgba(239,68,68,0.3);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px;
+      animation: pulse-lock 2s ease-in-out infinite;
+    }
+    @keyframes pulse-lock {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,.3); }
+      50% { box-shadow: 0 0 0 12px rgba(239,68,68,.0); }
+    }
+    .lock-circle svg { width: 42px; height: 42px; color: #ef4444; }
+    .denied-title { font-size: 1.3rem; font-weight: 800; color: var(--danger); margin-bottom: 8px; }
+    .denied-subtitle { font-size: .9rem; color: var(--text-secondary); margin-bottom: 28px; max-width: 420px; line-height: 1.6; }
+    .denied-collection-tag {
+      display: inline-block;
+      background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.3);
+      color: #ef4444; font-size: .85rem; font-weight: 700;
+      padding: 4px 14px; border-radius: 20px; margin-bottom: 28px;
+    }
+    .denied-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-contact-admin {
+      display: flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg,#ef4444,#dc2626);
+      border: none; border-radius: 8px;
+      padding: 11px 22px; color: #fff;
+      font-size: .9rem; font-weight: 600; font-family: 'Inter',sans-serif;
+      cursor: pointer; transition: all .2s;
+      box-shadow: 0 3px 14px rgba(239,68,68,.35);
+    }
+    .btn-contact-admin:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(239,68,68,.45); }
+    .btn-contact-admin svg { width: 16px; height: 16px; }
+    .btn-back-search {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg-input); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 20px; color: var(--text-muted);
+      font-size: .9rem; font-weight: 600; font-family: 'Inter',sans-serif;
+      cursor: pointer; transition: all .2s;
+    }
+    .btn-back-search:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-back-search svg { width: 15px; height: 15px; }
+
+    /* Request modal */
+    .req-modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.65); z-index: 300;
+      align-items: center; justify-content: center;
+    }
+    .req-modal-overlay.open { display: flex; }
+    .req-modal-box {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 30px 28px 24px;
+      width: 100%; max-width: 460px;
+      animation: fadeUp .22s ease;
+    }
+    .req-modal-title { font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+    .req-modal-sub { font-size: .82rem; color: var(--text-secondary); margin-bottom: 20px; }
+    .req-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .req-label { font-size: .8rem; font-weight: 600; color: var(--text-secondary); }
+    .req-textarea {
+      background: var(--bg-input); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text-primary);
+      font-size: .86rem; font-family: 'Inter',sans-serif;
+      padding: 10px 12px; outline: none; resize: vertical;
+      min-height: 90px; transition: border-color .18s;
+    }
+    .req-textarea:focus { border-color: var(--accent); }
+    .req-modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+    .req-sent-banner {
+      display: none; align-items: center; gap: 10px;
+      background: rgba(34,197,94,.08); border: 1px solid rgba(34,197,94,.25);
+      border-radius: 10px; padding: 12px 16px; margin-top: 14px;
+    }
+    .req-sent-banner.visible { display: flex; }
+    .req-sent-banner svg { width: 18px; height: 18px; color: var(--success); flex-shrink: 0; }
+    .req-sent-banner span { font-size: .84rem; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 8C10 8 14 8 16 12C18 16 22 16 22 16" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M10 16C10 16 14 16 16 20C18 24 22 24 22 24" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="10" cy="8" r="2.5" fill="#7c3aed"/>
+        <circle cx="22" cy="16" r="2.5" fill="#7c3aed"/>
+        <circle cx="10" cy="16" r="2.5" fill="#a78bfa"/>
+        <circle cx="22" cy="24" r="2.5" fill="#a78bfa"/>
+      </svg>
+      <span class="sidebar-logo-text">InfoLink</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+
+      <a href="dashboard-user.html" class="nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        Dashboard
+      </a>
+
+      <a href="search-user.html" class="nav-item active">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        Search
+      </a>
+
+      <div class="nav-section-label">Settings</div>
+
+      <a href="change-password.html" class="nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+        </svg>
+        Change Password
+      </a>
+    </nav>
+
+    <div class="sidebar-user">
+      <div class="user-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name">Abdelrahman Mostafa</div>
+        <div class="user-role">Standard User</div>
+      </div>
+    </div>
+    <div style="padding:0 14px 14px;">
+      <button class="btn-logout" id="logoutBtn" onclick="handleLogout()">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-title">
+        <h2>Search</h2>
+        <p>Search your assigned collections</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="theme-btn" title="Toggle theme">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+        <div class="profile-chip">
+          <div class="avatar">A</div>
+          <div>
+            <div class="name">Abdelrahman Mostafa</div>
+            <div class="role">Standard User</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="page-content">
+
+      <!-- Search Panel -->
+      <div class="search-panel">
+        <div class="search-panel-title">Search your assigned records</div>
+
+        <div class="search-row">
+          <!-- Keyword input -->
+          <div class="form-group">
+            <label class="form-label">Search keyword</label>
+            <div class="input-wrap">
+              <span class="input-icon">
+                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+              </span>
+              <input
+                type="text"
+                id="searchInput"
+                class="search-input"
+                placeholder="National ID, phone number, address"
+              />
+            </div>
+          </div>
+
+          <!-- Collection select (limited) -->
+          <div class="form-group">
+            <label class="form-label">Collection</label>
+            <div class="select-wrap">
+              <select class="group-select" id="groupSelect" style="padding-right: 80px; appearance: none; -webkit-appearance: none;">
+                <option value="dm">Digital Marketing</option>
+                <option value="it">IT Team</option>
+              </select>
+              <span class="group-count" id="groupCount">2</span>
+              <span class="select-chevron">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Access notice + actions -->
+        <div class="action-row">
+          <div class="access-notice" id="access-notice">
+            <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <span id="access-notice-text">Limited access: you can only search your assigned collections.</span>
+          </div>
+          <div class="action-btns">
+            <button class="btn-search" id="searchBtn">
+              <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              Search records
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Access Denied UI -->
+      <div class="access-denied-section" id="access-denied-section">
+        <div class="lock-circle">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <rect x="3" y="11" width="18" height="11" rx="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            <circle cx="12" cy="16" r="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="denied-title">Access Denied</div>
+        <div class="denied-collection-tag" id="denied-collection-tag">Collection</div>
+        <div class="denied-subtitle">You don't have permission to search this collection. Contact your administrator to request access.</div>
+        <div class="denied-btns">
+          <button class="btn-contact-admin" id="btn-contact-admin" onclick="openRequestModal()">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            Contact Admin
+          </button>
+          <button class="btn-back-search" onclick="backToSearch()">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+            </svg>
+            Back to Search
+          </button>
+        </div>
+        <!-- Sent confirmation banner -->
+        <div class="req-sent-banner" id="req-sent-banner">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          <span>Your request has been sent to the admin. You'll get access once it's approved.</span>
+        </div>
+      </div>
+
+      <!-- Recent Searches Table -->
+      <div class="results-section">
+        <div class="results-header">
+          <div class="results-title" id="resultsTitle">Recent Searches</div>
+        </div>
+
+        <div class="card" style="padding:0;overflow:hidden;">
+          <table class="data-table" id="resultsTable">
+            <thead>
+              <tr>
+                <th>Keyword</th>
+                <th>Collection</th>
+                <th>Results</th>
+                <th>Date &amp; time</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="resultsBody">
+              <tr>
+                <td style="color:var(--text-primary);font-weight:500">About AIB</td>
+                <td>IT Team</td>
+                <td class="positive">8</td>
+                <td>Today, 09:42</td>
+                <td><button class="search-again-btn">Search again</button></td>
+              </tr>
+              <tr>
+                <td style="color:var(--text-primary);font-weight:500">AIB FB Post</td>
+                <td>Digital Marketing</td>
+                <td class="positive">1</td>
+                <td>Yesterday</td>
+                <td><button class="search-again-btn">Search again</button></td>
+              </tr>
+              <tr>
+                <td style="color:var(--text-primary);font-weight:500">AIB Insta Post</td>
+                <td>Digital Marketing</td>
+                <td class="positive">3</td>
+                <td>2 days ago</td>
+                <td><button class="search-again-btn">Search again</button></td>
+              </tr>
+              <tr>
+                <td style="color:var(--text-primary);font-weight:500">Landing Page</td>
+                <td>IT Team</td>
+                <td class="positive">12</td>
+                <td>3 days ago</td>
+                <td><button class="search-again-btn">Search again</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Access Request Modal -->
+<div class="req-modal-overlay" id="req-modal">
+  <div class="req-modal-box">
+    <div class="req-modal-title">Request Collection Access</div>
+    <div class="req-modal-sub" id="req-modal-sub">You are requesting access to <strong id="req-modal-coll"></strong>.</div>
+    <div class="req-field">
+      <label class="req-label">Reason for access <span style="color:var(--text-secondary);font-weight:400">(optional)</span></label>
+      <textarea class="req-textarea" id="req-reason" placeholder="Briefly explain why you need access to this collection…"></textarea>
+    </div>
+    <div class="req-modal-actions">
+      <button class="btn btn-outline" onclick="closeRequestModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitRequest()">Send Request</button>
+    </div>
+  </div>
+</div>
+
+<script src="data-store.js"></script>
+<script>
+  // Auth guard
+  if (!InfoLinkStore.isLoggedIn()) { window.location.href = 'login.html'; }
+
+  const currentUser    = InfoLinkStore.getCurrentUser();
+  const displayName    = currentUser.fullname || currentUser.username || 'User';
+  const displayRole    = currentUser.role === 'admin' ? 'System Administrator' : 'Standard User';
+  const displayInitial = displayName.charAt(0).toUpperCase();
+
+  document.querySelector('.sidebar-user .user-name').textContent = displayName;
+  document.querySelector('.sidebar-user .user-role').textContent = displayRole;
+  document.querySelector('.sidebar-user .user-avatar').textContent = displayInitial;
+  document.querySelector('.profile-chip .name').textContent = displayName;
+  document.querySelector('.profile-chip .role').textContent = displayRole;
+  document.querySelector('.profile-chip .avatar').textContent = displayInitial;
+
+  function handleLogout() { InfoLinkStore.clearSession(); window.location.href = 'login.html'; }
+
+  // ── Resolve user’s allowed collections from ALL their groups ──
+  const userGroups      = currentUser.groups && currentUser.groups.length ? currentUser.groups : (currentUser.group ? [currentUser.group] : []);
+  const allowedCollections = InfoLinkStore.getGroupCollectionsForGroups(userGroups);
+
+  // Populate collection dropdown
+  const groupSelect  = document.getElementById('groupSelect');
+  const groupCountEl = document.getElementById('groupCount');
+  if (allowedCollections.length) {
+    groupSelect.innerHTML = allowedCollections.map(c => `<option value="${c}">${c}</option>`).join('');
+    groupCountEl.textContent = allowedCollections.length;
+  } else {
+    groupSelect.innerHTML = `<option value="">No collections assigned</option>`;
+    groupCountEl.textContent = '0';
+  }
+
+  // Update access notice
+  const noticeText = document.getElementById('access-notice-text');
+  if (userGroups.length) {
+    noticeText.textContent = `Limited access: searching collections from ${userGroups.join(', ')}.`;
+  }
+
+  // ── Access Denied state ──
+  let deniedCollection = '';
+
+  function showAccessDenied(collectionName) {
+    deniedCollection = collectionName;
+    document.getElementById('access-denied-section').classList.add('visible');
+    document.getElementById('denied-collection-tag').textContent = collectionName;
+    document.getElementById('req-sent-banner').classList.remove('visible');
+    document.querySelector('.search-panel').style.display = 'none';
+    document.querySelector('.results-section').style.display = 'none';
+  }
+
+  function backToSearch() {
+    document.getElementById('access-denied-section').classList.remove('visible');
+    document.querySelector('.search-panel').style.display = '';
+    document.querySelector('.results-section').style.display = '';
+    deniedCollection = '';
+  }
+
+  // ── Request modal ──
+  function openRequestModal() {
+    document.getElementById('req-modal-coll').textContent = deniedCollection;
+    document.getElementById('req-reason').value = '';
+    document.getElementById('req-modal').classList.add('open');
+  }
+
+  function closeRequestModal() {
+    document.getElementById('req-modal').classList.remove('open');
+  }
+
+  function submitRequest() {
+    // Find which group owns this collection
+    const groups = InfoLinkStore.getGroups();
+    const owningGroup = groups.find(g => (g.collections || []).includes(deniedCollection));
+    InfoLinkStore.addRequest({
+      username:            currentUser.username,
+      userFullname:        displayName,
+      requestedGroup:      owningGroup ? owningGroup.name : '',
+      requestedCollection: deniedCollection,
+      reason:              document.getElementById('req-reason').value.trim(),
+    });
+    closeRequestModal();
+    document.getElementById('req-sent-banner').classList.add('visible');
+    document.getElementById('btn-contact-admin').disabled = true;
+    document.getElementById('btn-contact-admin').style.opacity = '.5';
+  }
+
+  document.getElementById('req-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('req-modal')) closeRequestModal();
+  });
+
+  // ── Search logic ──
+  const searchBtn   = document.getElementById('searchBtn');
+  const searchInput = document.getElementById('searchInput');
+  const resultsTitle= document.getElementById('resultsTitle');
+  const resultsBody = document.getElementById('resultsBody');
+
+  searchBtn.addEventListener('click', performSearch);
+  searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') performSearch(); });
+
+  function performSearch() {
+    const kw   = searchInput.value.trim();
+    const coll = groupSelect.value;
+
+    if (!kw) {
+      searchInput.style.borderColor = '#ef4444';
+      setTimeout(() => (searchInput.style.borderColor = ''), 1200);
+      return;
+    }
+
+    // Check if collection is allowed
+    if (coll && allowedCollections.length && !allowedCollections.includes(coll)) {
+      showAccessDenied(coll);
+      return;
+    }
+
+    searchBtn.disabled = true;
+    searchBtn.innerHTML = `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="animation:spin .7s linear infinite"><circle cx="12" cy="12" r="10" stroke-opacity=".3"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Searching…`;
+
+    setTimeout(() => {
+      searchBtn.disabled = false;
+      searchBtn.innerHTML = `<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="width:16px;height:16px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Search records`;
+
+      const collLabel = groupSelect.options[groupSelect.selectedIndex]?.text || coll;
+      const fakeCount = Math.floor(Math.random() * 20);
+      const now = new Date();
+      const timeStr = `Today, ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+
+      resultsTitle.textContent = 'Search Results';
+
+      InfoLinkStore.addLog({
+        user:    currentUser.username || displayName,
+        group:   userGroups.join(', ') || collLabel,
+        keyword: kw,
+        status:  fakeCount > 0 ? 'Success' : 'Failed',
+      });
+
+      const tr = document.createElement('tr');
+      tr.classList.add('highlighted');
+      tr.innerHTML = `
+        <td style="color:var(--text-primary);font-weight:500">${escHtml(kw)}</td>
+        <td>${escHtml(collLabel)}</td>
+        <td class="${fakeCount > 0 ? 'positive' : 'zero'}">${fakeCount}</td>
+        <td>${timeStr}</td>
+        <td><button class="search-again-btn">Search again</button></td>
+      `;
+      resultsBody.insertBefore(tr, resultsBody.firstChild);
+
+      tr.querySelector('.search-again-btn').addEventListener('click', () => {
+        searchInput.value = kw;
+        performSearch();
+      });
+    }, 900);
+  }
+
+  document.querySelectorAll('.search-again-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const kw = this.closest('tr').querySelector('td:first-child').textContent.replace(/•+/g, '').trim();
+      searchInput.value = kw;
+      performSearch();
+    });
+  });
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  const style = document.createElement('style');
+  style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+  document.head.appendChild(style);
+</script>
+</body>
+</html>

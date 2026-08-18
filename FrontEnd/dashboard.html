@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>InfoLink – Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css"/>
+  <style>
+    /* ── Stats grid ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+      cursor: default;
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      border-radius: 14px 14px 0 0;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .stat-card:hover { border-color: rgba(124,58,237,0.3); transform: translateY(-2px); }
+    .stat-card:hover::before { opacity: 1; background: linear-gradient(90deg, #7c3aed, #4f46e5); }
+
+    .stat-icon {
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .stat-icon svg { width: 20px; height: 20px; }
+    .stat-icon-purple { background: rgba(124,58,237,0.15); color: #a78bfa; }
+    .stat-icon-teal   { background: rgba(20,184,166,0.15); color: #2dd4bf; }
+    .stat-icon-blue   { background: rgba(59,130,246,0.15); color: #60a5fa; }
+    .stat-icon-green  { background: rgba(16,185,129,0.15); color: #34d399; }
+
+    .stat-label { font-size: 0.8rem; color: var(--text-secondary); font-weight: 500; }
+    .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--text-primary); line-height: 1; }
+    .stat-delta {
+      font-size: 0.75rem; font-weight: 600;
+      color: var(--success); margin-top: 4px;
+    }
+    .stat-delta span { opacity: 0.7; font-weight: 400; }
+
+    /* ── Content row ── */
+    .content-row {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    /* ── Chart placeholder ── */
+    .chart-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .chart-title { font-size: 0.95rem; font-weight: 600; color: var(--text-primary); }
+    .chart-subtitle { font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px; }
+
+    .period-select {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-family: 'Inter', sans-serif;
+      padding: 6px 12px;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.18s;
+    }
+    .period-select:focus { border-color: var(--accent); }
+
+    .chart-wrap {
+      position: relative;
+      height: 180px;
+    }
+    canvas { width: 100% !important; }
+
+    /* ── System Health ── */
+    .health-list { display: flex; flex-direction: column; gap: 14px; }
+    .health-item {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .health-left { display: flex; align-items: center; gap: 10px; }
+    .health-dot {
+      width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
+    }
+    .dot-green  { background: var(--success); box-shadow: 0 0 6px var(--success); }
+    .dot-yellow { background: var(--warning); box-shadow: 0 0 6px var(--warning); }
+    .dot-red    { background: var(--danger);  box-shadow: 0 0 6px var(--danger);  }
+    .health-name { font-size: 0.87rem; color: var(--text-muted); }
+    .health-status {
+      font-size: 0.8rem; font-weight: 600;
+      padding: 2px 10px; border-radius: 20px;
+    }
+    .hs-operational { color: var(--success); background: var(--success-bg); }
+    .hs-alert       { color: var(--warning); background: var(--warning-bg); }
+
+    /* ── Logs section ── */
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .section-title { font-size: 0.97rem; font-weight: 600; color: var(--text-primary); }
+
+    .text-success { color: var(--success); font-weight: 600; }
+    .text-danger  { color: var(--danger);  font-weight: 600; }
+
+    /* ── Animated line chart via SVG ── */
+    .chart-svg { width: 100%; height: 180px; }
+    .chart-line { stroke: #7c3aed; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .chart-area {
+      fill: url(#areaGrad);
+    }
+    .chart-dot {
+      fill: #7c3aed; stroke: #0d1422; stroke-width: 2;
+      transition: r 0.2s;
+      cursor: pointer;
+    }
+    .chart-dot:hover { r: 6; fill: #a78bfa; }
+    .grid-line { stroke: var(--border); stroke-width: 1; stroke-dasharray: 4 4; }
+    .x-label { font-size: 10px; fill: var(--text-secondary); font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 8C10 8 14 8 16 12C18 16 22 16 22 16" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M10 16C10 16 14 16 16 20C18 24 22 24 22 24" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="10" cy="8" r="2.5" fill="#7c3aed"/>
+        <circle cx="22" cy="16" r="2.5" fill="#7c3aed"/>
+        <circle cx="10" cy="16" r="2.5" fill="#a78bfa"/>
+        <circle cx="22" cy="24" r="2.5" fill="#a78bfa"/>
+      </svg>
+      <span class="sidebar-logo-text">InfoLink</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+
+      <a href="dashboard.html" class="nav-item active" id="nav-dashboard">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        Dashboard
+      </a>
+
+      <a href="search-admin.html" class="nav-item" id="nav-search-admin">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        Search
+      </a>
+
+      <div class="nav-section-label">Management</div>
+
+      <a href="users.html" class="nav-item" id="nav-users">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        Users
+      </a>
+
+      <a href="groups.html" class="nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+        </svg>
+        Groups
+      </a>
+
+      <a href="logs.html" class="nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+        </svg>
+        Logs
+      </a>
+
+      <div class="nav-section-label">Settings</div>
+
+      <a href="change-password.html" class="nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+        </svg>
+        Change Password
+      </a>
+    </nav>
+
+    <div class="sidebar-user">
+      <div class="user-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name">Admin</div>
+        <div class="user-role">System Administrator</div>
+      </div>
+    </div>
+    <div style="padding:0 14px 14px;">
+      <button class="btn-logout" id="logoutBtn" onclick="handleLogout()">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-title">
+        <h2>Admin Dashboard</h2>
+        <p>System overview and recent activity</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="theme-btn" title="Toggle theme">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+        <div class="profile-chip">
+          <div class="avatar">A</div>
+          <div>
+            <div class="name">Admin</div>
+            <div class="role">System Administrator</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="page-content">
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-purple">
+            <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <div>
+            <div class="stat-label">Total Users</div>
+            <div class="stat-value" id="stat-total-users">0</div>
+            <div class="stat-delta"><span>registered accounts</span></div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-teal">
+            <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <div>
+            <div class="stat-label">Active Groups</div>
+            <div class="stat-value" id="stat-active-groups">0</div>
+            <div class="stat-delta"><span>configured groups</span></div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-blue">
+            <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <ellipse cx="12" cy="5" rx="9" ry="3"/>
+              <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+              <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+            </svg>
+          </div>
+          <div>
+            <div class="stat-label">Collections</div>
+            <div class="stat-value">6</div>
+            <div class="stat-delta"><span>MongoDB collections</span></div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-green">
+            <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </div>
+          <div>
+            <div class="stat-label">Searches Today</div>
+            <div class="stat-value" id="stat-searches-today">0</div>
+            <div class="stat-delta"><span>search queries</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart + Health -->
+      <div class="content-row">
+
+        <!-- Chart -->
+        <div class="card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Search Activity <span style="color:var(--text-secondary);font-weight:400;font-size:0.82rem">( Last 7 days )</span></div>
+            </div>
+            <select class="period-select">
+              <option>Last 7 Days</option>
+              <option>Last 30 Days</option>
+              <option>Last 90 Days</option>
+            </select>
+          </div>
+          <div class="chart-wrap">
+            <svg class="chart-svg" viewBox="0 0 580 180" preserveAspectRatio="xMidYMid meet">
+              <defs>
+                <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%"   stop-color="#7c3aed" stop-opacity="0.25"/>
+                  <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+
+              <!-- Grid lines -->
+              <line class="grid-line" x1="40" y1="20"  x2="570" y2="20"/>
+              <line class="grid-line" x1="40" y1="55"  x2="570" y2="55"/>
+              <line class="grid-line" x1="40" y1="90"  x2="570" y2="90"/>
+              <line class="grid-line" x1="40" y1="125" x2="570" y2="125"/>
+              <line class="grid-line" x1="40" y1="155" x2="570" y2="155"/>
+
+              <!-- Area fill -->
+              <path class="chart-area" d="
+                M 90,140
+                C 130,140 150,110 175,100
+                C 200,90  230,105 255,85
+                C 280,65  310,70  335,55
+                C 360,40  385,50  410,30
+                C 435,10  460,20  490,15
+                L 490,155 L 90,155 Z
+              "/>
+
+              <!-- Line -->
+              <path class="chart-line" d="
+                M 90,140
+                C 130,140 150,110 175,100
+                C 200,90  230,105 255,85
+                C 280,65  310,70  335,55
+                C 360,40  385,50  410,30
+                C 435,10  460,20  490,15
+              "/>
+
+              <!-- Dots -->
+              <circle class="chart-dot" cx="90"  cy="140" r="4"/>
+              <circle class="chart-dot" cx="175" cy="100" r="4"/>
+              <circle class="chart-dot" cx="255" cy="85"  r="4"/>
+              <circle class="chart-dot" cx="335" cy="55"  r="4"/>
+              <circle class="chart-dot" cx="410" cy="30"  r="4"/>
+              <circle class="chart-dot" cx="490" cy="15"  r="4"/>
+
+              <!-- X labels -->
+              <text class="x-label" x="82"  y="175" text-anchor="middle">Mon</text>
+              <text class="x-label" x="165" y="175" text-anchor="middle">Tue</text>
+              <text class="x-label" x="248" y="175" text-anchor="middle">Wed</text>
+              <text class="x-label" x="328" y="175" text-anchor="middle">Thu</text>
+              <text class="x-label" x="405" y="175" text-anchor="middle">Fri</text>
+              <text class="x-label" x="484" y="175" text-anchor="middle">Sat</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- System Health -->
+        <div class="card">
+          <div style="margin-bottom:20px">
+            <div class="chart-title">System Health</div>
+          </div>
+          <div class="health-list">
+            <div class="health-item">
+              <div class="health-left">
+                <span class="health-dot dot-green"></span>
+                <span class="health-name">SQL Server</span>
+              </div>
+              <span class="health-status hs-operational">Operational</span>
+            </div>
+            <div class="health-item">
+              <div class="health-left">
+                <span class="health-dot dot-green"></span>
+                <span class="health-name">MongoDB</span>
+              </div>
+              <span class="health-status hs-operational">Operational</span>
+            </div>
+            <div class="health-item">
+              <div class="health-left">
+                <span class="health-dot dot-green"></span>
+                <span class="health-name">API Gateway</span>
+              </div>
+              <span class="health-status hs-operational">Operational</span>
+            </div>
+            <div class="health-item">
+              <div class="health-left">
+                <span class="health-dot dot-yellow"></span>
+                <span class="health-name">Failed searches</span>
+              </div>
+              <span class="health-status hs-alert">3 alerts</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Logs -->
+      <div class="card">
+        <div class="section-header">
+          <div class="section-title">Recent Search Logs</div>
+          <a href="logs.html" class="btn btn-outline" style="font-size:0.8rem;padding:7px 14px;text-decoration:none;">
+            <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            View all logs
+          </a>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Group</th>
+              <th>Keyword</th>
+              <th>Date &amp; time</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="recent-logs-body">
+            <tr>
+              <td colspan="5" style="text-align:center;padding:24px;color:var(--text-secondary);font-size:0.85rem;">
+                No search logs yet.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script src="data-store.js"></script>
+<script>
+  // Auth guard
+  if (!InfoLinkStore.isLoggedIn()) {
+    window.location.href = 'login.html';
+  }
+
+  // Show logged-in user info
+  const currentUser = InfoLinkStore.getCurrentUser();
+  const displayName = currentUser.fullname || currentUser.username || 'Admin';
+  const displayRole = currentUser.role === 'admin' ? 'System Administrator' : 'User';
+  const displayInitial = displayName.charAt(0).toUpperCase();
+
+  document.querySelector('.sidebar-user .user-name').textContent = displayName;
+  document.querySelector('.sidebar-user .user-role').textContent = displayRole;
+  document.querySelector('.sidebar-user .user-avatar').textContent = displayInitial;
+  document.querySelector('.profile-chip .name').textContent = displayName;
+  document.querySelector('.profile-chip .role').textContent = displayRole;
+  document.querySelector('.profile-chip .avatar').textContent = displayInitial;
+
+  // Dynamic stats
+  document.getElementById('stat-total-users').textContent = InfoLinkStore.getUserCount();
+  document.getElementById('stat-active-groups').textContent = InfoLinkStore.getActiveGroupCount();
+  document.getElementById('stat-searches-today').textContent = InfoLinkStore.getTodayLogCount();
+
+  // Dynamic recent logs
+  const recentLogs = InfoLinkStore.getRecentLogs(4);
+  const logsBody = document.getElementById('recent-logs-body');
+  if (recentLogs.length > 0) {
+    logsBody.innerHTML = recentLogs.map(l => `<tr>
+      <td style="color:var(--text-primary);font-weight:500">${l.user || 'Unknown'}</td>
+      <td>${l.group || '—'}</td>
+      <td>${l.keyword || '—'}</td>
+      <td>${l.displayDate || '—'}</td>
+      <td><span class="${l.status === 'Failed' ? 'text-danger' : 'text-success'}">${l.status || 'Success'}</span></td>
+    </tr>`).join('');
+  } else {
+    logsBody.innerHTML = `<tr>
+      <td colspan="5" style="text-align:center;padding:24px;color:var(--text-secondary);font-size:0.85rem;">
+        No search logs yet.
+      </td>
+    </tr>`;
+  }
+
+  // Logout handler
+  function handleLogout() {
+    InfoLinkStore.clearSession();
+    window.location.href = 'login.html';
+  }
+
+  // Active nav highlight
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+      if (!this.href || this.href === '#') return;
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
