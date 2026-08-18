@@ -51,7 +51,6 @@ public class SearchController {
         List<Document> results = mongoTemplate.find(query, Document.class, collection);
         Log log = new Log();
         log.setUser(userDetails.getUser());
-        log.setGroups(gc.getGroup());
         log.setCollection(gc.getCollection());
         log.setSearchKeyword(keyword);
         log.setSearchDate(LocalDateTime.now());

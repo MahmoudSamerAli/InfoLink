@@ -9,39 +9,34 @@ public class Log {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "LogID", nullable = false, unique = true)
+    @Column(name = "Log_ID", nullable = false, unique = true)
     private Long logID;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "UserID", referencedColumnName = "UserID")
+    @JoinColumn(name = "User_Idd", referencedColumnName = "UserID")
     private User user;
 
-    @Column(name = "collection_name", nullable = false)
+    @Column(name = "Collection_Name", nullable = false)
     private String collection_name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_id", referencedColumnName = "GroupID")
-    private Groups group;
-
-    @Column(name = "SearchKeyword", length = 255)
+    @Column(name = "Search_keyword", length = 255)
     private String searchKeyword;
 
-    @Column(name = "SearchDate", nullable = false)
+    @Column(name = "Search_date", nullable = false)
     private LocalDateTime searchDate;
 
-    @Column(name = "IpAddress", length = 45)
+    @Column(name = "IP_address", length = 45)
     private String ipAddress;
 
-    @Column(name = "Status", nullable = false)
+    @Column(name = "Statuss", nullable = false)
     private Boolean status;
 
 
-    public Log(Long logID, User user, String collection_name,Groups group, String searchKeyword, LocalDateTime searchDate,
+    public Log(Long logID, User user, String collection_name, String searchKeyword, LocalDateTime searchDate,
             String ipAddress, Boolean status) {
         this.logID = logID;
         this.user = user;
         this.collection_name = collection_name;
-        this.group = group;
         this.searchKeyword = searchKeyword;
         this.searchDate = searchDate;
         this.ipAddress = ipAddress;
@@ -73,14 +68,6 @@ public class Log {
 
     public void setCollection(String collection_name) {
         this.collection_name = collection_name;
-    }
-
-    public Groups getGroups(){
-        return this.group;
-    }
-
-    public void setGroups(Groups group){
-        this.group = group;
     }
     
     public String getSearchKeyword() {

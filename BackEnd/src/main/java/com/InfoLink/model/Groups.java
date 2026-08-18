@@ -8,16 +8,16 @@ public class Groups {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) 
-    @Column(name = "GroupID", nullable = false, unique = true)
+    @Column(name = "Group_ID", nullable = false, unique = true)
     private Long groupID;
 
-    @Column(name = "GroupName", nullable = false, length = 100)
+    @Column(name = "Group_Name", nullable = false, length = 100)
     private String groupName;
 
-    @Column(name = "GroupDescription", length = 255)
+    @Column(name = "Descriptionn", length = 255)
     private String groupDescription;
 
-    @Column(name = "IsActive", nullable = false)
+    @Column(name = "Is_Active", nullable = false)
     private Boolean isActive;
 
     public Groups() {}

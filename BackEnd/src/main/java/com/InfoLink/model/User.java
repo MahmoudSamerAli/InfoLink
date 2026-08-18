@@ -9,30 +9,30 @@ import java.time.LocalDateTime;
 public class User {
 
     @Id
-    @Column(name = "UserID", nullable = false, unique = true, length = 36)
+    @Column(name = "User_Idd", nullable = false, unique = true, length = 36)
     private String userID;
 
     @Column(name = "Username", nullable = false, length = 50, unique = true)
     private String username;
 
-    @Column(name = "Password", nullable = false, length = 255)
+    @Column(name = "Password_Hash", nullable = false, length = 255)
     private String password;
 
-    @Column(name = "FullName", length = 100)
+    @Column(name = "Full_Name", length = 100)
     private String fullName;
 
     @ManyToOne(fetch = FetchType.LAZY) // lazy load group to save memory
-    @JoinColumn(name = "GroupID", referencedColumnName = "GroupID")
+    @JoinColumn(name = "Group_ID", referencedColumnName = "GroupID")
     private Groups group;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Role", nullable = false, length = 20)
+    @Column(name = "Rolee", nullable = false, length = 20)
     private Role role;
 
-    @Column(name = "IsActive", nullable = false)
+    @Column(name = "IS_Active", nullable = false)
     private Boolean isActive;
 
-    @Column(name = "CreatedDate", nullable = false)
+    @Column(name = "Created_date", nullable = false)
     private LocalDateTime createdDate;
     public User() {}
 
