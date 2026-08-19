@@ -5,7 +5,7 @@ import com.InfoLink.model.Role;
 
 public class UsersResponse {
 
-    private String userID;
+    private int userID;
     private String username;
     private String fullName;
     private Long groupID;
@@ -16,7 +16,7 @@ public class UsersResponse {
     public UsersResponse() {
     }
 
-    public UsersResponse(String userID, String username, String fullName,
+    public UsersResponse(int userID, String username, String fullName,
                          Long groupID, Role role,
                          Boolean isActive, LocalDateTime createdDate) {
 
@@ -29,11 +29,11 @@ public class UsersResponse {
         this.createdDate = createdDate;
     }
 
-    public String getUserID() {
+    public int getUserID() {
         return userID;
     }
 
-    public void setUserID(String userID) {
+    public void setUserID(int userID) {
         this.userID = userID;
     }
 

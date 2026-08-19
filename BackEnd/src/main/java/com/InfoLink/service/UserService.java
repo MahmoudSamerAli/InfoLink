@@ -49,8 +49,8 @@ public class UserService {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new RuntimeException("Username already exists: " + request.getUsername());
         }
-        if (userRepository.existsById(request.getUserID())) {
-            throw new RuntimeException("ID already exists: " + request.getUserID());
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new RuntimeException("Username already exists: " + request.getUsername());
         }
         Groups group = groupRepository.findById(request.getGroupID())
                 .orElseThrow(() -> new RuntimeException("Group not found with id: " + request.getGroupID()));
@@ -91,26 +91,8 @@ public class UserService {
         })
         .orElseThrow(() -> new RuntimeException("User not found with id: " + request.getUserID()));
     }
-    public User fullUpdateUser(AddUserRequest request){
-        return userRepository.findById(request.getUserID())
-        .map(user -> {
-            // Full replacement: overwrite all fields
-            user.setUsername(request.getUsername().trim());
-            user.setFullName(request.getFullName().trim());
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
-
-            Groups group = groupRepository.findById(request.getGroupID())
-                    .orElseThrow(() -> new RuntimeException("Group not found with id: " + request.getGroupID()));
-            user.setGroup(group);
-
-            user.setRole(request.getRole());
-            user.setIsActive(request.getIsActive());
-
-            return userRepository.save(user);
-        })
-        .orElseThrow(() -> new RuntimeException("User not found with id: " + request.getUserID()));
-    }
-    public void deleteUser(String id) {
+    
+    public void deleteUser(int id) {
         if (!userRepository.existsById(id)) {
             throw new RuntimeException("User not found with id: " + id);
         }

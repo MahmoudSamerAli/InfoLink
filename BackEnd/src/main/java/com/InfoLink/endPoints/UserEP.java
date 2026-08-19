@@ -50,19 +50,9 @@ public class UserEP {
         return ResponseEntity.ok("User updated successfully");
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<String> fullUpdateUser(
-            @PathVariable String id,
-            @Valid @RequestBody AddUserRequest request) {
-
-        userService.fullUpdateUser(request);
-
-        return ResponseEntity.ok("User updated successfully");
-    }
-
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteUser(
-            @PathVariable String id) {
+            @PathVariable int id) {
 
         userService.deleteUser(id);
 

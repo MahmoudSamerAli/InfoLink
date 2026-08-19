@@ -7,7 +7,7 @@ import com.InfoLink.model.User;
 import java.util.Optional;
 
 
-public interface UserRepository extends  JpaRepository<User, String> {
+public interface UserRepository extends  JpaRepository<User, Integer> {
     public boolean existsByUsername(String username);
     public Optional<User> findByUsername(String username);
 }

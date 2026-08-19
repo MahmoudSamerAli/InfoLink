@@ -9,8 +9,9 @@ import java.time.LocalDateTime;
 public class User {
 
     @Id
-    @Column(name = "User_Idd", nullable = false, unique = true, length = 14)
-    private String userID;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "User_Idd", updatable = false, nullable = false)
+    private int userID;
 
     @Column(name = "Username", nullable = false, length = 50, unique = true)
     private String username;
@@ -36,7 +37,7 @@ public class User {
     private LocalDateTime createdDate;
     public User() {}
 
-    public User(String userID, String username, String password, String fullName,
+    public User(int userID, String username, String password, String fullName,
                 Groups group, Role role, Boolean isActive, LocalDateTime createdDate) {
         this.userID = userID;
         this.username = username;
@@ -47,8 +48,8 @@ public class User {
         this.isActive = isActive;
         this.createdDate = createdDate;
     }
-    public String getUserID() { return userID; }
-    public void setUserID(String userID) { this.userID = userID; }
+    public int getUserID() { return userID; }
+    public void setUserID(int userID) { this.userID = userID; }
 
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
