@@ -79,8 +79,8 @@ public class UserService {
         newUser.setIsActive(true);
         return userRepository.save(newUser);
     }
-    public User updateUser(PatchUserRequest request) {
-        return userRepository.findById(request.getUserID())
+    public User updateUser(PatchUserRequest request, int id) {
+        return userRepository.findById(id)
             .map(user -> {
                 if (request.getUsername() != null) {
                     user.setUsername(request.getUsername().trim());

@@ -50,10 +50,10 @@ public class UserEP {
 
     @PatchMapping("/{id}")
     public ResponseEntity<String> updateUser(
-            @PathVariable String id,
+            @PathVariable int id,
             @Valid @RequestBody PatchUserRequest request) {
 
-        userService.updateUser(request);
+        userService.updateUser(request, id);
 
         return ResponseEntity.ok("User updated successfully");
     }
