@@ -105,10 +105,7 @@ public class GroupsCollectionsService {
     if (!mongoTemplate.collectionExists(collectionName)) {
         throw new IllegalStateException("Collection does not exist: " + collectionName);
     }
-    if (mongoTemplate.count(new Query(), collectionName) > 0) {
-        throw new IllegalStateException(
-            "Collection already contains data. Uploads are only allowed once, immediately after creation.");
-    }
+    
     if (file == null || file.isEmpty()) {
         throw new IllegalArgumentException("Uploaded file is empty");
     }
