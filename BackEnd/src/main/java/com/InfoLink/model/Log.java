@@ -8,8 +8,8 @@ import jakarta.persistence.*;
 public class Log {
 
     @Id
-    @Column(name = "Log_ID", nullable = false, unique = true)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "Log_ID", nullable = false, unique = true)
     private Long logID;
 
     @ManyToOne(fetch = FetchType.LAZY)
