@@ -14,7 +14,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.bson.Document;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -105,7 +104,7 @@ public class GroupsCollectionsService {
     if (!mongoTemplate.collectionExists(collectionName)) {
         throw new IllegalStateException("Collection does not exist: " + collectionName);
     }
-    
+
     if (file == null || file.isEmpty()) {
         throw new IllegalArgumentException("Uploaded file is empty");
     }
