@@ -43,6 +43,21 @@ public class UserService {
                 ))
                 .collect(Collectors.toList());
     }
+
+    public UsersResponse getUser(int id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        return new UsersResponse(
+            user.getUserID(),
+            user.getUsername(),
+            user.getFullName(),
+            user.getGroup().getGroupID(),
+            user.getRole(),
+            user.getIsActive(),
+            user.getCreatedDate()
+        );
+    }
+
     public User addUser(AddUserRequest request) {
         request.setUsername(request.getUsername().trim());
         request.setFullName(request.getFullName().trim());

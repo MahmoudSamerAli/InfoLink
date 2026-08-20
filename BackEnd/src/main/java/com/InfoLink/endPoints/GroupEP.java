@@ -8,11 +8,13 @@ import com.InfoLink.dto.AddGroupRequest;
 import com.InfoLink.model.Groups;
 import com.InfoLink.service.GroupService;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping("/group")
+@SecurityRequirement(name = "bearerAuth")
 public class GroupEP {
     private final GroupService groupService;
 

@@ -9,6 +9,7 @@ public class Log {
 
     @Id
     @Column(name = "Log_ID", nullable = false, unique = true)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long logID;
 
     @ManyToOne(fetch = FetchType.LAZY)

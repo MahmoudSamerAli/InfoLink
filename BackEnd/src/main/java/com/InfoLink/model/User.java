@@ -26,8 +26,8 @@ public class User {
     @JoinColumn(name = "Group_ID", referencedColumnName = "Group_ID")
     private Groups group;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "Rolee", nullable = false, length = 20)
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "Rolee", nullable = false)
     private Role role;
 
     @Column(name = "IS_Active", nullable = false)

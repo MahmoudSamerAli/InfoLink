@@ -21,10 +21,13 @@ import com.InfoLink.model.Log;
 import com.InfoLink.security.CustomUserDetails;
 import com.InfoLink.service.GroupsCollectionsService;
 import com.InfoLink.service.LogService;
+
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/search")
+@SecurityRequirement(name = "bearerAuth")
 public class SearchController {
 
     private final GroupsCollectionsService groupsCollectionsService;
