@@ -2,6 +2,8 @@ package com.InfoLink.config;
 
 import com.InfoLink.filter.JwtFilter;
 
+import org.springframework.http.HttpMethod;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -40,7 +42,8 @@ public class SecurityConfig {
                     "/swagger-ui/index.html/**",
                     "/v3/api-docs/**"
                 ).permitAll()
-
+                .requestMatchers(HttpMethod.POST, "/api/collections/**").hasAnyRole("ADMIN", "SYSADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/collections/**").hasAnyRole("ADMIN", "SYSADMIN")
                 // Everything else requires JWT
                 .anyRequest().authenticated()
             )
