@@ -1,0 +1,42 @@
+[
+  {
+    "nationalId": "30010112345",
+    "fullName": "Ama Owusu",
+    "department": "Marketing",
+    "position": "Research Analyst",
+    "phoneNumber": "+233201234567",
+    "email": "ama.owusu@infolink.com"
+  },
+  {
+    "nationalId": "29812098765",
+    "fullName": "Kwame Mensah",
+    "department": "Sales",
+    "position": "Account Manager",
+    "phoneNumber": "+233209876543",
+    "email": "kwame.mensah@infolink.com"
+  },
+  {
+    "nationalId": "30105567890",
+    "fullName": "Efua Boateng",
+    "department": "Marketing",
+    "position": "Content Strategist",
+    "phoneNumber": "+233245551212",
+    "email": "efua.boateng@infolink.com"
+  },
+  {
+    "nationalId": "29704432109",
+    "fullName": "Yaw Addo",
+    "department": "Finance",
+    "position": "Accountant",
+    "phoneNumber": "+233267891234",
+    "email": "yaw.addo@infolink.com"
+  },
+  {
+    "nationalId": "30203312233",
+    "fullName": "Abena Asante",
+    "department": "Sales",
+    "position": "Sales Executive",
+    "phoneNumber": "+233551239876",
+    "email": "abena.asante@infolink.com"
+  }
+]

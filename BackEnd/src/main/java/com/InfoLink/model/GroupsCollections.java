@@ -3,6 +3,8 @@ package com.InfoLink.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -13,29 +15,30 @@ import jakarta.persistence.Table;
 public class GroupsCollections {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Collection_ID", nullable = false)
-    private Long table_id;
+    private Long collectionId;
 
     @Column(name = "Collection_Name", nullable = false)
     private String collectionName;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "Group_ID", referencedColumnName = "Group_ID", insertable = false, updatable = false)
+    @JoinColumn(name = "Group_ID", referencedColumnName = "Group_ID")
     private Groups group;
 
     public GroupsCollections() {}
 
     public GroupsCollections(Long collectionID,String collectionName ,Groups group) {
-        this.table_id = collectionID;
+        this.collectionId = collectionID;
         this.collectionName = collectionName;
         this.group = group;
     }
 
-    public Long getCollectionID() { return table_id; }
-    public void setCollectionID(Long collectionID) { this.table_id = collectionID; }
+    public Long getCollectionID() { return collectionId; }
+    public void setCollectionID(Long collectionID) { this.collectionId = collectionID; }
 
-    public String getCollection() { return collectionName; }
-    public void setCollection(String collectionName) { this.collectionName = collectionName; }
+    public String getCollectionName() { return collectionName; }
+    public void setCollectionName(String collectionName) { this.collectionName = collectionName; }
 
     public Groups getGroup() { return group; }
     public void setGroup(Groups group) { this.group = group; }

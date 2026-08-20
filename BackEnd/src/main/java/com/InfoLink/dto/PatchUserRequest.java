@@ -8,11 +8,9 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class PatchUserRequest {
-    @NotBlank
-    private int userID;
 
     @Size(min = 4, max = 30, message = "Username must be between 4 and 30 characters")
-    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Username can only contain letters, numbers, and underscores")
+    @Pattern(regexp = "^[a-zA-Z0-9_\\.]+$", message = "Username can only contain letters, numbers, and underscores")
     private String username;
 
     @Size(min = 8, max = 30, message = "Password must be between 8 and 30 characters")
@@ -29,12 +27,7 @@ public class PatchUserRequest {
     private Role role;
     private Long groupID;
     private Boolean isActive;
-    public int getUserID() {
-        return userID;
-    }
-    public void setUserID(int userID) {
-        this.userID = userID;
-    }
+
     public String getUsername() {
         return username;
     }

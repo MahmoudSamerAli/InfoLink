@@ -104,7 +104,7 @@ public class UserService {
                 }
                 return userRepository.save(user);
         })
-        .orElseThrow(() -> new RuntimeException("User not found with id: " + request.getUserID()));
+        .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
     
     public void deleteUser(int id) {
