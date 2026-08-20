@@ -10,7 +10,7 @@ import jakarta.validation.constraints.Size;
 public class AddUserRequest {
     @NotBlank
     @Size(min = 4, max = 30, message = "Username must be between 4 and 30 characters")
-    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Username can only contain letters, numbers, and underscores")
+    @Pattern(regexp = "^[a-zA-Z0-9_\\.]+$", message = "Username can only contain letters, numbers, and underscores")
     private String username;
 
     @NotBlank

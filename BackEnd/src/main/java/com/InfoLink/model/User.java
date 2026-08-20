@@ -1,8 +1,20 @@
 package com.InfoLink.model;
 
-import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import org.hibernate.annotations.CreationTimestamp;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "Users")
@@ -33,7 +45,8 @@ public class User {
     @Column(name = "IS_Active", nullable = false)
     private Boolean isActive;
 
-    @Column(name = "Created_date", nullable = false)
+    @CreationTimestamp
+    @Column(name = "Created_date", nullable = false, updatable = false)
     private LocalDateTime createdDate;
     public User() {}
 
