@@ -4,6 +4,7 @@ DROP TABLE Group_Collections;
 DROP TABLE Logs;
 DROP TABLE Users;
 DROP TABLE Groups;
+DROP TABLE Refresh_Token;
 
 CREATE TABLE Groups(
 Group_ID INT PRIMARY KEY IDENTITY,
@@ -38,6 +39,13 @@ Search_keyword NVARCHAR(100),
 Search_date DATETIME DEFAULT GETDATE(),
 IP_address NVARCHAR(50),
 Statuss BIT NOT NULL DEFAULT 1              -- 1 = Success, 0 = Failed/Denied
+);
+
+CREATE TABLE Refresh_Token (
+    token NVARCHAR(255) PRIMARY KEY,
+    username NVARCHAR(50) NOT NULL,
+    expiryDate DATETIME2 NOT NULL,
+    lastUsed DATETIME2 NOT NULL
 );
 
 /* =========================================================

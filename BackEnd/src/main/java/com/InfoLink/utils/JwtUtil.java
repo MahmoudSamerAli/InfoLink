@@ -22,7 +22,7 @@ public class JwtUtil {
     @Value("${JWT_SECRET}")
     private String base64EncodedSecretKey;
 
-    private Key getSigningKey() {
+    public Key getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(base64EncodedSecretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
@@ -57,7 +57,7 @@ public class JwtUtil {
         return getClaims(token).getExpiration().before(new Date());
     }
 
-    private Claims getClaims(String token) {
+    public Claims getClaims(String token) {
         return Jwts.parserBuilder()
             .setSigningKey(getSigningKey())
             .build()

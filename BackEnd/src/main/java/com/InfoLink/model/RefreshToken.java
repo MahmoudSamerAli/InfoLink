@@ -1,11 +1,13 @@
 package com.InfoLink.model;
 
 import java.time.Instant;
-
+import java.time.temporal.ChronoUnit;
+import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 @Entity
+@Table(name = "Refresh_Token")
 public class RefreshToken {
     @Id
     @Column(name="token",nullable = false)
@@ -16,6 +18,12 @@ public class RefreshToken {
     private Instant expiryDate;
     @Column(name="lastUsed", nullable=false)
     private Instant lastUsed;
+    public RefreshToken(String token, String username){
+        this.token=token;
+        this.username = username;
+        this.expiryDate = Instant.now().plus(8, ChronoUnit.HOURS);
+        this.lastUsed = Instant.now();
+    }
     public RefreshToken(String token, String username, Instant expiryDate, Instant lastUsed) {
         this.token = token;
         this.username = username;
