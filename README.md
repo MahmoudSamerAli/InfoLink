@@ -1,115 +1,121 @@
 # InfoLink
 
-InfoLink is an internal information search platform. Authorized users sign in and search organizational records across group-scoped MongoDB collections, while administrators manage users and their access groups. Every search is logged for auditing.
+InfoLink is an internal information search platform. Authenticated users search organizational records across group-scoped MongoDB collections, while administrators manage users, groups, and which collections each group can access. Every search is logged for auditing.
+
+> **Status: backend in active development, frontend is a disconnected UI mock.** See [Known Limitations](#known-limitations--roadmap) before relying on this for anything beyond local backend development.
 
 ## Architecture
 
 | Folder | Description |
 | ------ | ----------- |
-| `BackEnd/` | Spring Boot REST API (Java, Maven) |
-| `FrontEnd/infolink-ui/` | Static HTML / CSS / JavaScript admin & user interfaces |
+| `BackEnd/` | Spring Boot REST API (Java 26, Maven) |
+| `FrontEnd/` | Static HTML/CSS/JS pages — currently a **UI mock**, not wired to the backend (see below) |
+| `Database/` | SQL Server schema script, a `.bak` backup, and sample MongoDB collection data (CSV/JSON) |
 
 ### Backend
 
-- **Framework:** Spring Boot 4.1 (Java 26), Spring MVC, Spring Security
-- **Relational storage (SQL Server):** users, groups, group–collection mappings, and search logs (JPA)
-- **Document storage (MongoDB):** the searchable organizational records
-- **Authentication:** stateless JWT issued on login, validated per request via a JWT filter; passwords hashed with BCrypt
-- **Roles:** `ADMIN` and `USER` (see `BackEnd/src/main/java/com/InfoLink/model/Role.java`)
+- **Framework:** Spring Boot 4.1 (Java 26), Spring MVC, Spring Security, springdoc-openapi (Swagger UI)
+- **Relational storage (SQL Server):** users, groups, group→collection access mappings, and search logs (Spring Data JPA)
+- **Document storage (MongoDB):** the searchable organizational records, stored as flat, all-string documents so search stays a simple regex match with no type-handling logic
+- **Authentication:** stateless JWT issued on login, validated per request via `JwtFilter`; passwords hashed with BCrypt
+- **Roles:** `USER`, `ADMIN`, `SYSADMIN` (`BackEnd/src/main/java/com/InfoLink/model/Role.java`), stored as a `TINYINT` ordinal in SQL Server
+- **File upload:** admins can create an empty MongoDB collection, then upload a flat CSV or JSON array into it; uploads can repeat (append-only, no dedup)
 
 ### Frontend
 
-Static pages in `FrontEnd/infolink-ui/` that talk to the backend through a shared HTTP client:
-
-- `api.js` — central API client; attaches the JWT (`Authorization: Bearer <token>`) and centralizes error handling
-- `data-store.js` — session helpers (token + logged-in user) and legacy localStorage store
-- `shared.css` — shared dark-theme layout (sidebar, topbar, cards, tables)
+Static pages in `FrontEnd/` styled with a shared dark theme (`shared.css`). **They currently run entirely on browser `localStorage`** via `data-store.js` — a self-contained mock data layer with seeded demo groups/users. There is no HTTP client calling the backend API yet (no `api.js`, no `fetch()` to `/auth`, `/users`, `/group`, or `/api/search` anywhere in this folder). Treat these pages as a UI/UX prototype, not a working client.
 
 ## Features
 
-- **JWT sign-in** with role-based redirect (admin → admin dashboard, user → user dashboard)
-- **User management** — list, search, filter, add, edit, disable, and delete users
-- **Group-scoped search** — records are searched inside the collections assigned to the user's group; access is enforced server-side
-- **Search auditing** — every search is recorded (user, group, collection, keyword, timestamp, IP, success status)
-- **Dashboards** — system stats for admins and personal access/summary for standard users
+### Implemented (backend, verified against source)
+- JWT sign-in (`POST /auth/login`), BCrypt password verification
+- User management — list, get by id, add, partially update, delete (`/users/**`)
+- Group management — list, add, update, delete (`/group/**`)
+- Group-scoped search — a search is only allowed against collections the caller's group has been granted access to; every search is logged (user, group, collection, keyword, timestamp, IP, hit/miss)
+- Collection lifecycle — create, delete, grant/revoke group access, list groups with access, and CSV/JSON data upload (`/api/collections/**`)
+- Centralized request validation (Jakarta Bean Validation) and a global exception handler returning consistent error shapes
+- Structured logging via SLF4J/Logback
+
+### UI-only (not backend-connected)
+- Sign-in, dashboards, user CRUD screens, group screens, search screens — all present as HTML pages, all currently reading/writing `localStorage` instead of the API
 
 ## API Endpoints
 
-Base URL: `http://localhost:8080`
+Base URL: `http://localhost:8080`. Swagger UI: `http://localhost:8080/swagger-ui/index.html`.
 
 ### Authentication
 
-| Method | Path | Description |
-| ------ | ---- | ----------- |
-| `POST` | `/auth/login` | Authenticate and receive a JWT (`{ "token": "..." }`) |
-| `GET`  | `/users/me` | Current authenticated user's profile (username, fullName, role, group, etc.) |
+| Method | Path | Auth | Description |
+| ------ | ---- | ---- | ----------- |
+| `POST` | `/auth/login` | public | Authenticate, returns `{ "token": "..." }` |
 
 ### Users
 
-| Method | Path | Description |
-| ------ | ---- | ----------- |
-| `GET`    | `/users` | List all users |
-| `POST`   | `/users/add` | Create a user |
-| `PATCH`  | `/users/{id}` | Partially update a user (e.g. disable) |
-| `PUT`    | `/users/{id}` | Full replacement of a user |
-| `DELETE` | `/users/{id}` | Delete a user |
+| Method | Path | Auth | Description |
+| ------ | ---- | ---- | ----------- |
+| `GET`    | `/users` | any authenticated user¹ | List all users |
+| `GET`    | `/users/{id}` | any authenticated user¹ | Get a single user |
+| `POST`   | `/users/add` | any authenticated user¹ | Create a user |
+| `PATCH`  | `/users/{id}` | any authenticated user¹ | Partially update a user |
+| `DELETE` | `/users/delete/{id}` | any authenticated user¹ | Delete a user |
 
 ### Groups
 
-| Method | Path | Description |
-| ------ | ---- | ----------- |
-| `GET`    | `/group` | List all groups |
-| `POST`   | `/group` | Create a group |
-| `PUT`    | `/group/{id}` | Update a group |
-| `DELETE` | `/group/{id}` | Delete a group |
+| Method | Path | Auth | Description |
+| ------ | ---- | ---- | ----------- |
+| `GET`    | `/group` | any authenticated user¹ | List all groups |
+| `POST`   | `/group` | any authenticated user¹ | Create a group |
+| `PUT`    | `/group/{id}` | any authenticated user¹ | Update a group |
+| `DELETE` | `/group/{id}` | any authenticated user¹ | Delete a group |
+
+### Collections
+
+| Method | Path | Auth | Description |
+| ------ | ---- | ---- | ----------- |
+| `POST`   | `/api/collections?name=&groupId=` | `ADMIN` / `SYSADMIN` | Create an empty MongoDB collection, optionally granting one group immediate access |
+| `DELETE` | `/api/collections/{name}` | `ADMIN` / `SYSADMIN` | Delete a collection and all its group-access rows |
+| `POST`   | `/api/collections/{name}/upload` | `ADMIN` / `SYSADMIN` | Upload a `.csv` or `.json` file (flat records only) into a collection |
+| `POST`   | `/api/collections/{name}/groups/{groupId}` | `ADMIN` / `SYSADMIN` | Grant a group access to a collection |
+| `DELETE` | `/api/collections/{name}/groups/{groupId}` | `ADMIN` / `SYSADMIN` | Revoke a group's access to a collection |
+| `GET`    | `/api/collections/{name}/groups` | any authenticated user¹ | List which groups have access to a collection |
 
 ### Search
 
-| Method | Path | Description |
-| ------ | ---- | ----------- |
-| `GET` | `/api/search?collection=<name>&field=<field>&keyword=<value>` | Search a collection (auth required, access-checked, logged) |
+| Method | Path | Auth | Description |
+| ------ | ---- | ---- | ----------- |
+| `GET` | `/api/search?collection=&field=&keyword=` | any authenticated user, group-checked | Regex search a collection the caller's group can access; logged |
 
-## Frontend Pages
+¹ **Known gap — see below.** These routes currently only require a valid JWT, not a specific role. There is no ownership or role check stopping a `USER` from managing other users' accounts or groups.
 
-| Page | Audience | Purpose |
-| ---- | -------- | ------- |
-| `login.html` | all | Sign in |
-| `dashboard.html` | admin | System overview and stats |
-| `dashboard-user.html` | user | Personal access and recent searches |
-| `users.html` | admin | User list, search, disable, delete |
-| `add-user.html` | admin | Create a user |
-| `edit-user.html` | admin | Edit a user / reset password |
-| `search-admin.html` | admin | Search across all groups |
-| `search-user.html` | user | Search within assigned collections |
+## Known Limitations / Roadmap
 
-## Security Flow
+These are real gaps in the current code, not hypothetical — worth fixing before wider use:
 
-1. User signs in via `POST /auth/login`.
-2. Backend validates credentials and returns a JWT.
-3. The frontend stores the token in `sessionStorage` and fetches the profile via `GET /users/me`.
-4. `api.js` sends the token as an `Authorization: Bearer <token>` header on every request.
-5. The backend's JWT filter validates the token and loads the user (including group and role) per request.
+1. **Missing role enforcement on `/users/**` and `/group/**`.** Only `/api/collections/**` writes are role-restricted in `SecurityConfig`. Any authenticated user can currently create/edit/delete any user (including changing their own role to `SYSADMIN`) or any group. Needs `.hasAnyRole("ADMIN","SYSADMIN")` added to the relevant matchers, plus a self-vs-admin ownership check inside `UserService`.
+2. **Frontend isn't connected to the backend.** `FrontEnd/` runs entirely on `localStorage` (`data-store.js`). Wiring it up means adding an API client (JWT attach + error handling), replacing every `InfoLinkStore.*` call with real `fetch()` calls, and enabling CORS on the backend (`SecurityConfig` currently has none configured).
+3. **No logout / token revocation.** JWTs are stateless and remain valid until natural expiry (1 hour) even after "logging out" client-side. A server-side revocation list (or short-lived tokens + refresh tokens) would close this gap.
+4. **`ExcelToCsvConverter.java` is unused.** It's implemented (including zip-slip-safe extraction) but never wired into `CollectionController`, so `.xlsx`/`.xls` upload isn't actually available despite the dependency (`org.apache.poi`) and code existing.
+5. **No automated tests** beyond the default Spring Boot context-load placeholder.
+6. **Secrets in `application.yaml`.** Correctly `.gitignore`'d and never committed to git history, but it's plaintext on disk (Mongo URI+password, SQL Server password, JWT secret). Rotate these before any shared/production use, and keep using environment variables or a secrets manager going forward.
+
+## Data Model
+
+- `User` — account: username, BCrypt password hash, full name, role (`USER`/`ADMIN`/`SYSADMIN`, stored as ordinal), group, active flag, creation timestamp (auto-set via `@CreationTimestamp`)
+- `Groups` — department/team: name, description, active flag
+- `GroupsCollections` — which MongoDB collection names a group is allowed to search
+- `Log` — one row per search: user, collection, keyword, timestamp, IP, hit/miss status
+- `Role` — `USER`, `ADMIN`, `SYSADMIN`
 
 ## Setup & Prerequisites
 
 1. **Databases**
-   - SQL Server with the `Users`, `Groups`, `GroupsCollections`, and `Logs` tables.
-   - MongoDB with the searchable collections.
+   - SQL Server — run `Database/InfoLink_Database.sql` to create `Groups`, `Group_Collections`, `Users`, `Logs`.
+   - MongoDB — the searchable collections are created via the API (`POST /api/collections`), not manually. Sample data is available under `Database/MongoDB/` if you want to seed a collection via the upload endpoint.
 
 2. **Backend configuration**
-   - Create `BackEnd/src/main/resources/application.properties` with your SQL Server datasource, MongoDB connection settings, and server port.
-   - Set `JWT_SECRET` (base64-encoded secret, see `BackEnd/src/main/java/com/InfoLink/.env.example`).
-   - Run: `./mvnw spring-boot:run`
+   - Create `BackEnd/src/main/resources/application.yaml` (gitignored — not shipped in the repo) with your SQL Server datasource, MongoDB URI, and `JWT_SECRET` (base64-encoded). See `BackEnd/src/main/java/com/InfoLink/.env.example` for the required variable name.
+   - Run: `./mvnw spring-boot:run` (from `BackEnd/`)
+   - Swagger UI: `http://localhost:8080/swagger-ui/index.html` — click **Authorize** and paste a JWT from `POST /auth/login` to test protected endpoints.
 
 3. **Frontend**
-   - Serve `FrontEnd/infolink-ui/` from any static server (or open the pages directly).
-   - Point `API_BASE` in `FrontEnd/infolink-ui/api.js` at the backend URL.
-   - Ensure the backend allows the frontend origin (CORS).
-
-## Data Model
-
-- `User` — account with username, password hash, full name, role, group, and active flag
-- `Groups` — department/team with name, description, and active flag
-- `GroupsCollections` — mapping of a group to the MongoDB collection names it may search
-- `Log` — audit entry for every search (user, group, collection, keyword, date, IP, status)
-- `Role` — `ADMIN` / `USER`
+   - Currently standalone — open the HTML pages directly, or serve `FrontEnd/` from any static server. They will run against mock local data only until wired to the API (see Roadmap above).
