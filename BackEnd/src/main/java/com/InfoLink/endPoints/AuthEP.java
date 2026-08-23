@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.InfoLink.dto.JwtResponse;
 import com.InfoLink.dto.LoginRequest;
+import com.InfoLink.dto.RefreshRequest;
 import com.InfoLink.security.CustomUserDetails;
 import com.InfoLink.utils.JwtUtil;
 import com.InfoLink.service.RefreshTokenService;
@@ -49,7 +50,8 @@ public class AuthEP {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<JwtResponse> refresh(@RequestBody String refreshToken) {
+    public ResponseEntity<JwtResponse> refresh(@RequestBody RefreshRequest refreshReq) {
+        String refreshToken = refreshReq.getRefreshToken();
         RefreshToken rt = refreshTokenService.validate(refreshToken);
         CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(rt.getUsername());
         String newAccessToken = jwtUtil.generateToken(userDetails);

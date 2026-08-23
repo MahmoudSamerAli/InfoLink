@@ -4,7 +4,7 @@ DROP TABLE Group_Collections;
 DROP TABLE Logs;
 DROP TABLE Users;
 DROP TABLE Groups;
-DROP TABLE Refresh_Token;
+DROP TABLE refresh_token;
 
 CREATE TABLE Groups(
 Group_ID INT PRIMARY KEY IDENTITY,
@@ -41,11 +41,11 @@ IP_address NVARCHAR(50),
 Statuss BIT NOT NULL DEFAULT 1              -- 1 = Success, 0 = Failed/Denied
 );
 
-CREATE TABLE Refresh_Token (
+CREATE TABLE refresh_token (
     token NVARCHAR(255) PRIMARY KEY,
     username NVARCHAR(50) NOT NULL,
-    expiryDate DATETIME2 NOT NULL,
-    lastUsed DATETIME2 NOT NULL
+    expiry_date DATETIME2 NOT NULL,
+    last_used DATETIME2 NOT NULL
 );
 
 /* =========================================================
@@ -119,3 +119,4 @@ SELECT * FROM Groups;
 SELECT * FROM Group_Collections;
 SELECT * FROM Users;
 SELECT * FROM Logs;
+SELECT * FROM refresh_token;

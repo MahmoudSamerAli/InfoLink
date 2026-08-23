@@ -7,16 +7,16 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 @Entity
-@Table(name = "Refresh_Token")
+@Table(name = "refresh_token")
 public class RefreshToken {
     @Id
     @Column(name="token",nullable = false)
     private String token;
     @Column(name="username", nullable=false)
     private String username;
-    @Column(name="expiryDate", nullable=false)
+    @Column(name="expiry_date", nullable=false)
     private Instant expiryDate;
-    @Column(name="lastUsed", nullable=false)
+    @Column(name="last_used", nullable=false)
     private Instant lastUsed;
     public RefreshToken(String token, String username){
         this.token=token;
