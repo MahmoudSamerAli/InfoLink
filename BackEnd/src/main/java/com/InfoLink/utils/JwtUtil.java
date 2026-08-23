@@ -1,6 +1,8 @@
 package com.InfoLink.utils;
 
 import java.security.Key;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -30,11 +32,18 @@ public class JwtUtil {
             .setSubject(userDetails.getUsername())
             .claim("roles", userDetails.getAuthorities())
             .setIssuedAt(new Date())
-            .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1h
+            .setExpiration(Date.from(Instant.now().plus(15, ChronoUnit.MINUTES))) // 15Min
             .signWith(getSigningKey(), SignatureAlgorithm.HS256)
             .compact();
     }
-
+    public String generateRefreshToken(String username) {
+        return Jwts.builder()
+            .setSubject(username)
+            .setIssuedAt(new Date())
+            .setExpiration(Date.from(Instant.now().plus(8, ChronoUnit.HOURS)))
+            .signWith(SignatureAlgorithm.HS256, getSigningKey())
+            .compact();
+    }
     public String extractUsername(String token) {
         return getClaims(token).getSubject();
     }
