@@ -14,6 +14,11 @@ import com.InfoLink.model.Groups;
 import com.InfoLink.model.User;
 import com.InfoLink.repository.GroupRepository;
 import com.InfoLink.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import com.InfoLink.dto.PagedResponse;
 
 @Service
 public class UserService {
@@ -29,20 +34,29 @@ public class UserService {
         this.userRepository = userRepository;
         this.groupRepository = groupRepository;
     }
-    public List<UsersResponse> getUsers() {
-        return userRepository.findAll()
-                .stream()
-                .map(user -> new UsersResponse(
-                    user.getUserID(),
-                    user.getUsername(),
-                    user.getFullName(),
-                    user.getGroup().getGroupID(),
-                    user.getRole(),
-                    user.getIsActive(),
-                    user.getCreatedDate()
-                ))
-                .collect(Collectors.toList());
+    public PagedResponse<UsersResponse> getUsers(Pageable pageable) {
+        Page<User> userPage = userRepository.findAll(pageable);
+        List<UsersResponse> content = userPage.getContent()
+            .stream()
+            .map(user -> new UsersResponse(
+                user.getUserID(),
+                user.getUsername(),
+                user.getFullName(),
+                user.getGroup().getGroupID(),
+                user.getRole(),
+                user.getIsActive(),
+                user.getCreatedDate()
+            ))
+            .collect(Collectors.toList());
+
+        return new PagedResponse<>(
+            content,
+            userPage.getNumber(),
+            userPage.getSize(),
+            userPage.getTotalElements()
+        );
     }
+
 
     public UsersResponse getUser(int id) {
         User user = userRepository.findById(id)

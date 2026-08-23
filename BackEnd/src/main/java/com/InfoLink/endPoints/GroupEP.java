@@ -3,11 +3,15 @@ package com.InfoLink.endPoints;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.InfoLink.dto.PagedResponse;
+import com.InfoLink.dto.GroupsResponse;
 import com.InfoLink.dto.AddGroupRequest;
 import com.InfoLink.model.Groups;
 import com.InfoLink.service.GroupService;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -22,8 +26,8 @@ public class GroupEP {
         this.groupService = groupService;
     }
     @GetMapping
-    public ResponseEntity<List<Groups>> getGroups() {
-        return ResponseEntity.ok(groupService.getGroups());
+    public PagedResponse<GroupsResponse> getGroups(Pageable pageable) {
+        return groupService.getGroups(pageable);
     }
     @PostMapping
     public ResponseEntity<Groups> createGroup(@Valid @RequestBody AddGroupRequest group) {
