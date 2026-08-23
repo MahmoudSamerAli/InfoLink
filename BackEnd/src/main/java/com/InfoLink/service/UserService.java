@@ -5,12 +5,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.InfoLink.dto.AddUserRequest;
 import com.InfoLink.dto.PatchUserRequest;
 import com.InfoLink.dto.UsersResponse;
 import com.InfoLink.model.Groups;
+import com.InfoLink.model.Role;
 import com.InfoLink.model.User;
 import com.InfoLink.repository.GroupRepository;
 import com.InfoLink.repository.UserRepository;
@@ -73,6 +77,7 @@ public class UserService {
     }
 
     public User addUser(AddUserRequest request) {
+        ensureCanManageRole(request.getRole());
         request.setUsername(request.getUsername().trim());
         request.setFullName(request.getFullName().trim());
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -96,6 +101,10 @@ public class UserService {
     public User updateUser(PatchUserRequest request, int id) {
         return userRepository.findById(id)
             .map(user -> {
+                ensureCanManageUser(user);
+                if (request.getRole() != null) {
+                    ensureCanManageRole(request.getRole());
+                }
                 if (request.getUsername() != null) {
                     user.setUsername(request.getUsername().trim());
                 }
@@ -122,11 +131,34 @@ public class UserService {
     }
     
     public void deleteUser(int id) {
-        if (!userRepository.existsById(id)) {
-            throw new RuntimeException("User not found with id: " + id);
-        }
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        ensureCanManageUser(user);
         userRepository.deleteById(id);
     }
+
+    private void ensureCanManageUser(User user) {
+        if (isAdmin() && isPrivileged(user.getRole())) {
+            throw new AccessDeniedException("Admins cannot manage other admins or sysadmins");
+        }
+    }
+
+    private void ensureCanManageRole(Role role) {
+        if (isAdmin() && isPrivileged(role)) {
+            throw new AccessDeniedException("Admins cannot assign admin or sysadmin roles");
+        }
+    }
+
+    private boolean isAdmin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null && authentication.getAuthorities().stream()
+            .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+    }
+
+    private boolean isPrivileged(Role role) {
+        return role == Role.ADMIN || role == Role.SYSADMIN;
+    }
+
     public Optional<User> findByUsername(String username){
         return userRepository.findByUsername(username);
     }

@@ -4,6 +4,7 @@ import java.security.Key;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,6 +31,7 @@ public class JwtUtil {
     public String generateToken(CustomUserDetails userDetails) {
         return Jwts.builder()
             .setSubject(userDetails.getUsername())
+            .claim("token_type", "access")
             .claim("roles", userDetails.getAuthorities())
             .setIssuedAt(new Date())
             .setExpiration(Date.from(Instant.now().plus(15, ChronoUnit.MINUTES))) // 15Min
@@ -39,6 +41,8 @@ public class JwtUtil {
     public String generateRefreshToken(String username) {
         return Jwts.builder()
             .setSubject(username)
+            .setId(UUID.randomUUID().toString())
+            .claim("token_type", "refresh")
             .setIssuedAt(new Date())
             .setExpiration(Date.from(Instant.now().plus(8, ChronoUnit.HOURS)))
             .signWith(SignatureAlgorithm.HS256, getSigningKey())
@@ -51,6 +55,14 @@ public class JwtUtil {
     public boolean validateToken(String token, UserDetails userDetails) {
         return extractUsername(token).equals(userDetails.getUsername()) &&
                !isTokenExpired(token);
+    }
+
+    public boolean isAccessToken(String token) {
+        return "access".equals(getClaims(token).get("token_type", String.class));
+    }
+
+    public boolean isRefreshToken(String token) {
+        return "refresh".equals(getClaims(token).get("token_type", String.class));
     }
 
     private boolean isTokenExpired(String token) {

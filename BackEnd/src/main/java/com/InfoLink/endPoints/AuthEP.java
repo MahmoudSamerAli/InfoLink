@@ -52,10 +52,14 @@ public class AuthEP {
     @PostMapping("/refresh")
     public ResponseEntity<JwtResponse> refresh(@RequestBody RefreshRequest refreshReq) {
         String refreshToken = refreshReq.getRefreshToken();
-        RefreshToken rt = refreshTokenService.validate(refreshToken);
-        CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(rt.getUsername());
+        String replacementRefreshToken = refreshTokenService.rotate(refreshToken);
+        String username = jwtUtil.extractUsername(replacementRefreshToken);
+        CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(username);
+        if (!userDetails.isEnabled()) {
+            throw new org.springframework.security.authentication.BadCredentialsException("User account is disabled");
+        }
         String newAccessToken = jwtUtil.generateToken(userDetails);
-        return ResponseEntity.ok(new JwtResponse(newAccessToken, refreshToken));
+        return ResponseEntity.ok(new JwtResponse(newAccessToken, replacementRefreshToken));
     }
 
     @PostMapping("/logout")
