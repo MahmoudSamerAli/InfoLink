@@ -1,21 +1,23 @@
 package com.InfoLink.endPoints;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.InfoLink.dto.JwtResponse;
 import com.InfoLink.dto.LoginRequest;
 import com.InfoLink.dto.RefreshRequest;
 import com.InfoLink.security.CustomUserDetails;
-import com.InfoLink.utils.JwtUtil;
 import com.InfoLink.service.RefreshTokenService;
-import com.InfoLink.model.RefreshToken;
+import com.InfoLink.utils.JwtUtil;
 
 @RestController
 @RequestMapping("/auth")

@@ -58,7 +58,7 @@ public class SecurityConfig {
                     "/swagger-ui/index.html/**",
                     "/v3/api-docs/**"
                 ).permitAll()
-                .requestMatchers("/users/profile", "/api/search/**").authenticated()
+                .requestMatchers("/users/profile", "/users/change-password", "/api/search/**").authenticated()
                 .requestMatchers("/users/**", "/group/**", "/logs/**")
                     .hasAnyRole("ADMIN", "SYSADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/collections/**").authenticated()

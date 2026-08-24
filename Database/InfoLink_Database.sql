@@ -48,6 +48,12 @@ CREATE TABLE refresh_token (
     last_used DATETIME2 NOT NULL
 );
 
+CREATE TABLE Search_Mapping (
+    Mapping_ID INT IDENTITY(1,1) PRIMARY KEY,
+    Collection_Name NVARCHAR(100) NOT NULL,
+    Field_Name NVARCHAR(100) NOT NULL
+);
+
 /* =========================================================
    1. GROUPS
    ========================================================= */

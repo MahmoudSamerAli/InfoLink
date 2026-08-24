@@ -1,20 +1,25 @@
 package com.InfoLink.endPoints;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import com.InfoLink.dto.PagedResponse;
-import com.InfoLink.dto.GroupsResponse;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.InfoLink.dto.AddGroupRequest;
+import com.InfoLink.dto.GroupsResponse;
+import com.InfoLink.dto.PagedResponse;
 import com.InfoLink.model.Groups;
 import com.InfoLink.service.GroupService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequestMapping("/group")
@@ -25,18 +30,21 @@ public class GroupEP {
     public GroupEP(GroupService groupService) {
         this.groupService = groupService;
     }
+
     @GetMapping
     public PagedResponse<GroupsResponse> getGroups(Pageable pageable) {
         return groupService.getGroups(pageable);
     }
+
     @PostMapping
     public ResponseEntity<Groups> createGroup(@Valid @RequestBody AddGroupRequest group) {
         groupService.save(group);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
     @PutMapping("/{id}")
     public ResponseEntity<Groups> updateGroup(@PathVariable Long id,
-                                              @Valid @RequestBody AddGroupRequest request) {
+            @Valid @RequestBody AddGroupRequest request) {
         try {
             Groups updated = groupService.updateGroup(id, request);
             return ResponseEntity.ok(updated);
@@ -44,6 +52,7 @@ public class GroupEP {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteGroup(@PathVariable Long id) {
         boolean deleted = groupService.deleteGroup(id);
