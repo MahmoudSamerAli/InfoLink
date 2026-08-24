@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.InfoLink.dto.AddGroupRequest;
@@ -32,8 +33,11 @@ public class GroupEP {
     }
 
     @GetMapping
-    public PagedResponse<GroupsResponse> getGroups(Pageable pageable) {
-        return groupService.getGroups(pageable);
+    public PagedResponse<GroupsResponse> getGroups(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Boolean active,
+            Pageable pageable) {
+        return groupService.getGroups(keyword, active, pageable);
     }
 
     @PostMapping
@@ -45,12 +49,7 @@ public class GroupEP {
     @PutMapping("/{id}")
     public ResponseEntity<Groups> updateGroup(@PathVariable Long id,
             @Valid @RequestBody AddGroupRequest request) {
-        try {
-            Groups updated = groupService.updateGroup(id, request);
-            return ResponseEntity.ok(updated);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        return ResponseEntity.ok(groupService.updateGroup(id, request));
     }
 
     @DeleteMapping("/{id}")

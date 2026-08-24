@@ -1,7 +1,5 @@
 package com.InfoLink.dto;
 
-import java.time.LocalDateTime;
-
 public class GroupsResponse {
     private Long groupID;
     private String groupName;

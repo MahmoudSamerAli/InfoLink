@@ -40,7 +40,8 @@ html, body {
 }
 
 /* ── App shell ── */
-.app { display: flex; height: 100vh; }
+.app, .layout { display: flex; height: 100vh; }
+
 
 /* ── Sidebar ── */
 .sidebar {
@@ -61,13 +62,8 @@ html, body {
   padding: 20px 20px 18px;
   border-bottom: 1px solid var(--border);
 }
-.sidebar-logo svg { width: 26px; height: 26px; }
-.sidebar-logo-text {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -0.3px;
-}
+.sidebar-logo img { height: 36px; object-fit: contain; max-width: 160px; display: block; }
+.sidebar-logo-text { display: none; }
 
 .sidebar-nav {
   flex: 1;
@@ -205,15 +201,16 @@ html, body {
 .profile-chip .role { font-size: 0.72rem; color: var(--text-secondary); }
 
 /* ── Page content ── */
-.page-content {
+.page-content, .main-content {
   flex: 1;
   overflow-y: auto;
   padding: 28px;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
 }
-.page-content::-webkit-scrollbar { width: 4px; }
-.page-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.page-content::-webkit-scrollbar, .main-content::-webkit-scrollbar { width: 4px; }
+.page-content::-webkit-scrollbar-thumb, .main-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
 
 /* ── Card ── */
 .card {
@@ -317,3 +314,99 @@ html, body {
   transform: translateY(-1px);
 }
 .btn-logout svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+/* =========================================
+   InfoLink – 3D Effects CSS
+   ========================================= */
+
+/* Cursor-tracked glow on hovered card */
+.card.tilt-active,
+.stat-card.tilt-active,
+.table-card.tilt-active,
+.toolbar.tilt-active {
+  background-image: radial-gradient(
+    circle at var(--glow-x,50%) var(--glow-y,50%),
+    rgba(124,58,237,0.07) 0%,
+    transparent 65%
+  );
+}
+
+/* Holographic shimmer */
+.stat-card.tilt-active::after,
+.card.tilt-active::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,0.04) 0%,
+    transparent 45%,
+    rgba(124,58,237,0.05) 65%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* Stat icon floats on hover */
+.stat-card:hover .stat-icon {
+  transform: scale(1.08) translateY(-2px);
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.stat-card .stat-icon { transition: transform 0.3s ease; }
+
+/* Table rows need position for box-shadow */
+.data-table tbody tr { position: relative; }
+
+/* Sidebar-logo preserves 3D for logo spin */
+.sidebar-logo { transform-style: preserve-3d; }
+
+/* Glowing input focus */
+input:focus, select:focus {
+  box-shadow:
+    0 0 0 3px rgba(124,58,237,0.28),
+    0 0 18px rgba(124,58,237,0.12),
+    inset 0 1px 3px rgba(0,0,0,0.3) !important;
+}
+
+/* Active nav item lift */
+.nav-item.active {
+  box-shadow: 0 4px 18px rgba(124,58,237,0.2), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+/* Profile chip hidden */
+.profile-chip { display: none !important; }
+
+/* Button depth press */
+.btn-primary:active { transform: translateY(1px) scale(0.98); }
+
+/* Card base shadow */
+.card, .stat-card {
+  box-shadow:
+    0 2px 8px rgba(0,0,0,0.3),
+    0 0 0 1px rgba(124,58,237,0.03),
+    inset 0 1px 0 rgba(255,255,255,0.03);
+}
+
+/* Health dot glow pulse */
+.health-dot.dot-green { animation: pulseG 2s ease-in-out infinite; }
+.health-dot.dot-yellow { animation: pulseY 2s ease-in-out infinite; }
+@keyframes pulseG {
+  0%,100% { box-shadow: 0 0 5px var(--success); }
+  50%      { box-shadow: 0 0 13px var(--success); }
+}
+@keyframes pulseY {
+  0%,100% { box-shadow: 0 0 5px var(--warning); }
+  50%      { box-shadow: 0 0 13px var(--warning); }
+}
+
+/* Topbar glass */
+.topbar {
+  backdrop-filter: blur(10px);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 4px 20px rgba(0,0,0,0.2);
+}
+
+/* Button hover glow */
+.btn:hover {
+  box-shadow: 0 6px 22px rgba(124,58,237,0.22), 0 2px 8px rgba(0,0,0,0.3);
+}

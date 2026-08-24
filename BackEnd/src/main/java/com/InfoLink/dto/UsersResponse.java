@@ -9,6 +9,7 @@ public class UsersResponse {
     private String username;
     private String fullName;
     private Long groupID;
+    private String groupName;
     private Role role;
     private Boolean isActive;
     private LocalDateTime createdDate;
@@ -27,6 +28,13 @@ public class UsersResponse {
         this.role = role;
         this.isActive = isActive;
         this.createdDate = createdDate;
+    }
+
+    public UsersResponse(int userID, String username, String fullName,
+                         Long groupID, String groupName, Role role,
+                         Boolean isActive, LocalDateTime createdDate) {
+        this(userID, username, fullName, groupID, role, isActive, createdDate);
+        this.groupName = groupName;
     }
 
     public int getUserID() {
@@ -59,6 +67,14 @@ public class UsersResponse {
 
     public void setGroupID(Long groupID) {
         this.groupID = groupID;
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
     }
 
     public Role getRole() {

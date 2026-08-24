@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="shared.css"/>
   <style>
-    /* ── Welcome banner ── */
+    /* -- Welcome banner -- */
     .welcome-banner {
       background: linear-gradient(135deg, rgba(124,58,237,0.12) 0%, rgba(79,70,229,0.08) 100%);
       border: 1px solid rgba(124,58,237,0.2);
@@ -91,7 +91,7 @@
     .btn-start-search:active { transform: translateY(0); }
     .btn-start-search svg { width: 16px; height: 16px; }
 
-    /* ── Stats grid ── */
+    /* -- Stats grid -- */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -174,14 +174,14 @@
       background: var(--info-bg);
     }
 
-    /* ── Bottom row: Recent Searches + Your Access ── */
+    /* -- Bottom row: Recent Searches + Your Access -- */
     .bottom-row {
       display: grid;
       grid-template-columns: 1fr 340px;
       gap: 16px;
     }
 
-    /* ── Recent Searches card ── */
+    /* -- Recent Searches card -- */
     .recent-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -257,7 +257,7 @@
       white-space: nowrap;
     }
 
-    /* ── Your Access card ── */
+    /* -- Your Access card -- */
     .access-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -342,7 +342,7 @@
       transform: translateY(-1px);
     }
 
-    /* ── Responsive adjustments ── */
+    /* -- Responsive adjustments -- */
     @media (max-width: 1100px) {
       .bottom-row {
         grid-template-columns: 1fr;
@@ -363,18 +363,10 @@
 <body>
 <div class="app">
 
-  <!-- ── SIDEBAR ── -->
+  <!-- -- SIDEBAR -- -->
   <aside class="sidebar">
     <div class="sidebar-logo">
-      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M10 8C10 8 14 8 16 12C18 16 22 16 22 16" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"/>
-        <path d="M10 16C10 16 14 16 16 20C18 24 22 24 22 24" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round"/>
-        <circle cx="10" cy="8" r="2.5" fill="#7c3aed"/>
-        <circle cx="22" cy="16" r="2.5" fill="#7c3aed"/>
-        <circle cx="10" cy="16" r="2.5" fill="#a78bfa"/>
-        <circle cx="22" cy="24" r="2.5" fill="#a78bfa"/>
-      </svg>
-      <span class="sidebar-logo-text">InfoLink</span>
+      <img src="infolink-logo.png" alt="InfoLink" class="sidebar-logo-img" style="height:38px;object-fit:contain;max-width:160px;">
     </div>
 
     <nav class="sidebar-nav">
@@ -403,6 +395,24 @@
         </svg>
         Change Password
       </a>
+      <div class="nav-section-label">Tools</div>
+
+      <a href="processor.html" class="nav-item" id="nav-processor">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/>
+          <rect x="3" y="17" width="18" height="4" rx="1"/>
+          <line x1="7" y1="5" x2="17" y2="5"/><line x1="7" y1="12" x2="14" y2="12"/>
+        </svg>
+        Column Mapping
+      </a>
+
+      <a href="convert.html" class="nav-item" id="nav-convert">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+        Converter
+      </a>
     </nav>
 
     <div class="sidebar-user">
@@ -424,7 +434,7 @@
     </div>
   </aside>
 
-  <!-- ── MAIN ── -->
+  <!-- -- MAIN -- -->
   <div class="main">
 
     <!-- Topbar -->
@@ -665,23 +675,23 @@
     document.querySelector('.profile-chip .avatar').textContent = displayInitial;
   }
 
-  // Update access card with real group info
+  // Update access card with backend-authoritative collection access.
   const accessGroupTitle = document.querySelector('.access-groups-title');
   if (accessGroupTitle) {
-    const userCols = InfoLinkStore.getGroupCollections(userGroup);
     accessGroupTitle.textContent = `Group : ${userGroup || 'None'}`;
-    // Update welcome banner collections
-    const badgesEl = document.querySelector('.group-badges');
-    if (badgesEl && userGroup) {
-      badgesEl.innerHTML = userCols.length > 0
-        ? userCols.map(c => `<span class="group-badge">${c}</span>`).join('')
-        : `<span class="group-badge">${userGroup}</span>`;
-    }
-    // Update welcome text
-    const welcomeP = document.querySelector('.welcome-left p');
-    if (welcomeP && userGroup) {
-      const colText = userCols.length > 0 ? userCols.join(', ') : userGroup;
-      welcomeP.textContent = `You can search records from: ${colText}.`;
+    if (currentUser.groupID) {
+      InfoLinkStore.apiRequest(`/api/collections?groupId=${currentUser.groupID}`)
+        .then(userCols => {
+          const badgesEl = document.querySelector('.group-badges');
+          if (badgesEl) badgesEl.innerHTML = userCols.length
+            ? userCols.map(c => `<span class="group-badge">${c}</span>`).join('')
+            : `<span class="group-badge">No collections assigned</span>`;
+          const welcomeP = document.querySelector('.welcome-left p');
+          if (welcomeP) welcomeP.textContent = userCols.length
+            ? `You can search records from: ${userCols.join(', ')}.`
+            : 'No collections are currently assigned.';
+        })
+        .catch(error => InfoLinkStore.showToast(error.message));
     }
   }
 
@@ -738,6 +748,7 @@
     observer.observe(el);
   });
 </script>
+  <script src="3d-effects.js"></script>
 </body>
 </html>
 

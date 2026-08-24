@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="shared.css" />
   <style>
-    /* ── Two-column layout ── */
+    /* -- Two-column layout -- */
     .form-layout {
       display: grid;
       grid-template-columns: 1fr 300px;
@@ -18,7 +18,7 @@
       align-items: start;
     }
 
-    /* ── Form card ── */
+    /* -- Form card -- */
     .form-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -35,7 +35,7 @@
       border-bottom: 1px solid var(--border);
     }
 
-    /* ── Field grid ── */
+    /* -- Field grid -- */
     .field-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -270,7 +270,7 @@
       margin-top: 10px;
     }
 
-    /* ── Permission Summary Card ── */
+    /* -- Permission Summary Card -- */
     .perm-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -410,20 +410,10 @@
 <body>
   <div class="app">
 
-    <!-- ── SIDEBAR ── -->
+    <!-- -- SIDEBAR -- -->
     <aside class="sidebar">
       <div class="sidebar-logo">
-        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M10 8C10 8 14 8 16 12C18 16 22 16 22 16" stroke="#7c3aed" stroke-width="2.5"
-            stroke-linecap="round" />
-          <path d="M10 16C10 16 14 16 16 20C18 24 22 24 22 24" stroke="#a78bfa" stroke-width="2.5"
-            stroke-linecap="round" />
-          <circle cx="10" cy="8" r="2.5" fill="#7c3aed" />
-          <circle cx="22" cy="16" r="2.5" fill="#7c3aed" />
-          <circle cx="10" cy="16" r="2.5" fill="#a78bfa" />
-          <circle cx="22" cy="24" r="2.5" fill="#a78bfa" />
-        </svg>
-        <span class="sidebar-logo-text">InfoLink</span>
+        <img src="infolink-logo.png" alt="InfoLink" class="sidebar-logo-img" style="height:38px;object-fit:contain;max-width:160px;">
       </div>
 
       <nav class="sidebar-nav">
@@ -481,6 +471,24 @@
           </svg>
           Change Password
         </a>
+      <div class="nav-section-label">Tools</div>
+
+      <a href="processor.html" class="nav-item" id="nav-processor">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/>
+          <rect x="3" y="17" width="18" height="4" rx="1"/>
+          <line x1="7" y1="5" x2="17" y2="5"/><line x1="7" y1="12" x2="14" y2="12"/>
+        </svg>
+        Column Mapping
+      </a>
+
+      <a href="convert.html" class="nav-item" id="nav-convert">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+        Converter
+      </a>
       </nav>
 
       <div class="sidebar-user">
@@ -502,7 +510,7 @@
       </div>
     </aside>
 
-    <!-- ── MAIN ── -->
+    <!-- -- MAIN -- -->
     <div class="main">
 
       <header class="topbar">
@@ -529,7 +537,7 @@
       <main class="page-content">
         <div class="form-layout">
 
-          <!-- ── Form Card ── -->
+          <!-- -- Form Card -- -->
           <div class="form-card">
             <div class="form-section-title">Account information</div>
 
@@ -542,7 +550,7 @@
                     <circle cx="12" cy="7" r="4" />
                   </svg>
                   <input id="full-name" type="text" class="field-input" placeholder="Enter full name"
-                    autocomplete="off" />
+                    autocomplete="off" minlength="3" maxlength="100" pattern="[a-zA-Z\s]+" required />
                 </div>
               </div>
               <div class="field-group">
@@ -554,7 +562,7 @@
                     <path d="M15 8h2m2 0h-2m0 0V6m0 2v2" stroke-linecap="round" />
                   </svg>
                   <input id="username" type="text" class="field-input" placeholder="Choose username"
-                    autocomplete="off" />
+                    autocomplete="off" minlength="4" maxlength="30" pattern="[a-zA-Z0-9_.]+" required />
                 </div>
               </div>
             </div>
@@ -669,7 +677,7 @@
                     <path d="M8 11V7a4 4 0 0 1 8 0v4" />
                   </svg>
                   <input id="temp-password" type="password" class="field-input"
-                    placeholder="Create a secure password" />
+                    placeholder="Create a secure password" minlength="8" maxlength="30" />
                 </div>
               </div>
               <div class="field-group">
@@ -695,7 +703,7 @@
             </div>
           </div>
 
-          <!-- ── Permission Summary Card ── -->
+          <!-- -- Permission Summary Card -- -->
           <div class="perm-card">
             <div class="perm-top">
               <div class="perm-icon">
@@ -772,29 +780,33 @@
       window.location.href = 'login.html';
     }
 
-    // Populate group dropdown from store
-    const groups = InfoLinkStore.getGroups();
+    // Populate group dropdown from the backend source of truth.
     const groupSelect = document.getElementById('group-select');
-    groupSelect.innerHTML = groups
-      .filter(g => g.isActive)
-      .map(g => `<option value="${g.name}" data-cols="${g.collections.join(',')}">${g.name}</option>`)
-      .join('');
+    let groups = [];
+    InfoLinkStore.apiRequest('/group?page=0&size=100')
+      .then(data => {
+        groups = (data.content || []).filter(g => g.isActive);
+        groupSelect.innerHTML = groups.map(g => `<option value="${g.groupID}">${g.groupName}</option>`).join('');
+        updatePermSummary();
+      })
+      .catch(error => InfoLinkStore.showToast(error.message));
 
     function updatePermSummary() {
       const role = document.getElementById('role-select').value;
-      const group = document.getElementById('group-select').value;
-      const cols = InfoLinkStore.getGroupCollections(group);
+      const groupID = Number(document.getElementById('group-select').value);
+      const selectedGroup = groups.find(g => g.groupID === groupID);
+      const groupName = selectedGroup ? selectedGroup.groupName : '—';
 
       document.getElementById('perm-role').textContent = role;
-      document.getElementById('perm-group').textContent = group;
+      document.getElementById('perm-group').textContent = groupName;
 
       const tagsEl = document.getElementById('coll-tags');
-      tagsEl.innerHTML = cols.map(c => `<span class="coll-tag">${c}</span>`).join('');
+      tagsEl.innerHTML = '<span class="coll-tag">Inherited from group</span>';
 
       // Highlight group select as active/selected
       const groupSel = document.getElementById('group-select');
       groupSel.classList.remove('inactive');
-      if (!group) groupSel.classList.add('inactive');
+      if (!groupID) groupSel.classList.add('inactive');
     }
 
     function updateToggleLabel() {
@@ -819,7 +831,7 @@
       }
     }
 
-    function handleCreate() {
+    async function handleCreate() {
       const fullName = document.getElementById('full-name').value.trim();
       const username = document.getElementById('username').value.trim();
       const email = document.getElementById('email').value.trim();
@@ -834,6 +846,14 @@
 
       if (!fullName || !username) {
         alert('Please fill in Full Name and Username.');
+        return;
+      }
+      if (fullName.length < 3 || fullName.length > 100 || !/^[a-zA-Z\s]+$/.test(fullName)) {
+        alert('Full name must be 3–100 characters and contain only letters and spaces.');
+        return;
+      }
+      if (username.length < 4 || username.length > 30 || !/^[a-zA-Z0-9_.]+$/.test(username)) {
+        alert('Username must be 4–30 characters and contain only letters, numbers, underscores, or dots.');
         return;
       }
 
@@ -859,35 +879,38 @@
         alert('Please enter a temporary password.');
         return;
       }
+      if (pass.length < 8 || pass.length > 30 || !/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+/.test(pass)) {
+        alert('Password must be 8–30 characters and include upper- and lowercase letters, a number, and a symbol.');
+        return;
+      }
       if (pass !== confirm) {
         alert('Passwords do not match.');
         return;
       }
 
-      const result = InfoLinkStore.addUser({
-        name: fullName,
-        username,
-        email,
-        phone,
-        nationalId,
-        address,
-        role,
-        group,
-        status: isActive ? 'Active' : 'Inactive',
-        password: pass
-      });
-
-      if (result.success) {
-        alert(`User "${fullName}" created successfully!`);
+      try {
+        await InfoLinkStore.apiRequest('/users/add', {
+          method: 'POST',
+          body: JSON.stringify({
+            username,
+            password: pass,
+            fullName,
+            role: role.toUpperCase(),
+            groupID,
+            isActive
+          })
+        });
+        InfoLinkStore.showToast(`User "${fullName}" created successfully.`, 'success');
         window.location.href = 'users.html';
-      } else {
-        alert(result.message);
+      } catch (error) {
+        InfoLinkStore.showToast(error.message);
       }
     }
 
     // Init
     updatePermSummary();
   </script>
+  <script src="3d-effects.js"></script>
 </body>
 
 </html>

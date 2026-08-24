@@ -3,6 +3,8 @@ package com.InfoLink.endPoints;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
@@ -24,9 +26,12 @@ import com.InfoLink.security.CustomUserDetails;
 import com.InfoLink.service.GroupsCollectionsService;
 import com.InfoLink.service.LogService;
 import com.InfoLink.dto.PagedResponse;
+import com.InfoLink.dto.DeepSearchRequest;
+import com.InfoLink.dto.DeepSearchResult;
 import com.InfoLink.utils.PaginationUtil;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/search")
@@ -58,6 +63,8 @@ public class SearchController {
 
         // Remove "collection" param so only search fields remain
         params.remove("collection");
+        params.remove("page");
+        params.remove("size");
 
         List<Criteria> criteriaList = new ArrayList<>();
         params.forEach((field, keyword) -> {
@@ -66,7 +73,7 @@ public class SearchController {
 
         Criteria criteria = new Criteria();
         if (!criteriaList.isEmpty()) {
-            criteria = new Criteria().andOperator(criteriaList.toArray(new Criteria[0]));
+            criteria = new Criteria().orOperator(criteriaList.toArray(new Criteria[0]));
         }
 
         Query query = new Query(criteria)
@@ -82,6 +89,81 @@ public class SearchController {
         log.setSearchKeyword(params.toString());
         log.setSearchDate(LocalDateTime.now());
         log.setIpAddress(request.getRemoteAddr());
+        log.setStatus(!results.isEmpty());
+        logService.saveLog(log);
+
+        return PaginationUtil.buildPagedResponse(results, page, size, total);
+    }
+
+    @GetMapping("/deep/fields")
+    public List<String> getDeepSearchFields() {
+        return groupsCollectionsService.getCommonFields();
+    }
+
+    @GetMapping("/fields")
+    public List<String> getSearchFields() {
+        return groupsCollectionsService.getCommonFields();
+    }
+
+    @PostMapping("/deep")
+    public PagedResponse<DeepSearchResult> deepSearch(
+            @Valid @RequestBody DeepSearchRequest request,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            HttpServletRequest httpRequest) {
+        if (page < 0 || size < 1 || size > 100) {
+            throw new IllegalArgumentException("Page must be non-negative and size must be between 1 and 100");
+        }
+
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
+                .getContext().getAuthentication().getPrincipal();
+        List<String> collectionNames = mongoTemplate.getCollectionNames().stream()
+            .sorted()
+            .toList();
+        List<String> commonFields = groupsCollectionsService.getCommonFields();
+        java.util.Set<String> invalidFields = new java.util.HashSet<>(request.getSearchKeys().keySet());
+        invalidFields.removeAll(commonFields);
+        if (!invalidFields.isEmpty()) {
+            throw new IllegalArgumentException("Search keys are not common to all selected collections: " + invalidFields);
+        }
+
+        List<Criteria> criteriaList = new ArrayList<>();
+        request.getSearchKeys().forEach((field, keyword) -> {
+            if (field == null || field.isBlank() || keyword == null || keyword.isBlank()) {
+                throw new IllegalArgumentException("Search fields and values cannot be empty");
+            }
+            criteriaList.add(Criteria.where(field).regex(java.util.regex.Pattern.quote(keyword), "i"));
+        });
+        Criteria criteria = new Criteria().orOperator(criteriaList.toArray(new Criteria[0]));
+        long requestedOffset = (long) page * size;
+        long skipped = 0;
+        long total = 0;
+        List<DeepSearchResult> results = new ArrayList<>();
+
+        for (String collectionName : collectionNames) {
+            long collectionTotal = mongoTemplate.count(new Query(criteria), collectionName);
+            total += collectionTotal;
+            if (skipped + collectionTotal <= requestedOffset) {
+                skipped += collectionTotal;
+                continue;
+            }
+            long collectionSkip = Math.max(0, requestedOffset - skipped);
+            int remaining = size - results.size();
+            List<Document> documents = mongoTemplate.find(
+                    new Query(criteria).skip(collectionSkip).limit(remaining), Document.class, collectionName);
+            documents.forEach(document -> results.add(new DeepSearchResult(collectionName, document)));
+            skipped += collectionTotal;
+            if (results.size() == size) {
+                break;
+            }
+        }
+
+        Log log = new Log();
+        log.setUser(userDetails.getUser());
+        log.setCollection(String.join(",", collectionNames));
+        log.setSearchKeyword(request.getSearchKeys().toString());
+        log.setSearchDate(LocalDateTime.now());
+        log.setIpAddress(httpRequest.getRemoteAddr());
         log.setStatus(!results.isEmpty());
         logService.saveLog(log);
 

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="shared.css"/>
   <style>
-    /* ── Stats grid ── */
+    /* -- Stats grid -- */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -60,7 +60,7 @@
     }
     .stat-delta span { opacity: 0.7; font-weight: 400; }
 
-    /* ── Content row ── */
+    /* -- Content row -- */
     .content-row {
       display: grid;
       grid-template-columns: 1fr 300px;
@@ -68,7 +68,7 @@
       margin-bottom: 24px;
     }
 
-    /* ── Chart placeholder ── */
+    /* -- Chart placeholder -- */
     .chart-header {
       display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 20px;
@@ -96,7 +96,7 @@
     }
     canvas { width: 100% !important; }
 
-    /* ── System Health ── */
+    /* -- System Health -- */
     .health-list { display: flex; flex-direction: column; gap: 14px; }
     .health-item {
       display: flex; align-items: center; justify-content: space-between;
@@ -116,7 +116,7 @@
     .hs-operational { color: var(--success); background: var(--success-bg); }
     .hs-alert       { color: var(--warning); background: var(--warning-bg); }
 
-    /* ── Logs section ── */
+    /* -- Logs section -- */
     .section-header {
       display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 16px;
@@ -126,7 +126,7 @@
     .text-success { color: var(--success); font-weight: 600; }
     .text-danger  { color: var(--danger);  font-weight: 600; }
 
-    /* ── Animated line chart via SVG ── */
+    /* -- Animated line chart via SVG -- */
     .chart-svg { width: 100%; height: 180px; }
     .chart-line { stroke: #7c3aed; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
     .chart-area {
@@ -145,18 +145,10 @@
 <body>
 <div class="app">
 
-  <!-- ── SIDEBAR ── -->
+  <!-- -- SIDEBAR -- -->
   <aside class="sidebar">
     <div class="sidebar-logo">
-      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M10 8C10 8 14 8 16 12C18 16 22 16 22 16" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"/>
-        <path d="M10 16C10 16 14 16 16 20C18 24 22 24 22 24" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round"/>
-        <circle cx="10" cy="8" r="2.5" fill="#7c3aed"/>
-        <circle cx="22" cy="16" r="2.5" fill="#7c3aed"/>
-        <circle cx="10" cy="16" r="2.5" fill="#a78bfa"/>
-        <circle cx="22" cy="24" r="2.5" fill="#a78bfa"/>
-      </svg>
-      <span class="sidebar-logo-text">InfoLink</span>
+      <img src="infolink-logo.png" alt="InfoLink" class="sidebar-logo-img" style="height:38px;object-fit:contain;max-width:160px;">
     </div>
 
     <nav class="sidebar-nav">
@@ -212,6 +204,24 @@
         </svg>
         Change Password
       </a>
+      <div class="nav-section-label">Tools</div>
+
+      <a href="processor.html" class="nav-item" id="nav-processor">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/>
+          <rect x="3" y="17" width="18" height="4" rx="1"/>
+          <line x1="7" y1="5" x2="17" y2="5"/><line x1="7" y1="12" x2="14" y2="12"/>
+        </svg>
+        Column Mapping
+      </a>
+
+      <a href="convert.html" class="nav-item" id="nav-convert">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+        Converter
+      </a>
     </nav>
 
     <div class="sidebar-user">
@@ -233,7 +243,7 @@
     </div>
   </aside>
 
-  <!-- ── MAIN ── -->
+  <!-- -- MAIN -- -->
   <div class="main">
 
     <!-- Topbar -->
@@ -485,29 +495,36 @@
   document.querySelector('.profile-chip .role').textContent = displayRole;
   document.querySelector('.profile-chip .avatar').textContent = displayInitial;
 
-  // Dynamic stats
-  document.getElementById('stat-total-users').textContent = InfoLinkStore.getUserCount();
-  document.getElementById('stat-active-groups').textContent = InfoLinkStore.getActiveGroupCount();
-  document.getElementById('stat-searches-today').textContent = InfoLinkStore.getTodayLogCount();
-
-  // Dynamic recent logs
-  const recentLogs = InfoLinkStore.getRecentLogs(4);
-  const logsBody = document.getElementById('recent-logs-body');
-  if (recentLogs.length > 0) {
-    logsBody.innerHTML = recentLogs.map(l => `<tr>
-      <td style="color:var(--text-primary);font-weight:500">${l.user || 'Unknown'}</td>
-      <td>${l.group || '—'}</td>
-      <td>${l.keyword || '—'}</td>
-      <td>${l.displayDate || '—'}</td>
-      <td><span class="${l.status === 'Failed' ? 'text-danger' : 'text-success'}">${l.status || 'Success'}</span></td>
-    </tr>`).join('');
-  } else {
-    logsBody.innerHTML = `<tr>
-      <td colspan="5" style="text-align:center;padding:24px;color:var(--text-secondary);font-size:0.85rem;">
-        No search logs yet.
-      </td>
-    </tr>`;
+  async function loadDashboard() {
+    try {
+      const [users, groups, logs] = await Promise.all([
+        InfoLinkStore.apiRequest('/users?page=0&size=1'),
+        InfoLinkStore.apiRequest('/group?page=0&size=100'),
+        InfoLinkStore.apiRequest('/logs?page=0&size=4')
+      ]);
+      document.getElementById('stat-total-users').textContent = users.totalElements;
+      document.getElementById('stat-active-groups').textContent = (groups.content || []).filter(g => g.isActive).length;
+      const today = new Date().toDateString();
+      const recentLogs = logs.content || [];
+      document.getElementById('stat-searches-today').textContent = recentLogs.filter(l => l.searchDate && new Date(l.searchDate).toDateString() === today).length;
+      const logsBody = document.getElementById('recent-logs-body');
+      logsBody.innerHTML = recentLogs.length ? recentLogs.map(l => `<tr>
+        <td style="color:var(--text-primary);font-weight:500">${escHtml(l.username || 'Unknown')}</td>
+        <td>${escHtml(l.collection || '—')}</td>
+        <td>${escHtml(l.searchKeyword || '—')}</td>
+        <td>${escHtml(l.searchDate ? new Date(l.searchDate).toLocaleString() : '—')}</td>
+        <td><span class="${l.status ? 'text-success' : 'text-danger'}">${l.status ? 'Success' : 'Failed'}</span></td>
+      </tr>`).join('') : `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-secondary);font-size:0.85rem;">No search logs yet.</td></tr>`;
+    } catch (error) {
+      InfoLinkStore.showToast(error.message);
+    }
   }
+
+  function escHtml(value) {
+    return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  loadDashboard();
 
   // Logout handler
   function handleLogout() {
@@ -524,5 +541,6 @@
     });
   });
 </script>
+  <script src="3d-effects.js"></script>
 </body>
 </html>

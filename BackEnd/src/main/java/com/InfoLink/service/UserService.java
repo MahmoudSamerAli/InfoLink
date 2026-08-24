@@ -50,6 +50,7 @@ public class UserService {
                 user.getUsername(),
                 user.getFullName(),
                 user.getGroup().getGroupID(),
+                user.getGroup().getGroupName(),
                 user.getRole(),
                 user.getIsActive(),
                 user.getCreatedDate()
@@ -64,6 +65,32 @@ public class UserService {
         );
     }
 
+        public PagedResponse<UsersResponse> getUsers(String keyword, Role role, Long groupId,
+                             Boolean active, Pageable pageable) {
+        Page<User> userPage = userRepository.search(
+            keyword == null || keyword.isBlank() ? null : keyword.trim(),
+            role, groupId, active, pageable);
+        List<UsersResponse> content = userPage.getContent()
+            .stream()
+            .map(user -> new UsersResponse(
+                user.getUserID(),
+                user.getUsername(),
+                user.getFullName(),
+                user.getGroup().getGroupID(),
+                user.getRole(),
+                user.getIsActive(),
+                user.getCreatedDate()
+            ))
+            .collect(Collectors.toList());
+
+        return new PagedResponse<>(
+            content,
+            userPage.getNumber(),
+            userPage.getSize(),
+            userPage.getTotalElements()
+        );
+        }
+
 
     public UsersResponse getUser(int id) {
         User user = userRepository.findById(id)
@@ -73,6 +100,7 @@ public class UserService {
             user.getUsername(),
             user.getFullName(),
             user.getGroup().getGroupID(),
+            user.getGroup().getGroupName(),
             user.getRole(),
             user.getIsActive(),
             user.getCreatedDate()

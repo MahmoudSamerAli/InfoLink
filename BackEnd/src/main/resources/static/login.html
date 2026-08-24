@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -307,18 +307,8 @@
   <div class="card">
 
     <!-- Logo -->
-    <div class="logo">
-      <div class="logo-icon">
-        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M10 8C10 8 14 8 16 12C18 16 22 16 22 16" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"/>
-          <path d="M10 16C10 16 14 16 16 20C18 24 22 24 22 24" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round"/>
-          <circle cx="10" cy="8" r="2.5" fill="#7c3aed"/>
-          <circle cx="22" cy="16" r="2.5" fill="#7c3aed"/>
-          <circle cx="10" cy="16" r="2.5" fill="#a78bfa"/>
-          <circle cx="22" cy="24" r="2.5" fill="#a78bfa"/>
-        </svg>
-      </div>
-      <span class="logo-text">InfoLink</span>
+    <div class="logo" style="text-align:center; margin-bottom: 24px;">
+      <img src="infolink-logo.png" alt="InfoLink" class="logo-img" style="height:42px; object-fit:contain; max-width:200px; display:inline-block;">
     </div>
 
     <!-- Header -->
@@ -340,7 +330,7 @@
               <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
             </svg>
           </span>
-          <input type="text" id="username" name="username" placeholder="Enter your username" autocomplete="username" />
+          <input type="text" id="username" name="username" placeholder="Enter your username" autocomplete="username" minlength="4" maxlength="30" pattern="[a-zA-Z0-9_]+" required />
         </div>
       </div>
 
@@ -352,7 +342,7 @@
               <rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>
             </svg>
           </span>
-          <input type="password" id="password" name="password" placeholder="Enter your password" autocomplete="current-password" />
+          <input type="password" id="password" name="password" placeholder="Enter your password" autocomplete="current-password" minlength="8" maxlength="16" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,16}" required />
           <button type="button" class="toggle-pass" id="togglePass" aria-label="Toggle password">
             <svg id="eyeIcon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
               <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>
@@ -403,7 +393,7 @@
     const btn  = document.getElementById('signInBtn');
     const err  = document.getElementById('errorMsg');
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const user = document.getElementById('username').value.trim();
       const pass = document.getElementById('password').value.trim();
@@ -416,31 +406,19 @@
       }
 
       btn.classList.add('loading');
-
-      setTimeout(() => {
+      try {
+        await InfoLinkStore.login(user, pass);
         btn.classList.remove('loading');
-
-        // System admin fallback (hardcoded)
-        if (user.toLowerCase() === 'admin1' && pass === '123') {
-          InfoLinkStore.setSession({ username: 'admin1', name: 'Admin', role: 'Admin', group: 'Management' });
-          window.location.href = 'dashboard.html';
-          return;
-        }
-
-        // Check stored users via centralized store
-        const found = InfoLinkStore.findUserByCredentials(user, pass);
-
-        if (found) {
-          InfoLinkStore.setSession(found);
-          const role = found.role.toLowerCase() === 'admin' ? 'admin' : 'user';
-          window.location.href = role === 'admin' ? 'dashboard.html' : 'dashboard-user.html';
-        } else {
-          err.textContent = 'Invalid username or password. Please try again.';
-          err.classList.add('show');
-        }
-      }, 1400);
+        const role = InfoLinkStore.getCurrentUser().role.toLowerCase();
+        window.location.href = role === 'admin' || role === 'sysadmin' ? 'dashboard.html' : 'dashboard-user.html';
+      } catch (error) {
+        btn.classList.remove('loading');
+        err.textContent = error.message || 'Unable to sign in. Please try again.';
+        err.classList.add('show');
+      }
     });
   </script>
+  <script src="3d-effects.js"></script>
 </body>
 </html>
 

@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.InfoLink.dto.AddGroupRequest;
 import com.InfoLink.dto.GroupsResponse;
@@ -21,7 +23,16 @@ public class GroupService {
         this.groupRepository = groupRepository;
     }
     public PagedResponse<GroupsResponse> getGroups(Pageable pageable) {
-        Page<Groups> groupPage = groupRepository.findAll(pageable);
+        return getGroups(null, null, pageable);
+    }
+
+    public PagedResponse<GroupsResponse> getGroups(String keyword, Pageable pageable) {
+        return getGroups(keyword, null, pageable);
+    }
+
+    public PagedResponse<GroupsResponse> getGroups(String keyword, Boolean active, Pageable pageable) {
+        Page<Groups> groupPage = groupRepository.search(
+                keyword == null || keyword.isBlank() ? null : keyword.trim(), active, pageable);
 
         List<GroupsResponse> content = groupPage.getContent()
                 .stream()
@@ -56,7 +67,7 @@ public class GroupService {
             editGroup.setIsActive(request.getIsActive());
             return groupRepository.save(editGroup);
         } else {
-            throw new RuntimeException("Group not found with id: " + id);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found with id: " + id);
         }
     }
     public boolean deleteGroup(Long id) {

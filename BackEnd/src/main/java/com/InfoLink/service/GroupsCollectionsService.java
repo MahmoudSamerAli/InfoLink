@@ -8,6 +8,8 @@ import com.InfoLink.model.Groups;
 import com.InfoLink.model.GroupsCollections;
 import com.InfoLink.repository.GroupRepository;
 import com.InfoLink.repository.GroupsCollectionsRepository;
+import com.InfoLink.repository.SearchMappingRepository;
+import com.InfoLink.model.SearchMapping;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.csv.CSVFormat;
@@ -30,15 +32,18 @@ public class GroupsCollectionsService {
     private final GroupsCollectionsRepository repo;
     private final GroupRepository groupsRepository;
     private final MongoTemplate mongoTemplate;
+    private final SearchMappingRepository searchMappingRepository;
     private static final int MAX_RECORDS = 50_000;
 
 
     public GroupsCollectionsService(GroupsCollectionsRepository repo,
                                      GroupRepository groupsRepository,
-                                     MongoTemplate mongoTemplate) {
+                                     MongoTemplate mongoTemplate,
+                                     SearchMappingRepository searchMappingRepository) {
         this.repo = repo;
         this.groupsRepository = groupsRepository;
         this.mongoTemplate = mongoTemplate;
+        this.searchMappingRepository = searchMappingRepository;
     }
 
     public List<GroupsCollections> getCollectionsForGroup(Long groupId) {
@@ -48,6 +53,13 @@ public class GroupsCollectionsService {
     public GroupsCollections getCollectionForGroup(String collectionName, Groups group) {
         return repo.findByCollectionNameAndGroup(collectionName, group)
                    .orElseThrow(() -> new RuntimeException("Collection not accessible for this group"));
+    }
+
+    public List<String> getCommonFields() {
+        return searchMappingRepository.findByCommonTrue().stream()
+                .map(SearchMapping::getFieldName)
+                .distinct()
+                .toList();
     }
 
     public List<GroupsCollections> getGroupsForCollection(String collectionName) {

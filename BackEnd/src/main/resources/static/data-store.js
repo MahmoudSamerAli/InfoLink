@@ -37,9 +37,21 @@ const InfoLinkStore = (() => {
     if (!localStorage.getItem(GROUPS_KEY)) {
       localStorage.setItem(GROUPS_KEY, JSON.stringify(DEFAULT_GROUPS));
     }
-    // Ensure users array exists
-    if (!localStorage.getItem(USERS_KEY)) {
-      localStorage.setItem(USERS_KEY, JSON.stringify([]));
+    // Ensure users array exists and is seeded with a default standard user if empty
+    if (!localStorage.getItem(USERS_KEY) || JSON.parse(localStorage.getItem(USERS_KEY) || '[]').length === 0) {
+      const defaultUsers = [
+        {
+          id: 1,
+          username: 'user',
+          password: '123',
+          fullname: 'Abdelrahman Mostafa',
+          role: 'user',
+          groups: ['HR', 'Contracts'],
+          status: 'Active',
+          created: 'May 12, 2025'
+        }
+      ];
+      localStorage.setItem(USERS_KEY, JSON.stringify(defaultUsers));
     }
     // Ensure logs array exists
     if (!localStorage.getItem(LOGS_KEY)) {
@@ -265,16 +277,19 @@ const InfoLinkStore = (() => {
       fullname: sessionStorage.getItem('infolink_fullname') || '',
       role:     sessionStorage.getItem('infolink_role') || '',
       group:    sessionStorage.getItem('infolink_group') || '',
+      groupID:  sessionStorage.getItem('infolink_group_id') || '',
       groups,
     };
   }
 
   function setSession(user) {
-    const role = user.role.toLowerCase() === 'admin' ? 'admin' : 'user';
+    const normalizedRole = (user.role || '').toLowerCase();
+    const role = normalizedRole === 'admin' || normalizedRole === 'sysadmin' ? normalizedRole : 'user';
     sessionStorage.setItem('infolink_role',      role);
     sessionStorage.setItem('infolink_user',      user.username);
     sessionStorage.setItem('infolink_fullname',  user.name || user.fullname || user.username);
     sessionStorage.setItem('infolink_group',     user.group || '');
+    if (user.groupID != null) sessionStorage.setItem('infolink_group_id', user.groupID);
     // Support multi-group: store comma-separated list
     const groups = Array.isArray(user.groups) ? user.groups : (user.group ? [user.group] : []);
     sessionStorage.setItem('infolink_groups',    groups.join(','));
@@ -298,7 +313,89 @@ const InfoLinkStore = (() => {
   }
 
   function isAdmin() {
-    return sessionStorage.getItem('infolink_role') === 'admin';
+    const role = sessionStorage.getItem('infolink_role');
+    return role === 'admin' || role === 'sysadmin';
+  }
+
+  async function apiFetch(path, options = {}, retry = true) {
+    const headers = new Headers(options.headers || {});
+    const accessToken = sessionStorage.getItem('infolink_access_token');
+    if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`);
+    if (options.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+    const response = await fetch(path, { ...options, headers });
+    const refreshToken = sessionStorage.getItem('infolink_refresh_token');
+    if (response.status === 401 && retry && refreshToken) {
+      const refreshResponse = await fetch('/auth/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken })
+      });
+      if (refreshResponse.ok) {
+        const tokens = await refreshResponse.json();
+        sessionStorage.setItem('infolink_access_token', tokens.accessToken);
+        sessionStorage.setItem('infolink_refresh_token', tokens.refreshToken);
+        return apiFetch(path, options, false);
+      }
+    }
+    return response;
+  }
+
+  async function apiRequest(path, options = {}) {
+    const response = await apiFetch(path, options);
+    const text = await response.text();
+    let body = null;
+    try { body = text ? JSON.parse(text) : null; } catch (_) { body = text; }
+    if (!response.ok) {
+      const message = body && typeof body === 'object'
+        ? Object.values(body).join(' ')
+        : body;
+      throw new Error(message || `Request failed (${response.status}).`);
+    }
+    return body;
+  }
+
+  function showToast(message, type = 'error') {
+    let toast = document.getElementById('infolink-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'infolink-toast';
+      toast.style.cssText = 'position:fixed;right:24px;bottom:24px;z-index:1000;max-width:380px;padding:14px 18px;border:1px solid var(--border);border-radius:10px;background:var(--bg-card);box-shadow:0 8px 28px rgba(0,0,0,.25);font:600 .85rem Inter,sans-serif;transition:opacity .2s;';
+      document.body.appendChild(toast);
+    }
+    toast.style.color = type === 'success' ? 'var(--success)' : 'var(--danger)';
+    toast.textContent = message;
+    toast.style.opacity = '1';
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => { toast.style.opacity = '0'; }, 4200);
+  }
+
+  async function login(username, password) {
+    const response = await fetch('/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    if (!response.ok) throw new Error('Invalid username or password.');
+    const tokens = await response.json();
+    sessionStorage.setItem('infolink_access_token', tokens.accessToken);
+    sessionStorage.setItem('infolink_refresh_token', tokens.refreshToken);
+    const profileResponse = await apiFetch('/users/profile');
+    if (!profileResponse.ok) throw new Error('Unable to load user profile.');
+    const profile = await profileResponse.json();
+    setSession({
+      username: profile.username,
+      name: profile.fullName,
+      role: profile.role,
+      group: profile.groupName,
+      groupID: profile.groupID
+    });
+  }
+
+  async function changePassword(currentPassword, newPassword, confirmPassword) {
+    await apiRequest('/users/change-password', {
+      method: 'POST',
+      body: JSON.stringify({ currentPassword, newPassword, confirmPassword })
+    });
   }
 
   // Initialize on load
@@ -341,6 +438,11 @@ const InfoLinkStore = (() => {
     clearSession,
     isLoggedIn,
     isAdmin,
+    apiFetch,
+    apiRequest,
+    showToast,
+    login,
+    changePassword,
   };
 
 })();

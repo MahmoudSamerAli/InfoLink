@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="shared.css"/>
   <style>
-    /* ── Toolbar ── */
+    /* -- Toolbar -- */
     .toolbar {
       display: flex;
       align-items: center;
@@ -37,7 +37,7 @@
     .search-input::placeholder { color: var(--text-secondary); }
     .search-input:focus { border-color: var(--accent); }
 
-    /* ── Groups grid ── */
+    /* -- Groups grid -- */
     .groups-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -142,7 +142,7 @@
     .user-count-badge:hover { background: rgba(59,130,246,0.2); }
     .user-count-badge svg { width: 11px; height: 11px; }
 
-    /* ── Summary bar ── */
+    /* -- Summary bar -- */
     .summary-bar {
       display: flex; gap: 20px; align-items: center;
       margin-bottom: 20px;
@@ -158,7 +158,7 @@
     .dot-inactive { background: var(--danger);  box-shadow: 0 0 6px var(--danger); }
     .summary-count { font-weight: 700; color: var(--text-primary); }
 
-    /* ── Filter pills ── */
+    /* -- Filter pills -- */
     .filter-pills { display: flex; gap: 6px; }
     .filter-pill {
       background: var(--bg-input); border: 1px solid var(--border);
@@ -205,7 +205,7 @@
     .modal-input:focus { border-color: var(--accent); }
     .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
 
-    /* ── Multi-select dropdown ── */
+    /* -- Multi-select dropdown -- */
     .multiselect-wrap { position: relative; }
     .multiselect-trigger {
       width: 100%; background: var(--bg-input); border: 1px solid var(--border);
@@ -291,18 +291,10 @@
 <body>
 <div class="app">
 
-  <!-- ── SIDEBAR ── -->
+  <!-- -- SIDEBAR -- -->
   <aside class="sidebar">
     <div class="sidebar-logo">
-      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M10 8C10 8 14 8 16 12C18 16 22 16 22 16" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"/>
-        <path d="M10 16C10 16 14 16 16 20C18 24 22 24 22 24" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round"/>
-        <circle cx="10" cy="8"  r="2.5" fill="#7c3aed"/>
-        <circle cx="22" cy="16" r="2.5" fill="#7c3aed"/>
-        <circle cx="10" cy="16" r="2.5" fill="#a78bfa"/>
-        <circle cx="22" cy="24" r="2.5" fill="#a78bfa"/>
-      </svg>
-      <span class="sidebar-logo-text">InfoLink</span>
+      <img src="infolink-logo.png" alt="InfoLink" class="sidebar-logo-img" style="height:38px;object-fit:contain;max-width:160px;">
     </div>
 
     <nav class="sidebar-nav">
@@ -358,6 +350,24 @@
         </svg>
         Change Password
       </a>
+      <div class="nav-section-label">Tools</div>
+
+      <a href="processor.html" class="nav-item" id="nav-processor">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/>
+          <rect x="3" y="17" width="18" height="4" rx="1"/>
+          <line x1="7" y1="5" x2="17" y2="5"/><line x1="7" y1="12" x2="14" y2="12"/>
+        </svg>
+        Column Mapping
+      </a>
+
+      <a href="convert.html" class="nav-item" id="nav-convert">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+        Converter
+      </a>
     </nav>
 
     <div class="sidebar-user">
@@ -379,7 +389,7 @@
     </div>
   </aside>
 
-  <!-- ── MAIN ── -->
+  <!-- -- MAIN -- -->
   <div class="main">
 
     <header class="topbar">
@@ -454,11 +464,11 @@
     <div class="modal-title" id="modal-title">Edit Group</div>
     <div class="modal-field">
       <label class="modal-label">Group Name</label>
-      <input class="modal-input" id="modal-name" type="text" placeholder="Group name"/>
+      <input class="modal-input" id="modal-name" type="text" placeholder="Group name" minlength="2" maxlength="30" pattern="[a-zA-Z_]+" required/>
     </div>
     <div class="modal-field">
       <label class="modal-label">Description</label>
-      <input class="modal-input" id="modal-desc" type="text" placeholder="Short description"/>
+      <input class="modal-input" id="modal-desc" type="text" placeholder="Short description" minlength="2" maxlength="100" pattern="[a-zA-Z\s]+" required/>
     </div>
     <div class="modal-field">
       <label class="modal-label">Collections</label>
@@ -527,13 +537,13 @@
   let statusFilter = 'all'; // 'all' | 'active' | 'inactive'
   let currentGroupList = [];
 
-  // ── Multi-select state ──
+  // -- Multi-select state --
   let msSelected = [];   // currently selected collection names
   let msAllOptions = []; // all known collection names
 
   function collectAllCollections() {
     const set = new Set();
-    InfoLinkStore.getGroups().forEach(g => (g.collections || []).forEach(c => set.add(c)));
+    currentGroupList.forEach(g => (g.collections || []).forEach(c => set.add(c)));
     return [...set].sort();
   }
 
@@ -613,7 +623,7 @@
     }
   });
 
-  // ── Filter pills ──
+  // -- Filter pills --
   function setFilter(f) {
     statusFilter = f;
     document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active-pill'));
@@ -672,16 +682,25 @@
     }).join('');
   }
 
-  function refreshView(query = '') {
-    const all = InfoLinkStore.getGroups();
+  async function refreshView(query = '') {
+    const params = new URLSearchParams({ page: 0, size: 100 });
+    if (query.trim()) params.set('keyword', query.trim());
+    if (statusFilter === 'active') params.set('active', 'true');
+    if (statusFilter === 'inactive') params.set('active', 'false');
+    const response = await InfoLinkStore.apiFetch(`/group?${params}`);
+    if (!response.ok) throw new Error('Unable to load groups.');
+    const data = await response.json();
+    const all = await Promise.all(data.content.map(async g => {
+      const collections = await InfoLinkStore.apiRequest(`/api/collections?groupId=${g.groupID}`);
+      return {
+        id: g.groupID,
+        name: g.groupName,
+        description: g.description,
+        collections: collections || [],
+        isActive: g.isActive
+      };
+    }));
     let filtered = all;
-    // Status filter
-    if (statusFilter === 'active')   filtered = filtered.filter(g => g.isActive);
-    if (statusFilter === 'inactive') filtered = filtered.filter(g => !g.isActive);
-    // Search filter
-    if (query) filtered = filtered.filter(g =>
-      g.name.toLowerCase().includes(query) || (g.description || '').toLowerCase().includes(query)
-    );
     renderGroups(filtered);
     const active   = all.filter(g => g.isActive).length;
     const inactive = all.length - active;
@@ -701,8 +720,8 @@
   }
 
   function openEditModal(idx) {
-    const groups = InfoLinkStore.getGroups();
-    const g = groups[idx];
+    const g = currentGroupList[idx];
+    if (!g) return;
     editingIdx   = idx;
     msAllOptions = collectAllCollections();
     // Ensure group's own collections are in the options list
@@ -716,22 +735,26 @@
   }
 
   function toggleGroup(idx) {
-    const groups = InfoLinkStore.getGroups();
-    groups[idx].isActive = !groups[idx].isActive;
-    InfoLinkStore.saveGroups(groups);
-    refreshView(document.getElementById('search-input').value.toLowerCase());
+    const g = currentGroupList[idx];
+    if (!g) return;
+    InfoLinkStore.apiRequest(`/group/${g.id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ groupName: g.name, groupDescription: g.description, isActive: !g.isActive })
+    }).then(() => refreshView(document.getElementById('search-input').value.toLowerCase()))
+      .catch(error => InfoLinkStore.showToast(error.message));
   }
 
   function deleteGroup(idx) {
-    const groups = InfoLinkStore.getGroups();
-    const g = groups[idx];
+    const g = currentGroupList[idx];
+    if (!g) return;
     const userCount = getUserCountForGroup(g.name);
     const msg = userCount > 0
       ? `Delete group "${g.name}"? It has ${userCount} user(s). Users will lose their group assignment. This cannot be undone.`
       : `Delete group "${g.name}"? This cannot be undone.`;
     if (!confirm(msg)) return;
-    InfoLinkStore.deleteGroup(g.id);
-    refreshView(document.getElementById('search-input').value.toLowerCase());
+    InfoLinkStore.apiRequest(`/group/${g.id}`, { method: 'DELETE' })
+      .then(() => refreshView(document.getElementById('search-input').value.toLowerCase()))
+      .catch(error => InfoLinkStore.showToast(error.message));
   }
 
   function openUsersModal(groupName) {
@@ -770,24 +793,42 @@
       document.getElementById('users-modal').classList.remove('open');
   });
 
-  document.getElementById('modal-save').addEventListener('click', () => {
+  document.getElementById('modal-save').addEventListener('click', async () => {
     const name = document.getElementById('modal-name').value.trim();
     const desc = document.getElementById('modal-desc').value.trim();
     const cols = [...msSelected];
 
-    if (!name) { alert('Group name is required.'); return; }
-
-    const groups = InfoLinkStore.getGroups();
-    if (editingIdx === -1) {
-      groups.push({ id: Date.now(), name, description: desc, collections: cols, isActive: true });
-    } else {
-      groups[editingIdx].name        = name;
-      groups[editingIdx].description = desc;
-      groups[editingIdx].collections = cols;
+    if (!/^[a-zA-Z_]{2,30}$/.test(name)) {
+      alert('Group name must be 2–30 characters and contain only letters or underscores.');
+      return;
     }
-    InfoLinkStore.saveGroups(groups);
-    document.getElementById('group-modal').classList.remove('open');
-    refreshView(document.getElementById('search-input').value.toLowerCase());
+    if (!/^[a-zA-Z\s]{2,100}$/.test(desc)) {
+      alert('Description must be 2–100 characters and contain only letters and spaces.');
+      return;
+    }
+
+    try {
+      const group = editingIdx === -1 ? null : currentGroupList[editingIdx];
+      await InfoLinkStore.apiRequest(group ? `/group/${group.id}` : '/group', {
+        method: group ? 'PUT' : 'POST',
+        body: JSON.stringify({ groupName: name, groupDescription: desc, isActive: group ? group.isActive : true })
+      });
+      if (group) {
+        const previous = new Set(group.collections || []);
+        const selected = new Set(cols);
+        await Promise.all([...selected]
+          .filter(collection => !previous.has(collection))
+          .map(collection => InfoLinkStore.apiRequest(`/api/collections/${encodeURIComponent(collection)}/groups/${group.id}`, { method: 'POST' })));
+        await Promise.all([...previous]
+          .filter(collection => !selected.has(collection))
+          .map(collection => InfoLinkStore.apiRequest(`/api/collections/${encodeURIComponent(collection)}/groups/${group.id}`, { method: 'DELETE' })));
+      }
+      document.getElementById('group-modal').classList.remove('open');
+      await refreshView(document.getElementById('search-input').value.toLowerCase());
+      InfoLinkStore.showToast('Group saved successfully.', 'success');
+    } catch (error) {
+      InfoLinkStore.showToast(error.message);
+    }
   });
 
   document.getElementById('search-input').addEventListener('input', function() {
@@ -795,7 +836,10 @@
   });
 
   // Initial render
-  refreshView();
+  refreshView().catch(error => {
+    document.getElementById('groups-grid').innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--danger);font-size:0.9rem;">${error.message}</div>`;
+  });
 </script>
+  <script src="3d-effects.js"></script>
 </body>
 </html>

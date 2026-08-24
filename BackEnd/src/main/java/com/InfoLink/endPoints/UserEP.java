@@ -11,6 +11,7 @@ import com.InfoLink.dto.PatchUserRequest;
 import com.InfoLink.dto.ProfileResponse;
 import com.InfoLink.dto.UsersResponse;
 import com.InfoLink.model.User;
+import com.InfoLink.model.Role;
 import com.InfoLink.security.CustomUserDetails;
 import com.InfoLink.service.UserService;
 import org.springframework.data.domain.Pageable;
@@ -32,8 +33,13 @@ public class UserEP {
         this.userService = userService;
     }
     @GetMapping
-    public PagedResponse<UsersResponse> getUsers(Pageable pageable) {
-        return userService.getUsers(pageable);
+    public PagedResponse<UsersResponse> getUsers(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Role role,
+            @RequestParam(required = false) Long groupId,
+            @RequestParam(required = false) Boolean active,
+            Pageable pageable) {
+        return userService.getUsers(keyword, role, groupId, active, pageable);
     }
     
     @GetMapping("/{id}")

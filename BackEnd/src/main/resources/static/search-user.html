@@ -1,15 +1,15 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>InfoLink – User Search</title>
+  <title>InfoLink â€“ User Search</title>
   <meta name="description" content="Search records within your assigned collections."/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="shared.css"/>
   <style>
-    /* ── Search panel ── */
+    /* â”€â”€ Search panel â”€â”€ */
     .search-panel {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -125,7 +125,7 @@
     .btn-search:active { transform: translateY(0); }
     .btn-search svg { width: 16px; height: 16px; }
 
-    /* ── Results table ── */
+    /* â”€â”€ Results table â”€â”€ */
     .results-header {
       display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 16px;
@@ -246,18 +246,10 @@
 <body>
 <div class="app">
 
-  <!-- ── SIDEBAR ── -->
+  <!-- â”€â”€ SIDEBAR â”€â”€ -->
   <aside class="sidebar">
     <div class="sidebar-logo">
-      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M10 8C10 8 14 8 16 12C18 16 22 16 22 16" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"/>
-        <path d="M10 16C10 16 14 16 16 20C18 24 22 24 22 24" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round"/>
-        <circle cx="10" cy="8" r="2.5" fill="#7c3aed"/>
-        <circle cx="22" cy="16" r="2.5" fill="#7c3aed"/>
-        <circle cx="10" cy="16" r="2.5" fill="#a78bfa"/>
-        <circle cx="22" cy="24" r="2.5" fill="#a78bfa"/>
-      </svg>
-      <span class="sidebar-logo-text">InfoLink</span>
+      <img src="infolink-logo.png" alt="InfoLink" class="sidebar-logo-img" style="height:38px;object-fit:contain;max-width:160px;">
     </div>
 
     <nav class="sidebar-nav">
@@ -286,6 +278,24 @@
         </svg>
         Change Password
       </a>
+      <div class="nav-section-label">Tools</div>
+
+      <a href="processor.html" class="nav-item" id="nav-processor">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/>
+          <rect x="3" y="17" width="18" height="4" rx="1"/>
+          <line x1="7" y1="5" x2="17" y2="5"/><line x1="7" y1="12" x2="14" y2="12"/>
+        </svg>
+        Column Mapping
+      </a>
+
+      <a href="convert.html" class="nav-item" id="nav-convert">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+        Converter
+      </a>
     </nav>
 
     <div class="sidebar-user">
@@ -307,7 +317,7 @@
     </div>
   </aside>
 
-  <!-- ── MAIN ── -->
+  <!-- â”€â”€ MAIN â”€â”€ -->
   <div class="main">
 
     <!-- Topbar -->
@@ -362,11 +372,11 @@
           <div class="form-group">
             <label class="form-label">Collection</label>
             <div class="select-wrap">
-              <select class="group-select" id="groupSelect" style="padding-right: 80px; appearance: none; -webkit-appearance: none;">
+              <select class="group-select" id="collectionSelect" style="padding-right: 80px; appearance: none; -webkit-appearance: none;">
                 <option value="dm">Digital Marketing</option>
                 <option value="it">IT Team</option>
               </select>
-              <span class="group-count" id="groupCount">2</span>
+              <span class="group-count" id="collectionCount">2</span>
               <span class="select-chevron">
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <polyline points="6 9 12 15 18 9"/>
@@ -492,7 +502,7 @@
     <div class="req-modal-sub" id="req-modal-sub">You are requesting access to <strong id="req-modal-coll"></strong>.</div>
     <div class="req-field">
       <label class="req-label">Reason for access <span style="color:var(--text-secondary);font-weight:400">(optional)</span></label>
-      <textarea class="req-textarea" id="req-reason" placeholder="Briefly explain why you need access to this collection…"></textarea>
+      <textarea class="req-textarea" id="req-reason" placeholder="Briefly explain why you need access to this collectionâ€¦"></textarea>
     </div>
     <div class="req-modal-actions">
       <button class="btn btn-outline" onclick="closeRequestModal()">Cancel</button>
@@ -520,19 +530,19 @@
 
   function handleLogout() { InfoLinkStore.clearSession(); window.location.href = 'login.html'; }
 
-  // ── Resolve user’s allowed collections from ALL their groups ──
+  // â”€â”€ Resolve userâ€™s allowed collections from ALL their groups â”€â”€
   const userGroups      = currentUser.groups && currentUser.groups.length ? currentUser.groups : (currentUser.group ? [currentUser.group] : []);
   const allowedCollections = InfoLinkStore.getGroupCollectionsForGroups(userGroups);
 
   // Populate collection dropdown
-  const groupSelect  = document.getElementById('groupSelect');
-  const groupCountEl = document.getElementById('groupCount');
+  const collectionSelect  = document.getElementById('collectionSelect');
+  const collectionCountEl = document.getElementById('collectionCount');
   if (allowedCollections.length) {
-    groupSelect.innerHTML = allowedCollections.map(c => `<option value="${c}">${c}</option>`).join('');
-    groupCountEl.textContent = allowedCollections.length;
+    collectionSelect.innerHTML = allowedCollections.map(c => `<option value="${c}">${c}</option>`).join('');
+    collectionCountEl.textContent = allowedCollections.length;
   } else {
-    groupSelect.innerHTML = `<option value="">No collections assigned</option>`;
-    groupCountEl.textContent = '0';
+    collectionSelect.innerHTML = `<option value="">No collections assigned</option>`;
+    collectionCountEl.textContent = '0';
   }
 
   // Update access notice
@@ -541,7 +551,7 @@
     noticeText.textContent = `Limited access: searching collections from ${userGroups.join(', ')}.`;
   }
 
-  // ── Access Denied state ──
+  // â”€â”€ Access Denied state â”€â”€
   let deniedCollection = '';
 
   function showAccessDenied(collectionName) {
@@ -560,7 +570,7 @@
     deniedCollection = '';
   }
 
-  // ── Request modal ──
+  // â”€â”€ Request modal â”€â”€
   function openRequestModal() {
     document.getElementById('req-modal-coll').textContent = deniedCollection;
     document.getElementById('req-reason').value = '';
@@ -592,7 +602,7 @@
     if (e.target === document.getElementById('req-modal')) closeRequestModal();
   });
 
-  // ── Search logic ──
+  // â”€â”€ Search logic â”€â”€
   const searchBtn   = document.getElementById('searchBtn');
   const searchInput = document.getElementById('searchInput');
   const resultsTitle= document.getElementById('resultsTitle');
@@ -601,9 +611,9 @@
   searchBtn.addEventListener('click', performSearch);
   searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') performSearch(); });
 
-  function performSearch() {
+  async function performSearch() {
     const kw   = searchInput.value.trim();
-    const coll = groupSelect.value;
+    const coll = collectionSelect.value;
 
     if (!kw) {
       searchInput.style.borderColor = '#ef4444';
@@ -611,39 +621,30 @@
       return;
     }
 
-    // Check if collection is allowed
-    if (coll && allowedCollections.length && !allowedCollections.includes(coll)) {
-      showAccessDenied(coll);
-      return;
-    }
-
     searchBtn.disabled = true;
-    searchBtn.innerHTML = `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="animation:spin .7s linear infinite"><circle cx="12" cy="12" r="10" stroke-opacity=".3"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Searching…`;
-
-    setTimeout(() => {
+    searchBtn.innerHTML = `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="animation:spin .7s linear infinite"><circle cx="12" cy="12" r="10" stroke-opacity=".3"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Searchingâ€¦`;
+    try {
+      const fields = await InfoLinkStore.apiRequest('/api/search/fields');
+      if (!fields.length) throw new Error('No searchable fields are configured.');
+      const query = new URLSearchParams({ collection: coll, page: 0, size: 100 });
+      fields.forEach(field => query.set(field, kw));
+      const data = await InfoLinkStore.apiRequest(`/api/search?${query}`);
       searchBtn.disabled = false;
       searchBtn.innerHTML = `<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="width:16px;height:16px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Search records`;
 
-      const collLabel = groupSelect.options[groupSelect.selectedIndex]?.text || coll;
-      const fakeCount = Math.floor(Math.random() * 20);
+      const collLabel = collectionSelect.options[collectionSelect.selectedIndex]?.text || coll;
+      const resultCount = data.totalElements;
       const now = new Date();
       const timeStr = `Today, ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
 
       resultsTitle.textContent = 'Search Results';
-
-      InfoLinkStore.addLog({
-        user:    currentUser.username || displayName,
-        group:   userGroups.join(', ') || collLabel,
-        keyword: kw,
-        status:  fakeCount > 0 ? 'Success' : 'Failed',
-      });
 
       const tr = document.createElement('tr');
       tr.classList.add('highlighted');
       tr.innerHTML = `
         <td style="color:var(--text-primary);font-weight:500">${escHtml(kw)}</td>
         <td>${escHtml(collLabel)}</td>
-        <td class="${fakeCount > 0 ? 'positive' : 'zero'}">${fakeCount}</td>
+        <td class="${resultCount > 0 ? 'positive' : 'zero'}">${resultCount}</td>
         <td>${timeStr}</td>
         <td><button class="search-again-btn">Search again</button></td>
       `;
@@ -653,12 +654,17 @@
         searchInput.value = kw;
         performSearch();
       });
-    }, 900);
+    } catch (error) {
+      InfoLinkStore.showToast(error.message);
+    } finally {
+      searchBtn.disabled = false;
+      searchBtn.innerHTML = `<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="width:16px;height:16px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Search records`;
+    }
   }
 
   document.querySelectorAll('.search-again-btn').forEach(btn => {
     btn.addEventListener('click', function() {
-      const kw = this.closest('tr').querySelector('td:first-child').textContent.replace(/•+/g, '').trim();
+      const kw = this.closest('tr').querySelector('td:first-child').textContent.replace(/â€¢+/g, '').trim();
       searchInput.value = kw;
       performSearch();
     });
