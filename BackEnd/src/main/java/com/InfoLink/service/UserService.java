@@ -6,11 +6,13 @@ import java.util.stream.Collectors;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.InfoLink.dto.AddUserRequest;
+import com.InfoLink.dto.ChangePasswordRequest;
 import com.InfoLink.dto.PatchUserRequest;
 import com.InfoLink.dto.UsersResponse;
 import com.InfoLink.model.Groups;
@@ -18,6 +20,7 @@ import com.InfoLink.model.Role;
 import com.InfoLink.model.User;
 import com.InfoLink.repository.GroupRepository;
 import com.InfoLink.repository.UserRepository;
+import com.InfoLink.security.CustomUserDetails;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
@@ -135,6 +138,26 @@ public class UserService {
             .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
         ensureCanManageUser(user);
         userRepository.deleteById(id);
+    }
+
+    public void changePassword(ChangePasswordRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userRepository.findById(userDetails.getUser().getUserID())
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new BadCredentialsException("Current password is incorrect");
+        }
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new IllegalArgumentException("New password and confirmation do not match");
+        }
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("New password must be different from the current password");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
     }
 
     private void ensureCanManageUser(User user) {

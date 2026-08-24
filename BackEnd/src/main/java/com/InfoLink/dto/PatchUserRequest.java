@@ -13,8 +13,8 @@ public class PatchUserRequest {
 
     @Size(min = 8, max = 30, message = "Password must be between 8 and 30 characters")
     @Pattern(
-        regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).+$",
-        message = "Password must contain upper, lower, digit, and special character"
+        regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).{8,16}$",
+        message = "Password must contain upper, lower, digit, and special character and between 8 and 16 characters"
     )
     private String password;
 
