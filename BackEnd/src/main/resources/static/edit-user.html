@@ -307,7 +307,7 @@
           <!-- National ID + Address -->
           <div class="field-row">
             <div class="field-group">
-              <label class="field-label" for="national-id">National ID <span style="color:var(--danger);font-size:.75rem">*</span></label>
+              <label class="field-label" for="national-id">National ID</label>
               <div class="input-wrap">
                 <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                   <rect x="2" y="5" width="20" height="14" rx="2"/>
@@ -315,7 +315,7 @@
                   <line x1="6" y1="15" x2="10" y2="15"/>
                   <line x1="14" y1="15" x2="18" y2="15"/>
                 </svg>
-                <input id="national-id" type="text" class="field-input" placeholder="14-digit national ID" maxlength="14" autocomplete="off" oninput="validateNationalId(this)" style="padding-right:44px"/>
+                <input id="national-id" type="text" class="field-input" placeholder="Not stored by the backend" maxlength="14" autocomplete="off" disabled style="padding-right:44px"/>
                 <span class="id-counter" id="id-counter">0/14</span>
               </div>
               <div class="field-error" id="id-error">
@@ -341,7 +341,7 @@
           <div class="field-row">
             <div class="field-group">
               <label class="field-label" for="role-select">Role</label>
-              <select id="role-select" class="field-select" onchange="updatePermSummary()">
+              <select id="role-select" class="field-select" onchange="handleRoleChange()">
                 <option value="User" selected>User</option>
                 <option value="Admin">Admin</option>
               </select>
@@ -350,17 +350,8 @@
 
           <div class="field-row full">
             <div class="field-group">
-              <label class="field-label">Groups <span class="optional">(select one or more)</span></label>
-              <div class="mg-wrap" id="mg-wrap">
-                <button type="button" class="mg-trigger" id="mg-trigger" onclick="event.stopPropagation();toggleMgDropdown()">
-                  <span class="mg-trigger-text" id="mg-display"><span class="mg-placeholder">Select groups…</span></span>
-                  <svg class="mg-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-                </button>
-                <div class="mg-dropdown" id="mg-dropdown">
-                  <input type="text" class="mg-search" id="mg-search" placeholder="Search groups…" oninput="renderMgOptions(this.value)" autocomplete="off"/>
-                  <div id="mg-options-list"></div>
-                </div>
-              </div>
+              <label class="field-label" for="group-select">Group</label>
+              <select id="group-select" class="field-select" onchange="updatePermSummary()"></select>
             </div>
           </div>
 
@@ -417,7 +408,7 @@
               <span class="perm-val" id="perm-role">User</span>
             </div>
             <div class="perm-row">
-              <span class="perm-key">Assigned groups</span>
+                <span class="perm-key">Assigned group</span>
               <span class="perm-val" id="perm-group">—</span>
             </div>
           </div>
@@ -434,7 +425,7 @@
             </div>
             <div class="warn-text">
               <strong>Important</strong><br/>
-              Collections are inherited from all assigned groups combined.
+              Collections are inherited from the assigned group.
             </div>
           </div>
           <!-- Access Requests for this user -->
@@ -456,7 +447,7 @@
 
   const currentUser = InfoLinkStore.getCurrentUser();
   const dName = currentUser.fullname || currentUser.username || 'Admin';
-  const dRole = currentUser.role === 'admin' ? 'System Administrator' : 'User';
+  const dRole = InfoLinkStore.isAdmin() ? 'System Administrator' : 'User';
   const dInit = dName.charAt(0).toUpperCase();
   document.querySelector('.sidebar-user .user-name').textContent = dName;
   document.querySelector('.sidebar-user .user-role').textContent = dRole;
@@ -469,94 +460,23 @@
 
   // -- Load target user --
   const params   = new URLSearchParams(window.location.search);
-  const idx      = parseInt(params.get('idx'));
   const targetId = parseInt(params.get('id'));
-  const ALL_USERS = InfoLinkStore.getUsers();
-  let targetUser = (!isNaN(targetId) ? null : ((!isNaN(idx) && ALL_USERS[idx]) ? ALL_USERS[idx] : null));
+  let targetUser = null;
 
-  // -- Multi-group picker state --
-  let mgSelected  = [];  // selected group names
-  let mgAllGroups = [];  // all active group names
+  let groupOptions = [];
+  let selectedGroupId = null;
 
-  function initMgGroups() {
-    mgAllGroups = InfoLinkStore.getGroups().filter(g => g.isActive).map(g => g.name);
-    renderMgOptions('');
-  }
-
-  function renderMgOptions(q) {
-    const list = document.getElementById('mg-options-list');
-    const filtered = q ? mgAllGroups.filter(n => n.toLowerCase().includes(q.toLowerCase())) : mgAllGroups;
-    if (!filtered.length) {
-      list.innerHTML = `<div style="padding:10px 14px;color:var(--text-secondary);font-size:.84rem;">No groups found.</div>`;
-      return;
+  async function loadGroups() {
+    const data = await InfoLinkStore.apiRequest('/group?page=0&size=100');
+    groupOptions = (data.content || []).filter(group => group.isActive || group.groupID === 1);
+    const select = document.getElementById('group-select');
+    select.innerHTML = groupOptions.map(group =>
+      `<option value="${group.groupID}">${group.groupName}</option>`).join('');
+    if (targetUser && targetUser.groupID != null) {
+      selectedGroupId = targetUser.groupID;
+      select.value = String(selectedGroupId);
     }
-    list.innerHTML = filtered.map(name => {
-      const sel = mgSelected.includes(name);
-      const safe = name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-      return `<div class="mg-option ${sel ? 'selected' : ''}" onclick="event.stopPropagation();toggleMgOption('${safe}')"><span class="mg-cb"></span><span>${name}</span></div>`;
-    }).join('');
-  }
-
-  function updateMgTrigger() {
-    const el = document.getElementById('mg-display');
-    if (!mgSelected.length) {
-      el.innerHTML = `<span class="mg-placeholder">Select groups…</span>`;
-    } else {
-      el.innerHTML = `<div class="mg-selected-tags">${mgSelected.map(s => `<span class="mg-tag">${s}</span>`).join('')}</div>`;
-    }
-    updatePermSummary();
-  }
-
-  function toggleMgOption(name) {
-    const i = mgSelected.indexOf(name);
-    if (i === -1) mgSelected.push(name); else mgSelected.splice(i, 1);
-    updateMgTrigger();
-    renderMgOptions(document.getElementById('mg-search').value);
-  }
-
-  function toggleMgDropdown() {
-    const trigger  = document.getElementById('mg-trigger');
-    const dropdown = document.getElementById('mg-dropdown');
-    const open = dropdown.classList.toggle('open');
-    trigger.classList.toggle('open', open);
-    if (open) { document.getElementById('mg-search').value = ''; renderMgOptions(''); document.getElementById('mg-search').focus(); }
-  }
-
-  document.addEventListener('click', e => {
-    const wrap = document.getElementById('mg-wrap');
-    if (wrap && !wrap.contains(e.target)) {
-      document.getElementById('mg-dropdown').classList.remove('open');
-      document.getElementById('mg-trigger').classList.remove('open');
-    }
-  });
-
-  // -- Populate & pre-fill --
-  initMgGroups();
-  if (targetUser) {
-    document.getElementById('full-name').value = targetUser.name;
-    document.getElementById('username').value  = targetUser.username;
-    document.getElementById('email').value     = targetUser.email || '';
-    document.getElementById('phone').value     = targetUser.phone || '';
-    document.getElementById('role-select').value = targetUser.role;
-    // Support legacy single-group AND new multi-group
-    mgSelected = Array.isArray(targetUser.groups) && targetUser.groups.length
-      ? [...targetUser.groups]
-      : (targetUser.group ? [targetUser.group] : []);
-    updateMgTrigger();
-    // National ID + Address
-    const niInput = document.getElementById('national-id');
-    niInput.value = targetUser.nationalId || '';
-    if (niInput.value) {
-      const len = niInput.value.length;
-      const counter = document.getElementById('id-counter');
-      counter.textContent = `${len}/14`;
-      counter.className   = 'id-counter' + (len === 14 ? ' full' : '');
-    }
-    document.getElementById('address').value = targetUser.address || '';
-    if (targetUser.status === 'Inactive') {
-      document.getElementById('status-toggle').checked = false;
-      document.getElementById('toggle-label').textContent = 'Inactive';
-    }
+    handleRoleChange();
   }
 
   if (!isNaN(targetId)) {
@@ -566,23 +486,35 @@
         document.getElementById('full-name').value = user.fullName || '';
         document.getElementById('username').value = user.username || '';
         document.getElementById('role-select').value = user.role || 'USER';
-        mgSelected = user.groupName ? [user.groupName] : [];
-        updateMgTrigger();
+        selectedGroupId = user.groupID;
+        loadGroups();
         document.getElementById('status-toggle').checked = Boolean(user.isActive);
         updateToggleLabel();
       })
       .catch(error => InfoLinkStore.showToast(error.message));
   }
 
+  if (isNaN(targetId)) {
+    InfoLinkStore.showToast('A backend user ID is required to edit a user.');
+  } else {
+    loadGroups().catch(error => InfoLinkStore.showToast(error.message));
+  }
+
   // -- Permission summary --
   function updatePermSummary() {
     const role = document.getElementById('role-select').value;
-    const cols = InfoLinkStore.getGroupCollectionsForGroups(mgSelected);
+    const selectedGroup = groupOptions.find(group => String(group.groupID) === String(document.getElementById('group-select').value));
     document.getElementById('perm-role').textContent  = role;
-    document.getElementById('perm-group').textContent = mgSelected.length ? mgSelected.join(', ') : '—';
-    document.getElementById('coll-tags').innerHTML = cols.length
-      ? cols.map(c => `<span class="coll-tag">${c}</span>`).join('')
-      : `<span style="font-size:.8rem;color:var(--text-secondary);">None</span>`;
+    document.getElementById('perm-group').textContent = selectedGroup ? selectedGroup.groupName : '—';
+    document.getElementById('coll-tags').innerHTML = '<span class="coll-tag">Inherited from group</span>';
+  }
+
+  function handleRoleChange() {
+    const isAdminRole = document.getElementById('role-select').value.toUpperCase() === 'ADMIN';
+    const groupSelect = document.getElementById('group-select');
+    if (isAdminRole) groupSelect.value = '1';
+    groupSelect.disabled = isAdminRole;
+    updatePermSummary();
   }
 
   function updateToggleLabel() {
@@ -622,14 +554,6 @@
 
   function resolveReq(id, action) {
     InfoLinkStore.resolveRequest(id, action);
-    if (action === 'approved') {
-      // Reload user groups from store
-      const updated = InfoLinkStore.getUsers().find(u => u.username === targetUser.username);
-      if (updated) {
-        mgSelected = Array.isArray(updated.groups) ? [...updated.groups] : (updated.group ? [updated.group] : []);
-        updateMgTrigger();
-      }
-    }
     loadRequestsForUser();
   }
 
@@ -637,7 +561,7 @@
     const newPass = prompt('Enter new password for this user:');
     if (newPass && newPass.trim() && targetUser) {
       if (newPass.length < 8 || newPass.length > 16 || !/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,16}/.test(newPass)) {
-        alert('Password must be 8–16 characters and include upper- and lowercase letters, a number, and a symbol.');
+        InfoLinkStore.showToast('Password must be 8–16 characters and include upper- and lowercase letters, a number, and a symbol.');
         return;
       }
       if (!isNaN(targetId)) {
@@ -673,25 +597,15 @@
   async function handleSave() {
     const fullName = document.getElementById('full-name').value.trim();
     const username = document.getElementById('username').value.trim();
-    const nationalId = document.getElementById('national-id').value.trim();
     if (fullName.length < 3 || fullName.length > 100 || !/^[a-zA-Z\s]+$/.test(fullName)) {
-      alert('Full name must be 3–100 characters and contain only letters and spaces.');
+      InfoLinkStore.showToast('Full name must be 3–100 characters and contain only letters and spaces.');
       return;
     }
     if (username.length < 4 || username.length > 30 || !/^[a-zA-Z0-9_.]+$/.test(username)) {
-      alert('Username must be 4–30 characters and contain only letters, numbers, underscores, or dots.');
+      InfoLinkStore.showToast('Username must be 4–30 characters and contain only letters, numbers, underscores, or dots.');
       return;
     }
-    // Validate national ID only if filled in
-    if (nationalId && !/^\d{14}$/.test(nationalId)) {
-      const inp = document.getElementById('national-id');
-      inp.classList.add('invalid');
-      document.getElementById('id-error').classList.add('visible');
-      inp.focus();
-      alert('Invalid National ID — must be exactly 14 digits.');
-      return;
-    }
-    if (!isNaN(targetId)) {
+    if (!isNaN(targetId) && targetUser) {
       try {
         await InfoLinkStore.apiRequest(`/users/${targetId}`, {
           method: 'PATCH',
@@ -699,7 +613,7 @@
             username,
             fullName,
             role: document.getElementById('role-select').value.toUpperCase(),
-            groupID: targetUser.groupID,
+            groupID: Number(document.getElementById('group-select').value),
             isActive: document.getElementById('status-toggle').checked
           })
         });
@@ -710,21 +624,7 @@
       }
       return;
     }
-    if (!isNaN(idx) && ALL_USERS[idx]) {
-      ALL_USERS[idx].name       = document.getElementById('full-name').value.trim();
-      ALL_USERS[idx].username   = document.getElementById('username').value.trim();
-      ALL_USERS[idx].email      = document.getElementById('email').value.trim();
-      ALL_USERS[idx].phone      = document.getElementById('phone').value.trim();
-      ALL_USERS[idx].nationalId = nationalId;
-      ALL_USERS[idx].address    = document.getElementById('address').value.trim();
-      ALL_USERS[idx].role       = document.getElementById('role-select').value;
-      ALL_USERS[idx].groups     = [...mgSelected];
-      ALL_USERS[idx].group      = mgSelected[0] || '';  // legacy compat
-      ALL_USERS[idx].status     = document.getElementById('status-toggle').checked ? 'Active' : 'Inactive';
-      InfoLinkStore.saveUsers(ALL_USERS);
-    }
-    alert('Changes saved successfully!');
-    window.location.href = 'users.html';
+    InfoLinkStore.showToast('The user record is not available for editing.');
   }
 
   // Init

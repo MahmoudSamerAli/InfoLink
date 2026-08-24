@@ -485,7 +485,7 @@
   // Show logged-in user info
   const currentUser = InfoLinkStore.getCurrentUser();
   const displayName = currentUser.fullname || currentUser.username || 'Admin';
-  const displayRole = currentUser.role === 'admin' ? 'System Administrator' : 'User';
+  const displayRole = InfoLinkStore.isAdmin() ? 'System Administrator' : 'User';
   const displayInitial = displayName.charAt(0).toUpperCase();
 
   document.querySelector('.sidebar-user .user-name').textContent = displayName;
@@ -497,16 +497,16 @@
 
   async function loadDashboard() {
     try {
-      const [users, groups, logs] = await Promise.all([
+      const [users, groups, logs, logsToday] = await Promise.all([
         InfoLinkStore.apiRequest('/users?page=0&size=1'),
-        InfoLinkStore.apiRequest('/group?page=0&size=100'),
-        InfoLinkStore.apiRequest('/logs?page=0&size=4')
+        InfoLinkStore.apiRequest('/group?active=true&page=0&size=1'),
+        InfoLinkStore.apiRequest('/logs?page=0&size=4'),
+        InfoLinkStore.apiRequest('/logs/today/count')
       ]);
       document.getElementById('stat-total-users').textContent = users.totalElements;
-      document.getElementById('stat-active-groups').textContent = (groups.content || []).filter(g => g.isActive).length;
-      const today = new Date().toDateString();
+      document.getElementById('stat-active-groups').textContent = groups.totalElements;
       const recentLogs = logs.content || [];
-      document.getElementById('stat-searches-today').textContent = recentLogs.filter(l => l.searchDate && new Date(l.searchDate).toDateString() === today).length;
+      document.getElementById('stat-searches-today').textContent = logsToday;
       const logsBody = document.getElementById('recent-logs-body');
       logsBody.innerHTML = recentLogs.length ? recentLogs.map(l => `<tr>
         <td style="color:var(--text-primary);font-weight:500">${escHtml(l.username || 'Unknown')}</td>

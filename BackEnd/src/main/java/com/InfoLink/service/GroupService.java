@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.InfoLink.dto.AddGroupRequest;
 import com.InfoLink.dto.GroupsResponse;
@@ -19,8 +20,10 @@ import com.InfoLink.repository.GroupRepository;
 @Service
 public class GroupService {
     private final GroupRepository groupRepository;
-    public GroupService(GroupRepository groupRepository) {
+    private final GroupsCollectionsService groupsCollectionsService;
+    public GroupService(GroupRepository groupRepository, GroupsCollectionsService groupsCollectionsService) {
         this.groupRepository = groupRepository;
+        this.groupsCollectionsService = groupsCollectionsService;
     }
     public PagedResponse<GroupsResponse> getGroups(Pageable pageable) {
         return getGroups(null, null, pageable);
@@ -51,13 +54,19 @@ public class GroupService {
                 groupPage.getTotalElements()
         );
     }
+    @Transactional
     public Groups save(AddGroupRequest group) {
         Groups newGroup = new Groups();
         newGroup.setGroupName(group.getGroupName());
         newGroup.setGroupDescription(group.getGroupDescription());
         newGroup.setIsActive(group.getIsActive());
-        return groupRepository.save(newGroup);
+        Groups savedGroup = groupRepository.save(newGroup);
+        if (group.getCollections() != null) {
+            groupsCollectionsService.synchronizeGroupCollections(savedGroup, group.getCollections());
+        }
+        return savedGroup;
     }
+    @Transactional
     public Groups updateGroup(Long id, AddGroupRequest request) {
         Optional<Groups> existing = groupRepository.findById(id);
         if (existing.isPresent()) {
@@ -65,7 +74,11 @@ public class GroupService {
             editGroup.setGroupName(request.getGroupName());
             editGroup.setGroupDescription(request.getGroupDescription());
             editGroup.setIsActive(request.getIsActive());
-            return groupRepository.save(editGroup);
+            Groups updatedGroup = groupRepository.save(editGroup);
+            if (request.getCollections() != null) {
+                groupsCollectionsService.synchronizeGroupCollections(updatedGroup, request.getCollections());
+            }
+            return updatedGroup;
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found with id: " + id);
         }

@@ -662,7 +662,7 @@
   // Show logged-in user info
   const currentUser = InfoLinkStore.getCurrentUser();
   const displayName = currentUser.fullname || currentUser.username || 'User';
-  const displayRole = currentUser.role === 'admin' ? 'System Administrator' : 'User';
+  const displayRole = InfoLinkStore.isAdmin() ? 'System Administrator' : 'User';
   const displayInitial = displayName.charAt(0).toUpperCase();
   const userGroup = currentUser.group || 'No Group';
 
@@ -695,16 +695,19 @@
     }
   }
 
-  // Dynamic stats
-  document.getElementById('searchesToday').textContent = InfoLinkStore.getTodayLogCountForUser(currentUser.username);
   document.getElementById('lastLogin').textContent     = InfoLinkStore.getLoginTime();
 
-  // Successful searches count
-  const userLogs = InfoLinkStore.getLogsForUser(currentUser.username);
-  const successCount = userLogs.filter(l => l.status !== 'Failed').length;
-  const successEl = document.querySelector('.stat-value:nth-of-type(3)');
-  // Update via ID is safer:
-  document.querySelectorAll('.stat-value')[2] && (document.querySelectorAll('.stat-value')[2].textContent = successCount);
+  Promise.all([
+    InfoLinkStore.apiRequest('/logs/me?page=0&size=100'),
+    InfoLinkStore.apiRequest('/logs/me/today/count'),
+    InfoLinkStore.apiRequest('/logs/me/success/count')
+  ])
+    .then(([data, todayCount, successCount]) => {
+      const userLogs = data.content || [];
+      document.getElementById('searchesToday').textContent = todayCount;
+      document.querySelectorAll('.stat-value')[2] && (document.querySelectorAll('.stat-value')[2].textContent = successCount);
+    })
+    .catch(error => InfoLinkStore.showToast(error.message));
 
   // Logout handler
   function handleLogout() {

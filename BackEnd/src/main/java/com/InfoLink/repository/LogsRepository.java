@@ -7,8 +7,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.InfoLink.model.Log;
+import java.time.LocalDateTime;
 
 public interface LogsRepository extends JpaRepository<Log, Long> {
+
+    Page<Log> findByUser_Username(String username, Pageable pageable);
+
+    long countBySearchDateBetween(LocalDateTime start, LocalDateTime end);
+
+    long countByUser_UsernameAndSearchDateBetween(String username, LocalDateTime start, LocalDateTime end);
+
+    long countByUser_UsernameAndStatusTrue(String username);
 
     @Query("SELECT l FROM Log l " +
            "WHERE LOWER(l.searchKeyword) LIKE LOWER(CONCAT('%', :keyword, '%')) " +

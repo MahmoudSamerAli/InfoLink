@@ -519,7 +519,7 @@
   // Show logged-in user
   const cu = InfoLinkStore.getCurrentUser();
   const dName = cu.fullname || cu.username || 'Admin';
-  const dRole = cu.role === 'admin' ? 'System Administrator' : 'User';
+  const dRole = InfoLinkStore.isAdmin() ? 'System Administrator' : 'User';
   const dInit = dName.charAt(0).toUpperCase();
   document.querySelector('.sidebar-user .user-name').textContent = dName;
   document.querySelector('.sidebar-user .user-role').textContent = dRole;
@@ -631,10 +631,6 @@
     refreshView(document.getElementById('search-input').value.toLowerCase());
   }
 
-  function getUserCountForGroup(groupName) {
-    return InfoLinkStore.getUsers().filter(u => u.group === groupName).length;
-  }
-
   function renderGroups(list) {
     currentGroupList = list;
     const grid = document.getElementById('groups-grid');
@@ -643,7 +639,7 @@
       return;
     }
     grid.innerHTML = list.map((g, i) => {
-      const userCount = getUserCountForGroup(g.name);
+      const userCount = g.userCount || 0;
       return `
       <div class="group-card">
         <div class="group-card-header">
@@ -664,7 +660,7 @@
           ${(g.collections || []).map(c => `<span class="coll-tag">${c}</span>`).join('')}
         </div>
         <div class="group-card-footer">
-          <button class="user-count-badge" onclick="openUsersModal('${g.name.replace(/'/g, "\\'")}')"> 
+          <button class="user-count-badge" onclick="openUsersModal('${g.name.replace(/'/g, "\\'")}', ${g.id})">
             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
             </svg>
@@ -691,12 +687,16 @@
     if (!response.ok) throw new Error('Unable to load groups.');
     const data = await response.json();
     const all = await Promise.all(data.content.map(async g => {
-      const collections = await InfoLinkStore.apiRequest(`/api/collections?groupId=${g.groupID}`);
+      const [collections, users] = await Promise.all([
+        InfoLinkStore.apiRequest(`/api/collections?groupId=${g.groupID}`),
+        InfoLinkStore.apiRequest(`/users?groupId=${g.groupID}&page=0&size=1`)
+      ]);
       return {
         id: g.groupID,
         name: g.groupName,
         description: g.description,
         collections: collections || [],
+        userCount: users.totalElements || 0,
         isActive: g.isActive
       };
     }));
@@ -747,7 +747,7 @@
   function deleteGroup(idx) {
     const g = currentGroupList[idx];
     if (!g) return;
-    const userCount = getUserCountForGroup(g.name);
+    const userCount = g.userCount || 0;
     const msg = userCount > 0
       ? `Delete group "${g.name}"? It has ${userCount} user(s). Users will lose their group assignment. This cannot be undone.`
       : `Delete group "${g.name}"? This cannot be undone.`;
@@ -757,24 +757,29 @@
       .catch(error => InfoLinkStore.showToast(error.message));
   }
 
-  function openUsersModal(groupName) {
-    const users = InfoLinkStore.getUsers().filter(u => u.group === groupName);
+  async function openUsersModal(groupName, groupId) {
     document.getElementById('users-modal-title').textContent = `Users in "${groupName}"`;
     const list = document.getElementById('users-modal-list');
-    if (!users.length) {
+    try {
+      const data = await InfoLinkStore.apiRequest(`/users?groupId=${groupId}&page=0&size=100`);
+      const users = data.content || [];
+      if (!users.length) {
       list.innerHTML = `<div style="padding:24px;text-align:center;color:var(--text-secondary);font-size:0.87rem;">No users assigned to this group.</div>`;
-    } else {
+      } else {
       list.innerHTML = users.map(u => `
         <div class="user-modal-item">
           <div>
-            <div class="user-modal-name">${u.name}</div>
+            <div class="user-modal-name">${u.fullName || '—'}</div>
             <div class="user-modal-username">@${u.username}</div>
           </div>
-          <span class="user-modal-status ${u.status === 'Active' ? 'status-active' : 'status-inactive'}">${u.status}</span>
+          <span class="user-modal-status ${u.isActive ? 'status-active' : 'status-inactive'}">${u.isActive ? 'Active' : 'Inactive'}</span>
         </div>
       `).join('');
+      }
+      document.getElementById('users-modal').classList.add('open');
+    } catch (error) {
+      InfoLinkStore.showToast(error.message);
     }
-    document.getElementById('users-modal').classList.add('open');
   }
 
   document.getElementById('modal-cancel').addEventListener('click', () => {
@@ -799,11 +804,11 @@
     const cols = [...msSelected];
 
     if (!/^[a-zA-Z_]{2,30}$/.test(name)) {
-      alert('Group name must be 2–30 characters and contain only letters or underscores.');
+      InfoLinkStore.showToast('Group name must be 2–30 characters and contain only letters or underscores.');
       return;
     }
     if (!/^[a-zA-Z\s]{2,100}$/.test(desc)) {
-      alert('Description must be 2–100 characters and contain only letters and spaces.');
+      InfoLinkStore.showToast('Description must be 2–100 characters and contain only letters and spaces.');
       return;
     }
 
@@ -811,18 +816,8 @@
       const group = editingIdx === -1 ? null : currentGroupList[editingIdx];
       await InfoLinkStore.apiRequest(group ? `/group/${group.id}` : '/group', {
         method: group ? 'PUT' : 'POST',
-        body: JSON.stringify({ groupName: name, groupDescription: desc, isActive: group ? group.isActive : true })
+        body: JSON.stringify({ groupName: name, groupDescription: desc, isActive: group ? group.isActive : true, collections: cols })
       });
-      if (group) {
-        const previous = new Set(group.collections || []);
-        const selected = new Set(cols);
-        await Promise.all([...selected]
-          .filter(collection => !previous.has(collection))
-          .map(collection => InfoLinkStore.apiRequest(`/api/collections/${encodeURIComponent(collection)}/groups/${group.id}`, { method: 'POST' })));
-        await Promise.all([...previous]
-          .filter(collection => !selected.has(collection))
-          .map(collection => InfoLinkStore.apiRequest(`/api/collections/${encodeURIComponent(collection)}/groups/${group.id}`, { method: 'DELETE' })));
-      }
       document.getElementById('group-modal').classList.remove('open');
       await refreshView(document.getElementById('search-input').value.toLowerCase());
       InfoLinkStore.showToast('Group saved successfully.', 'success');

@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 
 public class AddGroupRequest {
     @NotBlank
@@ -18,6 +19,7 @@ public class AddGroupRequest {
 
     @NotNull
     private Boolean isActive;
+    private List<String> collections;
 
     
 
@@ -44,6 +46,9 @@ public class AddGroupRequest {
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
     }
+
+    public List<String> getCollections() { return collections; }
+    public void setCollections(List<String> collections) { this.collections = collections; }
 
         
 }

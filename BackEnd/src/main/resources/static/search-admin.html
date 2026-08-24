@@ -479,14 +479,14 @@
 <script src="data-store.js"></script>
 <script>
   // Auth guard
-  if (!InfoLinkStore.isLoggedIn()) {
+  if (!InfoLinkStore.isLoggedIn() || !InfoLinkStore.isAdmin()) {
     window.location.href = 'login.html';
   }
 
   // Show logged-in user info
   const currentUser = InfoLinkStore.getCurrentUser();
   const displayName = currentUser.fullname || currentUser.username || 'Admin';
-  const displayRole = currentUser.role === 'admin' ? 'System Administrator' : 'User';
+  const displayRole = InfoLinkStore.isAdmin() ? 'System Administrator' : 'User';
   const displayInitial = displayName.charAt(0).toUpperCase();
   document.querySelector('.sidebar-user .user-name').textContent = displayName;
   document.querySelector('.sidebar-user .user-role').textContent = displayRole;

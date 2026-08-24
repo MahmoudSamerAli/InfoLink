@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.context.SecurityContextHolder;
+import com.InfoLink.security.CustomUserDetails;
 
 import com.InfoLink.dto.LogResponse;
 import com.InfoLink.dto.PagedResponse;
@@ -24,4 +26,30 @@ public class LogController {
     public PagedResponse<LogResponse> searchLogs(@RequestParam String keyword, Pageable pageable) {
         return logService.searchLogs(keyword, pageable);
     }   
+
+    @GetMapping("/me")
+    public PagedResponse<LogResponse> getCurrentUserLogs(Pageable pageable) {
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
+                .getContext().getAuthentication().getPrincipal();
+        return logService.getCurrentUserLogs(userDetails.getUsername(), pageable);
+    }
+
+    @GetMapping("/me/today/count")
+    public long getCurrentUserTodayCount() {
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
+                .getContext().getAuthentication().getPrincipal();
+        return logService.getCurrentUserTodayCount(userDetails.getUsername());
+    }
+
+    @GetMapping("/me/success/count")
+    public long getCurrentUserSuccessCount() {
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
+                .getContext().getAuthentication().getPrincipal();
+        return logService.getCurrentUserSuccessCount(userDetails.getUsername());
+    }
+
+    @GetMapping("/today/count")
+    public long getTodayCount() {
+        return logService.getTodayCount();
+    }
 }

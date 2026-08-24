@@ -56,6 +56,9 @@ public class SearchController {
                                       @RequestParam(defaultValue = "0") int page,
                                       @RequestParam(defaultValue = "20") int size,
                                       HttpServletRequest request) {
+        if (page < 0 || size < 1 || size > 100) {
+            throw new IllegalArgumentException("Page must be non-negative and size must be between 1 and 100");
+        }
         CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
             .getContext().getAuthentication().getPrincipal();
         Groups group = userDetails.getUser().getGroup();
@@ -65,10 +68,17 @@ public class SearchController {
         params.remove("collection");
         params.remove("page");
         params.remove("size");
+        java.util.Set<String> validFields = new java.util.HashSet<>(groupsCollectionsService.getCommonFields());
+        if (!validFields.containsAll(params.keySet())) {
+            throw new IllegalArgumentException("Unsupported search field supplied");
+        }
 
         List<Criteria> criteriaList = new ArrayList<>();
         params.forEach((field, keyword) -> {
-            criteriaList.add(Criteria.where(field).regex(keyword, "i"));
+            if (field == null || field.isBlank() || keyword == null || keyword.isBlank()) {
+                throw new IllegalArgumentException("Search fields and values cannot be empty");
+            }
+            criteriaList.add(Criteria.where(field).regex(java.util.regex.Pattern.quote(keyword), "i"));
         });
 
         Criteria criteria = new Criteria();

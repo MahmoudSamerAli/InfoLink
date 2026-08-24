@@ -540,14 +540,14 @@
   <script src="data-store.js"></script>
   <script>
     // Auth guard
-    if (!InfoLinkStore.isLoggedIn()) {
+    if (!InfoLinkStore.isLoggedIn() || !InfoLinkStore.isAdmin()) {
       window.location.href = 'login.html';
     }
 
     // Show logged-in user info
     const currentUser = InfoLinkStore.getCurrentUser();
     const displayName = currentUser.fullname || currentUser.username || 'Admin';
-    const displayRole = currentUser.role === 'admin' ? 'System Administrator' : 'User';
+    const displayRole = InfoLinkStore.isAdmin() ? 'System Administrator' : 'User';
     const displayInitial = displayName.charAt(0).toUpperCase();
 
     document.querySelector('.sidebar-user .user-name').textContent = displayName;
@@ -610,8 +610,7 @@
     }
 
     function renderPage() {
-      const start = (currentPage - 1) * PAGE_SIZE;
-      const slice = filtered.slice(start, start + PAGE_SIZE);
+      const slice = filtered;
 
       if (filtered.length === 0) {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px 16px;color:var(--text-secondary);font-size:0.9rem;">
@@ -639,10 +638,6 @@
         }).join('');
       }
 
-      const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-      pageNumEl.textContent = currentPage;
-      btnPrev.disabled = currentPage === 1;
-      btnNext.disabled = currentPage >= totalPages;
     }
 
     function editUser(id) {

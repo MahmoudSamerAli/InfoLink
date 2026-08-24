@@ -25,6 +25,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 public class GroupsCollectionsService {
@@ -48,6 +50,43 @@ public class GroupsCollectionsService {
 
     public List<GroupsCollections> getCollectionsForGroup(Long groupId) {
         return repo.findByGroup_GroupID(groupId);
+    }
+
+    @Transactional
+    public void synchronizeGroupCollections(Groups group, List<String> requestedCollections) {
+        Set<String> requested = new HashSet<>(requestedCollections == null ? List.of() : requestedCollections);
+        if (requested.stream().anyMatch(name -> name == null || !name.matches("^[a-zA-Z][a-zA-Z0-9_]{0,63}$"))) {
+            throw new IllegalArgumentException("Invalid collection name. Use letters, numbers, underscores; must start with a letter.");
+        }
+        List<GroupsCollections> existingMappings = repo.findByGroup_GroupID(group.getGroupID());
+        Set<String> existing = existingMappings.stream()
+                .map(GroupsCollections::getCollectionName)
+                .collect(java.util.stream.Collectors.toSet());
+        List<String> createdCollections = new ArrayList<>();
+        try {
+            for (String collectionName : requested) {
+                if (!mongoTemplate.collectionExists(collectionName)) {
+                    mongoTemplate.createCollection(collectionName);
+                    createdCollections.add(collectionName);
+                }
+                if (!existing.contains(collectionName)) {
+                    GroupsCollections mapping = new GroupsCollections();
+                    mapping.setCollectionName(collectionName);
+                    mapping.setGroup(group);
+                    repo.save(mapping);
+                }
+            }
+            existingMappings.stream()
+                    .filter(mapping -> !requested.contains(mapping.getCollectionName()))
+                    .forEach(repo::delete);
+        } catch (RuntimeException exception) {
+            createdCollections.forEach(collectionName -> {
+                if (mongoTemplate.collectionExists(collectionName)) {
+                    mongoTemplate.dropCollection(collectionName);
+                }
+            });
+            throw exception;
+        }
     }
 
     public GroupsCollections getCollectionForGroup(String collectionName, Groups group) {
@@ -96,6 +135,9 @@ public class GroupsCollectionsService {
     }
 
     public void grantAccess(String collectionName, Long groupId) {
+        if (!mongoTemplate.collectionExists(collectionName)) {
+            throw new IllegalArgumentException("Collection does not exist: " + collectionName);
+        }
         if (repo.existsByCollectionNameAndGroup_GroupID(collectionName, groupId)) {
             return; // already granted, no-op
         }

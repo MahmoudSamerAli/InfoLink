@@ -383,15 +383,15 @@
     const conf = confirmPasswordInput.value;
 
     if (!curr) {
-      alert("Please enter your current password.");
+      InfoLinkStore.showToast("Please enter your current password.");
       return;
     }
     if (newPw.length < 8 || newPw.length > 16 || !/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,16}/.test(newPw)) {
-      alert("New password must be 8–16 characters and include upper- and lowercase letters, a number, and a symbol.");
+      InfoLinkStore.showToast("New password must be 8–16 characters and include upper- and lowercase letters, a number, and a symbol.");
       return;
     }
     if (newPw !== conf) {
-      alert("New password and confirmation do not match.");
+      InfoLinkStore.showToast("New password and confirmation do not match.");
       return;
     }
 

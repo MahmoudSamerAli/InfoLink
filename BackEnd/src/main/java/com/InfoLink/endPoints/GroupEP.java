@@ -42,8 +42,7 @@ public class GroupEP {
 
     @PostMapping
     public ResponseEntity<Groups> createGroup(@Valid @RequestBody AddGroupRequest group) {
-        groupService.save(group);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(groupService.save(group));
     }
 
     @PutMapping("/{id}")

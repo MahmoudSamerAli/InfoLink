@@ -580,8 +580,15 @@
     document.getElementById('top-title').textContent = 'Search Logs';
     document.getElementById('top-subtitle').textContent = 'Your recent searches, ready to run again';
 
-    function renderUserLogs() {
-      const userLogs = InfoLinkStore.getLogsForUser(currentUser.username);
+    async function renderUserLogs() {
+      let userLogs;
+      try {
+        const data = await InfoLinkStore.apiRequest('/logs/me?page=0&size=100');
+        userLogs = data.content || [];
+      } catch (error) {
+        InfoLinkStore.showToast(error.message);
+        return;
+      }
       const tbody = document.getElementById("user-logs-tbody");
       tbody.innerHTML = "";
 
@@ -594,13 +601,12 @@
         const tr = document.createElement("tr");
 
         // Grab or construct results count safely
-        const resultsCount = log.results !== undefined ? log.results : (log.status === 'Failed' ? 0 : Math.floor(Math.random() * 15) + 1);
         const displayTime = log.displayDate || log.searchDate;
 
         tr.innerHTML = `
           <td style="color:var(--text-primary);font-weight:500">${escapeHtml(log.keyword)}</td>
-          <td>${escapeHtml(log.collection)}</td>
-          <td class="${resultsCount > 0 ? 'text-success' : 'text-danger'}">${resultsCount}</td>
+          <td>${escapeHtml(log.collection || '—')}</td>
+          <td class="${log.status ? 'text-success' : 'text-danger'}">${log.status ? 'Success' : 'Failed'}</td>
           <td>${escapeHtml(displayTime)}</td>
           <td><button type="button" class="btn btn-outline" style="padding:6px 12px; font-size:0.8rem">Search again</button></td>
         `;

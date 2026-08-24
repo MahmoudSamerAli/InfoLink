@@ -61,6 +61,7 @@ public class SecurityConfig {
                 .requestMatchers("/users/profile", "/users/change-password", "/api/search").authenticated()
                 .requestMatchers("/api/search/deep", "/api/search/deep/**").hasAnyRole("ADMIN", "SYSADMIN")
                 .requestMatchers("/api/search/**").authenticated()
+                .requestMatchers("/logs/me/**").authenticated()
                 .requestMatchers("/users/**", "/group/**", "/logs/**")
                     .hasAnyRole("ADMIN", "SYSADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/collections/**").authenticated()

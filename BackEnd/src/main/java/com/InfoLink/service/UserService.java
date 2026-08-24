@@ -65,7 +65,7 @@ public class UserService {
         );
     }
 
-        public PagedResponse<UsersResponse> getUsers(String keyword, Role role, Long groupId,
+    public PagedResponse<UsersResponse> getUsers(String keyword, Role role, Long groupId,
                              Boolean active, Pageable pageable) {
         Page<User> userPage = userRepository.search(
             keyword == null || keyword.isBlank() ? null : keyword.trim(),
@@ -77,6 +77,7 @@ public class UserService {
                 user.getUsername(),
                 user.getFullName(),
                 user.getGroup().getGroupID(),
+                user.getGroup().getGroupName(),
                 user.getRole(),
                 user.getIsActive(),
                 user.getCreatedDate()
@@ -114,11 +115,17 @@ public class UserService {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new RuntimeException("Username already exists: " + request.getUsername());
         }
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already exists: " + request.getUsername());
+        Groups group;
+        if (request.getRole() == Role.ADMIN) {
+            group = groupRepository.findById(1L)
+                .orElseThrow(() -> new RuntimeException("Admin group not found with id: 1"));
+        } else {
+            if (request.getGroupID() == null) {
+                throw new IllegalArgumentException("GroupID is required for non-admin users");
+            }
+            group = groupRepository.findById(request.getGroupID())
+                    .orElseThrow(() -> new RuntimeException("Group not found with id: " + request.getGroupID()));
         }
-        Groups group = groupRepository.findById(request.getGroupID())
-                .orElseThrow(() -> new RuntimeException("Group not found with id: " + request.getGroupID()));
         String hashedPassword = passwordEncoder.encode(request.getPassword());
         User newUser = new User();
         newUser.setUsername(request.getUsername());
@@ -126,7 +133,7 @@ public class UserService {
         newUser.setPassword(hashedPassword);
         newUser.setGroup(group);
         newUser.setRole(request.getRole());
-        newUser.setIsActive(true);
+        newUser.setIsActive(request.getIsActive());
         return userRepository.save(newUser);
     }
     public User updateUser(PatchUserRequest request, int id) {
@@ -152,9 +159,19 @@ public class UserService {
                 }
                 if (request.getRole() != null) {
                     user.setRole(request.getRole());
+                    if (request.getRole() == Role.ADMIN) {
+                        Groups adminGroup = groupRepository.findById(1L)
+                                .orElseThrow(() -> new RuntimeException("Admin group not found with id: 1"));
+                        user.setGroup(adminGroup);
+                    }
                 }
                 if (request.getIsActive() != null) {
                     user.setIsActive(request.getIsActive());
+                }
+                if (user.getRole() == Role.ADMIN) {
+                    Groups adminGroup = groupRepository.findById(1L)
+                            .orElseThrow(() -> new RuntimeException("Admin group not found with id: 1"));
+                    user.setGroup(adminGroup);
                 }
                 return userRepository.save(user);
         })
@@ -189,13 +206,17 @@ public class UserService {
     }
 
     private void ensureCanManageUser(User user) {
-        if (isAdmin() && isPrivileged(user.getRole())) {
+        if ((isAdmin() && isPrivileged(user.getRole())) ||
+            (isSysAdmin() && user.getRole() == Role.SYSADMIN)) {
             throw new AccessDeniedException("Admins cannot manage other admins or sysadmins");
         }
     }
 
     private void ensureCanManageRole(Role role) {
-        if (isAdmin() && isPrivileged(role)) {
+        if (role == Role.SYSADMIN) {
+            throw new AccessDeniedException("Sysadmin accounts can only be added directly in the database");
+        }
+        if (isAdmin() && role == Role.ADMIN) {
             throw new AccessDeniedException("Admins cannot assign admin or sysadmin roles");
         }
     }
@@ -204,6 +225,12 @@ public class UserService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null && authentication.getAuthorities().stream()
             .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+    }
+
+    private boolean isSysAdmin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null && authentication.getAuthorities().stream()
+            .anyMatch(authority -> "ROLE_SYSADMIN".equals(authority.getAuthority()));
     }
 
     private boolean isPrivileged(Role role) {

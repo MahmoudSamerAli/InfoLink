@@ -518,7 +518,7 @@
 
   const currentUser    = InfoLinkStore.getCurrentUser();
   const displayName    = currentUser.fullname || currentUser.username || 'User';
-  const displayRole    = currentUser.role === 'admin' ? 'System Administrator' : 'Standard User';
+  const displayRole    = InfoLinkStore.isAdmin() ? 'System Administrator' : 'Standard User';
   const displayInitial = displayName.charAt(0).toUpperCase();
 
   document.querySelector('.sidebar-user .user-name').textContent = displayName;
@@ -530,18 +530,26 @@
 
   function handleLogout() { InfoLinkStore.clearSession(); window.location.href = 'login.html'; }
 
-  // â”€â”€ Resolve userâ€™s allowed collections from ALL their groups â”€â”€
-  const userGroups      = currentUser.groups && currentUser.groups.length ? currentUser.groups : (currentUser.group ? [currentUser.group] : []);
-  const allowedCollections = InfoLinkStore.getGroupCollectionsForGroups(userGroups);
+  // Resolve the user's single group and its backend-authoritative collections.
+  const userGroups = currentUser.group ? [currentUser.group] : [];
+  let allowedCollections = [];
 
   // Populate collection dropdown
   const collectionSelect  = document.getElementById('collectionSelect');
   const collectionCountEl = document.getElementById('collectionCount');
-  if (allowedCollections.length) {
-    collectionSelect.innerHTML = allowedCollections.map(c => `<option value="${c}">${c}</option>`).join('');
-    collectionCountEl.textContent = allowedCollections.length;
+  collectionSelect.innerHTML = `<option value="">Loading collections…</option>`;
+  if (currentUser.groupID) {
+    InfoLinkStore.apiRequest(`/api/collections?groupId=${currentUser.groupID}`)
+      .then(collections => {
+        allowedCollections = collections || [];
+        collectionSelect.innerHTML = allowedCollections.length
+          ? allowedCollections.map(c => `<option value="${c}">${c}</option>`).join('')
+          : `<option value="">No collections assigned</option>`;
+        collectionCountEl.textContent = allowedCollections.length;
+      })
+      .catch(error => InfoLinkStore.showToast(error.message));
   } else {
-    collectionSelect.innerHTML = `<option value="">No collections assigned</option>`;
+    collectionSelect.innerHTML = `<option value="">No group assigned</option>`;
     collectionCountEl.textContent = '0';
   }
 

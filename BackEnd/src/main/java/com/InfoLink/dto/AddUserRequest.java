@@ -14,7 +14,7 @@ public class AddUserRequest {
     private String username;
 
     @NotBlank
-    @Size(min = 8, max = 30, message = "Password must be between 8 and 30 characters")
+    @Size(min = 8, max = 16, message = "Password must be between 8 and 16 characters")
     @Pattern(
         regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).+$",
         message = "Password must contain upper, lower, digit, and special character"
@@ -29,7 +29,6 @@ public class AddUserRequest {
     @NotNull(message = "Role is required")
     private Role role;
 
-    @NotNull(message = "GroupID is required")
     private Long groupID;
 
     @NotNull(message = "isActive flag is required")
