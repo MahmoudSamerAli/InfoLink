@@ -1,6 +1,9 @@
 package com.InfoLink.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -15,4 +18,6 @@ public interface GroupRepository extends JpaRepository<Groups, Long> {
 		    "AND (:active IS NULL OR g.isActive = :active)")
 	    Page<Groups> search(@Param("keyword") String keyword, @Param("active") Boolean active,
 				   Pageable pageable);
+
+    Optional<Groups> findByGroupNameContainingIgnoreCase(String name);
 }

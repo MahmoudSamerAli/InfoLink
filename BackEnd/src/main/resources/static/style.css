@@ -125,43 +125,43 @@ input::placeholder {
 .table tr:hover {
   background: rgba(255,255,255,0.02);
 }
-/* ===== FIX الاختفاء ===== */
 
-/* الصندوق الأساسي */
+/* Choices.js customization - using higher specificity instead of !important */
+.choices .choices__inner,
 .choices__inner {
-  background-color: #0b1220 !important;
-  color: #e5e7eb !important;
-  border: 1px solid #1f2937 !important;
+  background-color: #0b1220;
+  color: #e5e7eb;
+  border: 1px solid #1f2937;
 }
 
-/* القائمة اللي بتنزل */
+.choices .choices__list--dropdown,
 .choices__list--dropdown {
-  background-color: #0b1220 !important;
-  color: #e5e7eb !important;
-  border: 1px solid #1f2937 !important;
+  background-color: #0b1220;
+  color: #e5e7eb;
+  border: 1px solid #1f2937;
 }
 
-/* كل عنصر جوه الليست */
+.choices .choices__list--dropdown .choices__item,
 .choices__list--dropdown .choices__item {
-  color: #e5e7eb !important;
+  color: #e5e7eb;
 }
 
-/* لما تعملي hover */
+.choices .choices__item--selectable.is-highlighted,
 .choices__item--selectable.is-highlighted {
-  background-color: #1f2937 !important;
-  color: #ffffff !important;
+  background-color: #1f2937;
+  color: #ffffff;
 }
 
-/* الـ chips (الاختيارات) */
+.choices .choices__item--selectable,
 .choices__item--selectable {
-  background: linear-gradient(90deg, #7c3aed, #6366f1) !important;
-  color: #fff !important;
+  background: linear-gradient(90deg, #7c3aed, #6366f1);
+  color: #fff;
 }
 
-/* input الكتابة */
+.choices .choices__input,
 .choices__input {
-  background: transparent !important;
-  color: #e5e7eb !important;
+  background: transparent;
+  color: #e5e7eb;
 }
 /* Upload Box */
 .upload-box {
@@ -191,12 +191,13 @@ input::placeholder {
   color: var(--subtext);
 }
 
-/* select نفس شكل input */
+/* select styling - using higher specificity instead of !important */
+.choices .choices__inner,
 .choices__inner {
-  background: #0b1220 !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 12px !important;
-  color: var(--text) !important;
+  background: #0b1220;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
 }
 /* =========================================
    RESET
@@ -969,7 +970,7 @@ td:nth-child(6) {
     }
 
     .filter-button {
-        width: 109px !important;
+        width: 109px;
     }
 
 }
@@ -999,7 +1000,7 @@ td:nth-child(6) {
 
     .nav-item {
         justify-content: center;
-        padding: 0 !important;
+        padding: 0;
     }
 
     .sidebar-user {
@@ -1554,39 +1555,39 @@ td {
 /* choices.js re-skinned to the audit palette */
 
 .field-grid-3 .choices__inner {
-    background: #0d1524 !important;
-    border: 1px solid #2b3b55 !important;
-    border-radius: 14px !important;
-    color: #e5e7eb !important;
-    font-size: 12px !important;
-    min-height: 46px !important;
+    background: #0d1524;
+    border: 1px solid #2b3b55;
+    border-radius: 14px;
+    color: #e5e7eb;
+    font-size: 12px;
+    min-height: 46px;
 }
 
 .field-grid-3 .choices__list--dropdown {
-    background: #0d1524 !important;
-    border: 1px solid #2b3b55 !important;
-    color: #e5e7eb !important;
-    font-size: 12px !important;
+    background: #0d1524;
+    border: 1px solid #2b3b55;
+    color: #e5e7eb;
+    font-size: 12px;
 }
 
 .field-grid-3 .choices__list--dropdown .choices__item {
-    color: #e5e7eb !important;
+    color: #e5e7eb;
 }
 
 .field-grid-3 .choices__item--selectable.is-highlighted {
-    background-color: #1f2937 !important;
-    color: #ffffff !important;
+    background-color: #1f2937;
+    color: #ffffff;
 }
 
 .field-grid-3 .choices__item--selectable {
-    background: #8b3dff !important;
-    color: #fff !important;
-    border-radius: 9px !important;
+    background: #8b3dff;
+    color: #fff;
+    border-radius: 9px;
 }
 
 .field-grid-3 .choices__input {
-    background: transparent !important;
-    color: #e5e7eb !important;
+    background: transparent;
+    color: #e5e7eb;
 }
 
 @media (max-width: 1232px) {

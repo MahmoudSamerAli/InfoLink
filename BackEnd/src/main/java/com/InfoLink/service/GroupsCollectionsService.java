@@ -58,35 +58,26 @@ public class GroupsCollectionsService {
         if (requested.stream().anyMatch(name -> name == null || !name.matches("^[a-zA-Z][a-zA-Z0-9_]{0,63}$"))) {
             throw new IllegalArgumentException("Invalid collection name. Use letters, numbers, underscores; must start with a letter.");
         }
+        for (String collectionName : requested) {
+            if (!mongoTemplate.collectionExists(collectionName)) {
+                throw new IllegalArgumentException("Collection does not exist: " + collectionName + ". Create the collection first using the dedicated endpoint.");
+            }
+        }
         List<GroupsCollections> existingMappings = repo.findByGroup_GroupID(group.getGroupID());
         Set<String> existing = existingMappings.stream()
                 .map(GroupsCollections::getCollectionName)
                 .collect(java.util.stream.Collectors.toSet());
-        List<String> createdCollections = new ArrayList<>();
-        try {
-            for (String collectionName : requested) {
-                if (!mongoTemplate.collectionExists(collectionName)) {
-                    mongoTemplate.createCollection(collectionName);
-                    createdCollections.add(collectionName);
-                }
-                if (!existing.contains(collectionName)) {
-                    GroupsCollections mapping = new GroupsCollections();
-                    mapping.setCollectionName(collectionName);
-                    mapping.setGroup(group);
-                    repo.save(mapping);
-                }
+        for (String collectionName : requested) {
+            if (!existing.contains(collectionName)) {
+                GroupsCollections mapping = new GroupsCollections();
+                mapping.setCollectionName(collectionName);
+                mapping.setGroup(group);
+                repo.save(mapping);
             }
-            existingMappings.stream()
-                    .filter(mapping -> !requested.contains(mapping.getCollectionName()))
-                    .forEach(repo::delete);
-        } catch (RuntimeException exception) {
-            createdCollections.forEach(collectionName -> {
-                if (mongoTemplate.collectionExists(collectionName)) {
-                    mongoTemplate.dropCollection(collectionName);
-                }
-            });
-            throw exception;
         }
+        existingMappings.stream()
+                .filter(mapping -> !requested.contains(mapping.getCollectionName()))
+                .forEach(repo::delete);
     }
 
     public GroupsCollections getCollectionForGroup(String collectionName, Groups group) {
@@ -96,6 +87,13 @@ public class GroupsCollectionsService {
 
     public List<String> getCommonFields() {
         return searchMappingRepository.findByCommonTrue().stream()
+                .map(SearchMapping::getFieldName)
+                .distinct()
+                .toList();
+    }
+
+    public List<String> getFieldsForCollection(String collectionName) {
+        return searchMappingRepository.findByCollectionName(collectionName).stream()
                 .map(SearchMapping::getFieldName)
                 .distinct()
                 .toList();

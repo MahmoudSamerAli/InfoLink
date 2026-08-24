@@ -8,4 +8,5 @@ import com.InfoLink.model.SearchMapping;
 
 public interface SearchMappingRepository extends JpaRepository<SearchMapping, Long> {
     List<SearchMapping> findByCommonTrue();
+    List<SearchMapping> findByCollectionName(String collectionName);
 }

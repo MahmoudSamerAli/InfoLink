@@ -6,9 +6,9 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>../InfoLink/logs/infolink.log</file>
+        <file>../logs/infolink.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>../InfoLink/logs/infolink-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>../logs/infolink-%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>

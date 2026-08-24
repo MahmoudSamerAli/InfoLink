@@ -117,8 +117,8 @@ public class UserService {
         }
         Groups group;
         if (request.getRole() == Role.ADMIN) {
-            group = groupRepository.findById(1L)
-                .orElseThrow(() -> new RuntimeException("Admin group not found with id: 1"));
+            group = groupRepository.findByGroupNameContainingIgnoreCase("Admin")
+                .orElseThrow(() -> new RuntimeException("Admin group not found"));
         } else {
             if (request.getGroupID() == null) {
                 throw new IllegalArgumentException("GroupID is required for non-admin users");
@@ -160,8 +160,8 @@ public class UserService {
                 if (request.getRole() != null) {
                     user.setRole(request.getRole());
                     if (request.getRole() == Role.ADMIN) {
-                        Groups adminGroup = groupRepository.findById(1L)
-                                .orElseThrow(() -> new RuntimeException("Admin group not found with id: 1"));
+                        Groups adminGroup = groupRepository.findByGroupNameContainingIgnoreCase("Admin")
+                                .orElseThrow(() -> new RuntimeException("Admin group not found"));
                         user.setGroup(adminGroup);
                     }
                 }
@@ -169,8 +169,8 @@ public class UserService {
                     user.setIsActive(request.getIsActive());
                 }
                 if (user.getRole() == Role.ADMIN) {
-                    Groups adminGroup = groupRepository.findById(1L)
-                            .orElseThrow(() -> new RuntimeException("Admin group not found with id: 1"));
+                    Groups adminGroup = groupRepository.findByGroupNameContainingIgnoreCase("Admin")
+                            .orElseThrow(() -> new RuntimeException("Admin group not found"));
                     user.setGroup(adminGroup);
                 }
                 return userRepository.save(user);

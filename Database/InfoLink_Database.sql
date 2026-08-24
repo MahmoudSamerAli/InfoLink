@@ -5,6 +5,7 @@ DROP TABLE Logs;
 DROP TABLE Users;
 DROP TABLE Groups;
 DROP TABLE refresh_token;
+DROP TABLE Search_Mapping;
 
 CREATE TABLE Groups(
 Group_ID INT PRIMARY KEY IDENTITY,
@@ -127,3 +128,4 @@ SELECT * FROM Group_Collections;
 SELECT * FROM Users;
 SELECT * FROM Logs;
 SELECT * FROM refresh_token;
+SELECT * FROM Search_Mapping;

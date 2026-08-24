@@ -89,11 +89,11 @@ public class CollectionController {
         return ResponseEntity.ok(groupsCollectionsService.getGroupsForCollection(name));
     }
     @PostMapping(value = "/{name}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-public ResponseEntity<String> uploadData(
-        @PathVariable String name,
-        @RequestParam("file") MultipartFile file) {
-    try {
-        int count = groupsCollectionsService.uploadData(name, file);
+    public ResponseEntity<String> uploadData(
+            @PathVariable String name,
+            @RequestParam("file") MultipartFile file) {
+        try {
+            int count = groupsCollectionsService.uploadData(name, file);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(count + " document(s) uploaded to '" + name + "'");
     } catch (IllegalStateException e) {

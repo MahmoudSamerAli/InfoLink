@@ -1,6 +1,7 @@
 package com.InfoLink.endPoints;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -68,7 +69,7 @@ public class SearchController {
         params.remove("collection");
         params.remove("page");
         params.remove("size");
-        java.util.Set<String> validFields = new java.util.HashSet<>(groupsCollectionsService.getCommonFields());
+        java.util.Set<String> validFields = new java.util.HashSet<>(groupsCollectionsService.getFieldsForCollection(collection));
         if (!validFields.containsAll(params.keySet())) {
             throw new IllegalArgumentException("Unsupported search field supplied");
         }
@@ -113,6 +114,11 @@ public class SearchController {
     @GetMapping("/fields")
     public List<String> getSearchFields() {
         return groupsCollectionsService.getCommonFields();
+    }
+
+    @GetMapping("/fields/{collectionName}")
+    public List<String> getFieldsForCollection(@PathVariable String collectionName) {
+        return groupsCollectionsService.getFieldsForCollection(collectionName);
     }
 
     @PostMapping("/deep")
