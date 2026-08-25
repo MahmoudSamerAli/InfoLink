@@ -807,8 +807,8 @@
       InfoLinkStore.showToast('Group name must be 2–30 characters and contain only letters or underscores.');
       return;
     }
-    if (!/^[a-zA-Z\s]{2,100}$/.test(desc)) {
-      InfoLinkStore.showToast('Description must be 2–100 characters and contain only letters and spaces.');
+    if (!/^[a-zA-Z\s,.]{2,100}$/.test(desc)) {
+      InfoLinkStore.showToast('Description must be 2–100 characters and contain only letters, spaces, commas, and periods.');
       return;
     }
 

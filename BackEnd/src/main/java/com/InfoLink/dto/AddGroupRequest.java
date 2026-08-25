@@ -14,7 +14,7 @@ public class AddGroupRequest {
 
     @NotBlank
     @Size(min = 2, max = 100)
-    @Pattern(regexp = "^[a-zA-Z\\s]+$")
+    @Pattern(regexp = "^[a-zA-Z\\s,.]+$", message = "Group description can only contain letters, spaces, commas, and periods.")
     private String groupDescription;
 
     @NotNull

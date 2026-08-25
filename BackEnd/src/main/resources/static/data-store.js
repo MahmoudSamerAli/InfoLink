@@ -110,17 +110,23 @@ const InfoLinkStore = (() => {
     const response = await fetch(path, { ...options, headers });
     const refreshToken = sessionStorage.getItem('infolink_refresh_token');
     if (response.status === 401 && retry && refreshToken) {
-      const refreshResponse = await fetch('/auth/refresh', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken })
-      });
-      if (refreshResponse.ok) {
-        const tokens = await refreshResponse.json();
-        sessionStorage.setItem('infolink_access_token', tokens.accessToken);
-        sessionStorage.setItem('infolink_refresh_token', tokens.refreshToken);
-        return apiFetch(path, options, false);
-      }
+      try {
+        const refreshResponse = await fetch('/auth/refresh', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken })
+        });
+        if (refreshResponse.ok) {
+          const tokens = await refreshResponse.json();
+          sessionStorage.setItem('infolink_access_token', tokens.accessToken);
+          sessionStorage.setItem('infolink_refresh_token', tokens.refreshToken);
+          return apiFetch(path, options, false);
+        }
+      } catch (_) {}
+    }
+    if (response.status === 401) {
+      clearSession();
+      window.location.href = 'login.html';
     }
     return response;
   }
