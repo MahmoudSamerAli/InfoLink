@@ -1,4 +1,4 @@
-package com.InfoLink.service;
+package com.InfoLink.utils.service;
 
 import com.InfoLink.model.User;
 import org.springframework.security.core.userdetails.UserDetailsService;

@@ -15,7 +15,8 @@ import java.util.Optional;
 public interface UserRepository extends  JpaRepository<User, Integer> {
     public boolean existsByUsername(String username);
     public Optional<User> findByUsername(String username);
-
+        @Query("SELECT u FROM User u JOIN FETCH u.group WHERE u.username = :username")
+        Optional<User> findByUsernameWithGroup(String username);
         @Query("SELECT u FROM User u WHERE " +
             "(:keyword IS NULL OR LOWER(u.username) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +

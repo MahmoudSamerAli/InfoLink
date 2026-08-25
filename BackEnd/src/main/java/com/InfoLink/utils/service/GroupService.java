@@ -1,4 +1,4 @@
-package com.InfoLink.service;
+package com.InfoLink.utils.service;
 
 import java.util.List;
 import java.util.Optional;

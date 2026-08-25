@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.InfoLink.model.GroupsCollections;
-import com.InfoLink.service.GroupsCollectionsService;
+import com.InfoLink.utils.service.GroupsCollectionsService;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 

@@ -17,7 +17,7 @@ import com.InfoLink.dto.AddGroupRequest;
 import com.InfoLink.dto.GroupsResponse;
 import com.InfoLink.dto.PagedResponse;
 import com.InfoLink.model.Groups;
-import com.InfoLink.service.GroupService;
+import com.InfoLink.utils.service.GroupService;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;

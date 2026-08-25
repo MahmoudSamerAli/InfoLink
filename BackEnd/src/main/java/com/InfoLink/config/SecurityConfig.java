@@ -48,6 +48,11 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(auth -> auth
 
+                // Static frontend assets — must be public, or nobody can even reach login.html
+                .requestMatchers(
+                    "/", "/*.html", "/*.js", "/*.css", "/*.png", "/*.ico", "/*.svg"
+                ).permitAll()
+
                 // Authentication
                 .requestMatchers("/auth/**").permitAll()
 
