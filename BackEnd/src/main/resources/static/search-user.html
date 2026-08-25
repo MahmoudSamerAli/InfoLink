@@ -26,10 +26,36 @@
 
     .search-row {
       display: grid;
-      grid-template-columns: 1fr 260px;
+      grid-template-columns: 1fr 220px 220px;
       gap: 16px;
       margin-bottom: 16px;
     }
+    @media (max-width: 900px) {
+      .search-row { grid-template-columns: 1fr; }
+    }
+    .group-select:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* Matched records panel */
+    .records-section { margin-bottom: 24px; }
+    .record-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+    }
+    .record-card-title {
+      font-size: .78rem; font-weight: 700; letter-spacing: .04em;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 10px;
+    }
+    .record-fields {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 8px 20px;
+    }
+    .record-field { font-size: .84rem; color: var(--text-secondary); overflow-wrap: anywhere; }
+    .record-field b { color: var(--text-primary); font-weight: 600; display: block; font-size: .72rem; text-transform: uppercase; letter-spacing: .03em; margin-bottom: 2px; }
+    .records-empty { padding: 20px; text-align: center; color: var(--text-secondary); font-size: .88rem; }
     .form-group { display: flex; flex-direction: column; gap: 8px; }
     .form-label { font-size: 0.8rem; font-weight: 500; color: var(--text-muted); }
 
@@ -373,10 +399,24 @@
             <label class="form-label">Collection</label>
             <div class="select-wrap">
               <select class="group-select" id="collectionSelect" style="padding-right: 80px; appearance: none; -webkit-appearance: none;">
-                <option value="dm">Digital Marketing</option>
-                <option value="it">IT Team</option>
+                <option value="">Loading collections…</option>
               </select>
-              <span class="group-count" id="collectionCount">2</span>
+              <span class="group-count" id="collectionCount">0</span>
+              <span class="select-chevron">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </span>
+            </div>
+          </div>
+
+          <!-- Field select -->
+          <div class="form-group">
+            <label class="form-label">Field</label>
+            <div class="select-wrap">
+              <select class="group-select" id="fieldSelect" disabled style="appearance: none; -webkit-appearance: none;">
+                <option value="">Select a collection first</option>
+              </select>
               <span class="select-chevron">
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <polyline points="6 9 12 15 18 9"/>
@@ -440,6 +480,14 @@
         </div>
       </div>
 
+      <!-- Matched Records -->
+      <div class="records-section" id="records-section" style="display:none;">
+        <div class="results-header">
+          <div class="results-title">Matched Records</div>
+        </div>
+        <div id="recordsContainer"></div>
+      </div>
+
       <!-- Recent Searches Table -->
       <div class="results-section">
         <div class="results-header">
@@ -452,41 +500,13 @@
               <tr>
                 <th>Keyword</th>
                 <th>Collection</th>
+                <th>Field</th>
                 <th>Results</th>
                 <th>Date &amp; time</th>
                 <th>Action</th>
               </tr>
             </thead>
-            <tbody id="resultsBody">
-              <tr>
-                <td style="color:var(--text-primary);font-weight:500">About AIB</td>
-                <td>IT Team</td>
-                <td class="positive">8</td>
-                <td>Today, 09:42</td>
-                <td><button class="search-again-btn">Search again</button></td>
-              </tr>
-              <tr>
-                <td style="color:var(--text-primary);font-weight:500">AIB FB Post</td>
-                <td>Digital Marketing</td>
-                <td class="positive">1</td>
-                <td>Yesterday</td>
-                <td><button class="search-again-btn">Search again</button></td>
-              </tr>
-              <tr>
-                <td style="color:var(--text-primary);font-weight:500">AIB Insta Post</td>
-                <td>Digital Marketing</td>
-                <td class="positive">3</td>
-                <td>2 days ago</td>
-                <td><button class="search-again-btn">Search again</button></td>
-              </tr>
-              <tr>
-                <td style="color:var(--text-primary);font-weight:500">Landing Page</td>
-                <td>IT Team</td>
-                <td class="positive">12</td>
-                <td>3 days ago</td>
-                <td><button class="search-again-btn">Search again</button></td>
-              </tr>
-            </tbody>
+            <tbody id="resultsBody"></tbody>
           </table>
         </div>
       </div>
@@ -537,6 +557,7 @@
   // Populate collection dropdown
   const collectionSelect  = document.getElementById('collectionSelect');
   const collectionCountEl = document.getElementById('collectionCount');
+  const fieldSelect       = document.getElementById('fieldSelect');
   collectionSelect.innerHTML = `<option value="">Loading collections…</option>`;
   if (currentUser.groupID) {
     InfoLinkStore.apiRequest(`/api/collections?groupId=${currentUser.groupID}`)
@@ -546,11 +567,35 @@
           ? allowedCollections.map(c => `<option value="${c}">${c}</option>`).join('')
           : `<option value="">No collections assigned</option>`;
         collectionCountEl.textContent = allowedCollections.length;
+        if (allowedCollections.length) loadFieldsForCollection(collectionSelect.value);
       })
       .catch(error => InfoLinkStore.showToast(error.message));
   } else {
     collectionSelect.innerHTML = `<option value="">No group assigned</option>`;
     collectionCountEl.textContent = '0';
+  }
+
+  collectionSelect.addEventListener('change', () => loadFieldsForCollection(collectionSelect.value));
+
+  function loadFieldsForCollection(collection) {
+    if (!collection) {
+      fieldSelect.innerHTML = `<option value="">Select a collection first</option>`;
+      fieldSelect.disabled = true;
+      return;
+    }
+    fieldSelect.disabled = true;
+    fieldSelect.innerHTML = `<option value="">Loading fields…</option>`;
+    InfoLinkStore.apiRequest(`/api/search/fields/${encodeURIComponent(collection)}`)
+      .then(fields => {
+        fieldSelect.innerHTML = fields.length
+          ? fields.map(f => `<option value="${f}">${f}</option>`).join('')
+          : `<option value="">No searchable fields configured</option>`;
+        fieldSelect.disabled = !fields.length;
+      })
+      .catch(error => {
+        fieldSelect.innerHTML = `<option value="">Failed to load fields</option>`;
+        InfoLinkStore.showToast(error.message);
+      });
   }
 
   // Update access notice
@@ -616,42 +661,49 @@
   const resultsTitle= document.getElementById('resultsTitle');
   const resultsBody = document.getElementById('resultsBody');
 
-  searchBtn.addEventListener('click', performSearch);
+  searchBtn.addEventListener('click', () => performSearch());
   searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') performSearch(); });
 
-  async function performSearch() {
-    const kw   = searchInput.value.trim();
-    const coll = collectionSelect.value;
+  const recordsSection   = document.getElementById('records-section');
+  const recordsContainer = document.getElementById('recordsContainer');
+
+  async function performSearch(overrideKw, overrideColl, overrideField) {
+    const kw    = overrideKw    !== undefined ? overrideKw    : searchInput.value.trim();
+    const coll  = overrideColl  !== undefined ? overrideColl  : collectionSelect.value;
+    const field = overrideField !== undefined ? overrideField : fieldSelect.value;
 
     if (!kw) {
       searchInput.style.borderColor = '#ef4444';
       setTimeout(() => (searchInput.style.borderColor = ''), 1200);
       return;
     }
+    if (!coll || !field) {
+      InfoLinkStore.showToast('Choose a collection and a field to search.');
+      return;
+    }
 
     searchBtn.disabled = true;
-    searchBtn.innerHTML = `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="animation:spin .7s linear infinite"><circle cx="12" cy="12" r="10" stroke-opacity=".3"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Searchingâ€¦`;
+    searchBtn.innerHTML = `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="animation:spin .7s linear infinite"><circle cx="12" cy="12" r="10" stroke-opacity=".3"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Searching…`;
     try {
-      const fields = await InfoLinkStore.apiRequest('/api/search/fields');
-      if (!fields.length) throw new Error('No searchable fields are configured.');
-      const query = new URLSearchParams({ collection: coll, page: 0, size: 100 });
-      fields.forEach(field => query.set(field, kw));
+      const query = new URLSearchParams({ collection: coll, page: 0, size: 50 });
+      query.set(field, kw);
       const data = await InfoLinkStore.apiRequest(`/api/search?${query}`);
-      searchBtn.disabled = false;
-      searchBtn.innerHTML = `<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="width:16px;height:16px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Search records`;
 
-      const collLabel = collectionSelect.options[collectionSelect.selectedIndex]?.text || coll;
+      const collLabel = Array.from(collectionSelect.options).find(o => o.value === coll)?.text || coll;
       const resultCount = data.totalElements;
       const now = new Date();
       const timeStr = `Today, ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
 
       resultsTitle.textContent = 'Search Results';
+      renderRecords(data.content || []);
 
       const tr = document.createElement('tr');
       tr.classList.add('highlighted');
+      tr.dataset.kw = kw; tr.dataset.coll = coll; tr.dataset.field = field;
       tr.innerHTML = `
         <td style="color:var(--text-primary);font-weight:500">${escHtml(kw)}</td>
         <td>${escHtml(collLabel)}</td>
+        <td>${escHtml(field)}</td>
         <td class="${resultCount > 0 ? 'positive' : 'zero'}">${resultCount}</td>
         <td>${timeStr}</td>
         <td><button class="search-again-btn">Search again</button></td>
@@ -660,7 +712,9 @@
 
       tr.querySelector('.search-again-btn').addEventListener('click', () => {
         searchInput.value = kw;
-        performSearch();
+        collectionSelect.value = coll;
+        loadFieldsForCollection(coll);
+        performSearch(kw, coll, field);
       });
     } catch (error) {
       InfoLinkStore.showToast(error.message);
@@ -670,16 +724,29 @@
     }
   }
 
-  document.querySelectorAll('.search-again-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const kw = this.closest('tr').querySelector('td:first-child').textContent.replace(/â€¢+/g, '').trim();
-      searchInput.value = kw;
-      performSearch();
-    });
-  });
+  function renderRecords(documents) {
+    recordsSection.style.display = '';
+    if (!documents.length) {
+      recordsContainer.innerHTML = `<div class="card records-empty">No matching records found.</div>`;
+      return;
+    }
+    recordsContainer.innerHTML = documents.map((doc, i) => {
+      const fields = Object.entries(doc)
+        .filter(([k]) => k !== '_id')
+        .map(([k, v]) => `<div class="record-field"><b>${escHtml(k)}</b>${escHtml(formatValue(v))}</div>`)
+        .join('');
+      return `<div class="record-card"><div class="record-card-title">Record ${i + 1}</div><div class="record-fields">${fields}</div></div>`;
+    }).join('');
+  }
+
+  function formatValue(v) {
+    if (v === null || v === undefined) return '—';
+    if (typeof v === 'object') return JSON.stringify(v);
+    return String(v);
+  }
 
   function escHtml(s) {
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
   const style = document.createElement('style');

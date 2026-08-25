@@ -29,6 +29,36 @@
       gap: 16px;
       margin-bottom: 16px;
     }
+    @media (max-width: 900px) {
+      .search-row { grid-template-columns: 1fr; }
+    }
+
+    /* Matched records panel */
+    .records-section { margin-bottom: 24px; }
+    .record-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+    }
+    .record-card-title {
+      font-size: .78rem; font-weight: 700; letter-spacing: .04em;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 10px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .record-card-tag {
+      background: var(--accent-light); color: var(--accent);
+      border-radius: 4px; padding: 2px 8px; font-size: .7rem;
+    }
+    .record-fields {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 8px 20px;
+    }
+    .record-field { font-size: .84rem; color: var(--text-secondary); overflow-wrap: anywhere; }
+    .record-field b { color: var(--text-primary); font-weight: 600; display: block; font-size: .72rem; text-transform: uppercase; letter-spacing: .03em; margin-bottom: 2px; }
+    .records-empty { padding: 20px; text-align: center; color: var(--text-secondary); font-size: .88rem; }
     .form-group { display: flex; flex-direction: column; gap: 8px; }
     .form-label { font-size: 0.8rem; font-weight: 500; color: var(--text-muted); }
 
@@ -292,7 +322,7 @@
     <header class="topbar">
       <div class="topbar-title">
         <h2>Admin Search</h2>
-        <p>Search all collections</p>
+        <p>Deep search across every collection</p>
       </div>
       <div class="topbar-actions">
         <button class="theme-btn" title="Toggle theme">
@@ -336,22 +366,14 @@
             </div>
           </div>
 
-          <!-- Collection select -->
+          <!-- Common field select -->
           <div class="form-group">
-            <label class="form-label">Collection</label>
+            <label class="form-label">Field</label>
             <div class="select-wrap">
-              <select class="collection-select" id="collectionSelect" style="padding-right: 80px; appearance: none; -webkit-appearance: none;">
-                <option value="all">All collections</option>
-                <option value="hr">HR – Employees</option>
-                <option value="sales">Sales – Customers</option>
-                <option value="finance">Finance – Payments</option>
-                <option value="mgmt">Management</option>
-                <option value="dm">Digital Marketing</option>
-                <option value="it">IT Team</option>
-                <option value="legal">Legal – Contracts</option>
-                <option value="ops">Operations</option>
+              <select class="collection-select" id="fieldSelect" style="padding-right: 80px; appearance: none; -webkit-appearance: none;">
+                <option value="">Loading fields…</option>
               </select>
-              <span class="collection-count" id="collectionCount">All</span>
+              <span class="collection-count" id="fieldCount">0</span>
               <span class="select-chevron">
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <polyline points="6 9 12 15 18 9"/>
@@ -367,15 +389,9 @@
             <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             </svg>
-            <span>Full access: all collections are searchable.</span>
+            <span>Deep search: scans every collection that shares the selected field.</span>
           </div>
           <div class="action-btns">
-            <button class="btn-filter" id="filterBtn">
-              <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-              </svg>
-              Filters
-            </button>
             <button class="btn-search" id="searchBtn">
               <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -384,6 +400,14 @@
             </button>
           </div>
         </div>
+      </div>
+
+      <!-- Matched Records -->
+      <div class="records-section" id="records-section" style="display:none;">
+        <div class="results-header">
+          <div class="results-title">Matched Records</div>
+        </div>
+        <div id="recordsContainer"></div>
       </div>
 
       <!-- Recent Searches Table -->
@@ -397,77 +421,14 @@
             <thead>
               <tr>
                 <th>Keyword</th>
-                <th>Collection</th>
+                <th>Field</th>
+                <th>Collections matched</th>
                 <th>Results</th>
                 <th>Date &amp; time</th>
                 <th>Action</th>
               </tr>
             </thead>
-            <tbody id="resultsBody">
-              <tr>
-                <td style="color:var(--text-primary);font-weight:500" class="kw-masked">2988••••</td>
-                <td>IT Team</td>
-                <td class="positive">8</td>
-                <td>Today, 09:42</td>
-                <td><button class="search-again-btn">Search again</button></td>
-              </tr>
-              <tr>
-                <td style="color:var(--text-primary);font-weight:500">Invoice 934</td>
-                <td>Finance Payments</td>
-                <td class="positive">3</td>
-                <td>Today, 09:12</td>
-                <td><button class="search-again-btn">Search again</button></td>
-              </tr>
-              <tr>
-                <td style="color:var(--text-primary);font-weight:500" class="kw-masked">0101••••</td>
-                <td>Sales Customers</td>
-                <td class="zero">0</td>
-                <td>Yesterday</td>
-                <td><button class="search-again-btn">Search again</button></td>
-              </tr>
-              <tr>
-                <td style="color:var(--text-primary);font-weight:500">Renewal 2026</td>
-                <td>Digital Marketing</td>
-                <td class="positive">12</td>
-                <td>Yesterday</td>
-                <td><button class="search-again-btn">Search again</button></td>
-              </tr>
-              <tr>
-                <td style="color:var(--text-primary);font-weight:500">Address: Cairo</td>
-                <td>All Collections</td>
-                <td class="positive">21</td>
-                <td>2 days ago</td>
-                <td><button class="search-again-btn">Search again</button></td>
-              </tr>
-              <tr>
-                <td style="color:var(--text-primary);font-weight:500">Invoice 934</td>
-                <td>Finance Payments</td>
-                <td class="positive">3</td>
-                <td>Today, 09:12</td>
-                <td><button class="search-again-btn">Search again</button></td>
-              </tr>
-              <tr>
-                <td style="color:var(--text-primary);font-weight:500" class="kw-masked">0101••••</td>
-                <td>Sales Customers</td>
-                <td class="zero">0</td>
-                <td>Yesterday</td>
-                <td><button class="search-again-btn">Search again</button></td>
-              </tr>
-              <tr>
-                <td style="color:var(--text-primary);font-weight:500">Renewal 2026</td>
-                <td>Digital Marketing</td>
-                <td class="positive">12</td>
-                <td>Yesterday</td>
-                <td><button class="search-again-btn">Search again</button></td>
-              </tr>
-              <tr>
-                <td style="color:var(--text-primary);font-weight:500">Address: Giza</td>
-                <td>All Collections</td>
-                <td class="positive">21</td>
-                <td>2 days ago</td>
-                <td><button class="search-again-btn">Search again</button></td>
-              </tr>
-            </tbody>
+            <tbody id="resultsBody"></tbody>
           </table>
         </div>
       </div>
@@ -501,90 +462,118 @@
     window.location.href = 'login.html';
   }
 
-  // The admin deep-search endpoint searches across all accessible collections.
-  const collectionSelect = document.getElementById('collectionSelect');
-  const collectionCount  = document.getElementById('collectionCount');
-  collectionSelect.innerHTML = '<option value="all">All collections</option>';
-  collectionCount.textContent = 'All';
+  // Deep search: pick ONE common field (from the Search Mapping table) and search its value
+  // across every collection that has that field.
+  const fieldSelect  = document.getElementById('fieldSelect');
+  const fieldCountEl = document.getElementById('fieldCount');
 
-  // Search button — demo: prepend new row
-  const searchBtn   = document.getElementById('searchBtn');
-  const searchInput = document.getElementById('searchInput');
-  const resultsTitle= document.getElementById('resultsTitle');
-  const resultsBody = document.getElementById('resultsBody');
-  resultsBody.innerHTML = '';
+  InfoLinkStore.apiRequest('/api/search/deep/fields')
+    .then(fields => {
+      fieldSelect.innerHTML = fields.length
+        ? fields.map(f => `<option value="${f}">${f}</option>`).join('')
+        : `<option value="">No common fields configured</option>`;
+      fieldCountEl.textContent = fields.length;
+    })
+    .catch(error => {
+      fieldSelect.innerHTML = `<option value="">Failed to load fields</option>`;
+      InfoLinkStore.showToast(error.message);
+    });
 
-  searchBtn.addEventListener('click', performSearch);
+  const searchBtn        = document.getElementById('searchBtn');
+  const searchInput      = document.getElementById('searchInput');
+  const resultsTitle     = document.getElementById('resultsTitle');
+  const resultsBody      = document.getElementById('resultsBody');
+  const recordsSection   = document.getElementById('records-section');
+  const recordsContainer = document.getElementById('recordsContainer');
+
+  searchBtn.addEventListener('click', () => performSearch());
   searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') performSearch(); });
 
-  async function performSearch() {
-    const kw = searchInput.value.trim();
+  async function performSearch(overrideKw, overrideField) {
+    const kw    = overrideKw    !== undefined ? overrideKw    : searchInput.value.trim();
+    const field = overrideField !== undefined ? overrideField : fieldSelect.value;
+
     if (!kw) {
       searchInput.focus();
       searchInput.style.borderColor = '#ef4444';
       setTimeout(() => (searchInput.style.borderColor = ''), 1200);
       return;
     }
+    if (!field) {
+      InfoLinkStore.showToast('Choose a field to search.');
+      return;
+    }
 
     searchBtn.disabled = true;
     searchBtn.innerHTML = `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="animation:spin 0.7s linear infinite"><circle cx="12" cy="12" r="10" stroke-opacity="0.3"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Searching…`;
     try {
-      const fieldsResponse = await InfoLinkStore.apiFetch('/api/search/deep/fields');
-      if (!fieldsResponse.ok) throw new Error('Unable to load searchable fields.');
-      const fields = await fieldsResponse.json();
-      if (!fields.length) throw new Error('No common searchable fields are configured.');
-      const response = await InfoLinkStore.apiFetch('/api/search/deep?page=0&size=100', {
+      const data = await InfoLinkStore.apiRequest('/api/search/deep?page=0&size=50', {
         method: 'POST',
-        body: JSON.stringify({ searchKeys: Object.fromEntries(fields.map(field => [field, kw])) })
+        body: JSON.stringify({ searchKeys: { [field]: kw } })
       });
-      if (!response.ok) throw new Error((await response.text()) || 'Search failed.');
-      const data = await response.json();
-      searchBtn.disabled = false;
-      searchBtn.innerHTML = `<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="width:16px;height:16px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Search records`;
 
-      const collections = [...new Set(data.content.map(result => result.collectionName))];
+      const collections = [...new Set((data.content || []).map(result => result.collectionName))];
       const resultCount = data.totalElements;
       const now        = new Date();
       const timeStr    = `Today, ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
 
       resultsTitle.textContent = `Search Results`;
+      renderRecords(data.content || []);
 
       const tr = document.createElement('tr');
       tr.classList.add('highlighted');
+      tr.dataset.kw = kw; tr.dataset.field = field;
       tr.innerHTML = `
         <td style="color:var(--text-primary);font-weight:500">${escHtml(kw)}</td>
-        <td>${escHtml(collections.length ? collections.join(', ') : 'All collections')}</td>
+        <td>${escHtml(field)}</td>
+        <td>${escHtml(collections.length ? collections.join(', ') : '—')}</td>
         <td class="${resultCount > 0 ? 'positive' : 'zero'}">${resultCount}</td>
         <td>${timeStr}</td>
         <td><button class="search-again-btn">Search again</button></td>
       `;
       resultsBody.insertBefore(tr, resultsBody.firstChild);
 
-      // Wire "search again" on new row
       tr.querySelector('.search-again-btn').addEventListener('click', () => {
         searchInput.value = kw;
-        performSearch();
+        fieldSelect.value = field;
+        performSearch(kw, field);
       });
     } catch (error) {
       resultsTitle.textContent = 'Search Error';
-      resultsBody.innerHTML = `<tr><td colspan="5" style="padding:24px;color:var(--danger);">${escHtml(error.message)}</td></tr>`;
+      resultsBody.innerHTML = `<tr><td colspan="6" style="padding:24px;color:var(--danger);">${escHtml(error.message)}</td></tr>`;
     } finally {
       searchBtn.disabled = false;
       searchBtn.innerHTML = `<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="width:16px;height:16px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Search records`;
     }
   }
 
-  // Wire "search again" on existing rows
-  document.querySelectorAll('.search-again-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const kw = this.closest('tr').querySelector('td:first-child').textContent.replace(/•+/g, '').trim();
-      searchInput.value = kw;
-      performSearch();
-    });
-  });
+  function renderRecords(results) {
+    recordsSection.style.display = '';
+    if (!results.length) {
+      recordsContainer.innerHTML = `<div class="card records-empty">No matching records found.</div>`;
+      return;
+    }
+    recordsContainer.innerHTML = results.map((result, i) => {
+      const doc = result.document || {};
+      const fields = Object.entries(doc)
+        .filter(([k]) => k !== '_id')
+        .map(([k, v]) => `<div class="record-field"><b>${escHtml(k)}</b>${escHtml(formatValue(v))}</div>`)
+        .join('');
+      return `<div class="record-card">
+        <div class="record-card-title">Record ${i + 1} <span class="record-card-tag">${escHtml(result.collectionName)}</span></div>
+        <div class="record-fields">${fields}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function formatValue(v) {
+    if (v === null || v === undefined) return '—';
+    if (typeof v === 'object') return JSON.stringify(v);
+    return String(v);
+  }
 
   function escHtml(s) {
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
   // Spin keyframe

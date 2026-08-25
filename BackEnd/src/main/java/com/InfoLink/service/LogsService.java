@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.InfoLink.dto.LogResponse;
 import com.InfoLink.dto.PagedResponse;
@@ -24,6 +25,7 @@ public class LogsService {
         this.logRepository = logRepository;
     }
 
+    @Transactional(readOnly = true)
     public PagedResponse<LogResponse> getLogs(Pageable pageable) {
         Page<Log> logPage = logRepository.findAll(pageable);
 
@@ -46,6 +48,7 @@ public class LogsService {
                 logPage.getTotalElements());
     }
 
+    @Transactional(readOnly = true)
     public PagedResponse<LogResponse> searchLogs(String keyword, Pageable pageable) {
     Page<Log> logPage = logRepository.searchLogs(keyword, pageable);
 
@@ -68,6 +71,7 @@ public class LogsService {
             logPage.getTotalElements());
     }
 
+        @Transactional(readOnly = true)
         public PagedResponse<LogResponse> getCurrentUserLogs(String username, Pageable pageable) {
                 Page<Log> logPage = logRepository.findByUser_Username(username, pageable);
                 return toResponse(logPage);
@@ -98,4 +102,3 @@ public class LogsService {
         }
 
 }
-

@@ -10,6 +10,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.InfoLink.dto.AddUserRequest;
 import com.InfoLink.dto.ChangePasswordRequest;
@@ -41,6 +42,7 @@ public class UserService {
         this.userRepository = userRepository;
         this.groupRepository = groupRepository;
     }
+    @Transactional(readOnly = true)
     public PagedResponse<UsersResponse> getUsers(Pageable pageable) {
         Page<User> userPage = userRepository.findAll(pageable);
         List<UsersResponse> content = userPage.getContent()
@@ -65,6 +67,7 @@ public class UserService {
         );
     }
 
+    @Transactional(readOnly = true)
     public PagedResponse<UsersResponse> getUsers(String keyword, Role role, Long groupId,
                              Boolean active, Pageable pageable) {
         Page<User> userPage = userRepository.search(
@@ -93,6 +96,7 @@ public class UserService {
         }
 
 
+    @Transactional(readOnly = true)
     public UsersResponse getUser(int id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
