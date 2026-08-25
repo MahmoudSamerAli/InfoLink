@@ -1,4 +1,4 @@
-package com.InfoLink.utils.service;
+package com.InfoLink.service;
 
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;

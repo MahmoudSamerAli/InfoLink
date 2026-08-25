@@ -1,8 +1,8 @@
 package com.InfoLink.filter;
 
 import com.InfoLink.security.CustomUserDetails;
+import com.InfoLink.service.CustomUserDetailsService;
 import com.InfoLink.utils.JwtUtil;
-import com.InfoLink.utils.service.CustomUserDetailsService;
 
 import io.jsonwebtoken.JwtException;
 

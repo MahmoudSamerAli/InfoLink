@@ -16,8 +16,8 @@ import com.InfoLink.dto.JwtResponse;
 import com.InfoLink.dto.LoginRequest;
 import com.InfoLink.dto.RefreshRequest;
 import com.InfoLink.security.CustomUserDetails;
+import com.InfoLink.service.RefreshTokenService;
 import com.InfoLink.utils.JwtUtil;
-import com.InfoLink.utils.service.RefreshTokenService;
 
 @RestController
 @RequestMapping("/auth")

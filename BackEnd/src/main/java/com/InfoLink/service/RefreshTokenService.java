@@ -1,4 +1,4 @@
-package com.InfoLink.utils.service;
+package com.InfoLink.service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;

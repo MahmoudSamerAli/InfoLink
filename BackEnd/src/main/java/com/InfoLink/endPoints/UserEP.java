@@ -13,7 +13,7 @@ import com.InfoLink.dto.UsersResponse;
 import com.InfoLink.model.User;
 import com.InfoLink.model.Role;
 import com.InfoLink.security.CustomUserDetails;
-import com.InfoLink.utils.service.UserService;
+import com.InfoLink.service.UserService;
 
 import org.springframework.data.domain.Pageable;
 

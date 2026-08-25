@@ -1,4 +1,4 @@
-package com.InfoLink.utils.service;
+package com.InfoLink.service;
 
 import org.springframework.stereotype.Service;
 import com.InfoLink.model.Log;

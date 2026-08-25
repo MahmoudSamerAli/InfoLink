@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.core.context.SecurityContextHolder;
 import com.InfoLink.security.CustomUserDetails;
-import com.InfoLink.utils.service.LogsService;
+import com.InfoLink.service.LogsService;
 import com.InfoLink.dto.LogResponse;
 import com.InfoLink.dto.PagedResponse;
 @RestController

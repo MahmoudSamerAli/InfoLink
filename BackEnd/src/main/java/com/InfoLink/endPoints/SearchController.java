@@ -24,12 +24,12 @@ import com.InfoLink.model.Groups;
 import com.InfoLink.model.GroupsCollections;
 import com.InfoLink.model.Log;
 import com.InfoLink.security.CustomUserDetails;
+import com.InfoLink.service.GroupsCollectionsService;
+import com.InfoLink.service.LogService;
 import com.InfoLink.dto.PagedResponse;
 import com.InfoLink.dto.DeepSearchRequest;
 import com.InfoLink.dto.DeepSearchResult;
 import com.InfoLink.utils.PaginationUtil;
-import com.InfoLink.utils.service.GroupsCollectionsService;
-import com.InfoLink.utils.service.LogService;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
