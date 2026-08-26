@@ -121,6 +121,13 @@ public class UserService {
         }
         Groups group;
         if (request.getRole() == Role.ADMIN) {
+            if (request.getGroupID() != null) {
+                Groups requestedGroup = groupRepository.findById(request.getGroupID())
+                    .orElseThrow(() -> new RuntimeException("Group not found with id: " + request.getGroupID()));
+                if (!isAdminGroup(requestedGroup)) {
+                    throw new IllegalArgumentException("Admin users must belong to the Admin group");
+                }
+            }
             group = groupRepository.findByGroupNameContainingIgnoreCase("Admin")
                 .orElseThrow(() -> new RuntimeException("Admin group not found"));
         } else {
@@ -129,6 +136,9 @@ public class UserService {
             }
             group = groupRepository.findById(request.getGroupID())
                     .orElseThrow(() -> new RuntimeException("Group not found with id: " + request.getGroupID()));
+            if (isAdminGroup(group)) {
+                throw new IllegalArgumentException("User accounts cannot belong to the Admin group");
+            }
         }
         String hashedPassword = passwordEncoder.encode(request.getPassword());
         User newUser = new User();
@@ -235,6 +245,11 @@ public class UserService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null && authentication.getAuthorities().stream()
             .anyMatch(authority -> "ROLE_SYSADMIN".equals(authority.getAuthority()));
+    }
+
+    private boolean isAdminGroup(Groups group) {
+        return group.getGroupName() != null
+            && group.getGroupName().toLowerCase().contains("admin");
     }
 
     private boolean isPrivileged(Role role) {

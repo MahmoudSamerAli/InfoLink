@@ -42,39 +42,23 @@
       gap: 16px;
       margin-bottom: 16px;
     }
-
-    .field-row.full {
-      grid-template-columns: 1fr;
-    }
-
-    .field-group {
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-    }
-
+    .field-row.full { grid-template-columns: 1fr; }
+    .field-group { display: flex; flex-direction: column; gap: 7px; }
     .field-label {
       font-size: 0.8rem;
       font-weight: 600;
       color: var(--text-secondary);
-      letter-spacing: 0.2px;
     }
 
     .field-label .optional {
-      font-weight: 400;
       font-style: italic;
       color: var(--text-secondary);
       margin-left: 4px;
     }
-
     /* Inputs with icon */
-    .input-wrap {
-      position: relative;
-    }
-
+    .input-wrap { position: relative; }
     .input-wrap svg {
       position: absolute;
-      left: 13px;
       top: 50%;
       transform: translateY(-50%);
       width: 15px;
@@ -93,7 +77,6 @@
       font-family: 'Inter', sans-serif;
       padding: 10px 14px 10px 38px;
       outline: none;
-      transition: border-color 0.18s, box-shadow 0.18s;
     }
 
     .field-input.no-icon {
@@ -152,6 +135,68 @@
 
     .id-counter.over {
       color: var(--danger);
+    }
+
+    /* Password requirements checklist */
+    .pw-checklist {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 12px;
+      margin-top: 8px;
+    }
+
+    .pw-check {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .76rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      transition: color .15s;
+    }
+
+    .pw-check svg {
+      width: 13px;
+      height: 13px;
+      flex-shrink: 0;
+      color: var(--text-secondary);
+      transition: color .15s;
+    }
+
+    .pw-check.met {
+      color: var(--success);
+    }
+
+    .pw-check.met svg {
+      color: var(--success);
+    }
+
+    /* Confirm password live match message */
+    .pw-match {
+      display: none;
+      align-items: center;
+      gap: 5px;
+      font-size: .77rem;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .pw-match.visible {
+      display: flex;
+    }
+
+    .pw-match.match {
+      color: var(--success);
+    }
+
+    .pw-match.mismatch {
+      color: var(--danger);
+    }
+
+    .pw-match svg {
+      width: 13px;
+      height: 13px;
+      flex-shrink: 0;
     }
 
     /* Select */
@@ -269,6 +314,7 @@
       gap: 12px;
       margin-top: 10px;
     }
+    #create-status { min-height: 20px; margin-top: 12px; font-size: .82rem; font-weight: 600; }
 
     /* -- Permission Summary Card -- */
     .perm-card {
@@ -617,7 +663,30 @@
                     <path d="M8 11V7a4 4 0 0 1 8 0v4" />
                   </svg>
                   <input id="temp-password" type="password" class="field-input"
-                    placeholder="Create a secure password" minlength="8" maxlength="16" />
+                    placeholder="Create a secure password" minlength="8" maxlength="16"
+                    oninput="validatePassword(this)" />
+                </div>
+                <div class="pw-checklist" id="pw-checklist">
+                  <span class="pw-check" id="pw-check-length">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
+                    8–16 characters
+                  </span>
+                  <span class="pw-check" id="pw-check-upper">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
+                    Uppercase letter
+                  </span>
+                  <span class="pw-check" id="pw-check-lower">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
+                    Lowercase letter
+                  </span>
+                  <span class="pw-check" id="pw-check-number">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
+                    Number
+                  </span>
+                  <span class="pw-check" id="pw-check-symbol">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
+                    Symbol (@$!%*?&)
+                  </span>
                 </div>
               </div>
               <div class="field-group">
@@ -627,7 +696,12 @@
                     <rect x="5" y="11" width="14" height="10" rx="2" />
                     <path d="M8 11V7a4 4 0 0 1 8 0v4" />
                   </svg>
-                  <input id="confirm-password" type="password" class="field-input" placeholder="Repeat the password" />
+                  <input id="confirm-password" type="password" class="field-input" placeholder="Repeat the password"
+                    oninput="validatePasswordMatch()" />
+                </div>
+                <div class="pw-match" id="pw-match">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" id="pw-match-icon"><polyline points="20 6 9 17 4 12" /></svg>
+                  <span id="pw-match-text"></span>
                 </div>
               </div>
             </div>
@@ -641,6 +715,7 @@
                 Create User
               </button>
             </div>
+            <div id="create-status" role="status" aria-live="polite"></div>
           </div>
 
           <!-- -- Permission Summary Card -- -->
@@ -725,8 +800,8 @@
     let groups = [];
     InfoLinkStore.apiRequest('/group?page=0&size=100')
       .then(data => {
-        groups = (data.content || []).filter(g => g.isActive || g.groupID === 1);
-        groupSelect.innerHTML = groups.map(g => `<option value="${g.groupID}">${g.groupName}</option>`).join('');
+        groups = (data.content || []).filter(g => g.isActive || isAdminGroup(g));
+        renderGroupsForRole();
         updatePermSummary();
       })
       .catch(error => InfoLinkStore.showToast(error.message));
@@ -749,10 +824,25 @@
       if (!groupID) groupSel.classList.add('inactive');
     }
 
+    function renderGroupsForRole() {
+      const role = document.getElementById('role-select').value.toUpperCase();
+      const availableGroups = role === 'ADMIN'
+        ? groups.filter(isAdminGroup)
+        : groups.filter(g => !isAdminGroup(g));
+      groupSelect.innerHTML = availableGroups.length
+        ? availableGroups.map(g => `<option value="${g.groupID}">${g.groupName}</option>`).join('')
+        : '<option value="">No compatible group available</option>';
+      if (role === 'ADMIN' && availableGroups.length) groupSelect.value = availableGroups[0].groupID;
+    }
+
+    function isAdminGroup(group) {
+      return String(group.groupName || '').toLowerCase().includes('admin');
+    }
+
     function handleRoleChange() {
       const isAdminRole = document.getElementById('role-select').value.toUpperCase() === 'ADMIN';
       const groupSelect = document.getElementById('group-select');
-      if (isAdminRole) groupSelect.value = '1';
+      renderGroupsForRole();
       groupSelect.disabled = isAdminRole;
       updatePermSummary();
     }
@@ -779,46 +869,125 @@
       }
     }
 
+    function validatePassword(input) {
+      const pass = input.value;
+      const checks = {
+        length: pass.length >= 8 && pass.length <= 16,
+        upper: /[A-Z]/.test(pass),
+        lower: /[a-z]/.test(pass),
+        number: /\d/.test(pass),
+        symbol: /[@$!%*?&]/.test(pass)
+      };
+
+      document.getElementById('pw-check-length').classList.toggle('met', checks.length);
+      document.getElementById('pw-check-upper').classList.toggle('met', checks.upper);
+      document.getElementById('pw-check-lower').classList.toggle('met', checks.lower);
+      document.getElementById('pw-check-number').classList.toggle('met', checks.number);
+      document.getElementById('pw-check-symbol').classList.toggle('met', checks.symbol);
+
+      const allMet = Object.values(checks).every(Boolean);
+      input.classList.toggle('invalid', pass.length > 0 && !allMet);
+
+      // Re-check confirm password match whenever the password changes
+      validatePasswordMatch();
+
+      return allMet;
+    }
+
+    function validatePasswordMatch() {
+      const pass = document.getElementById('temp-password').value;
+      const confirmInput = document.getElementById('confirm-password');
+      const confirm = confirmInput.value;
+      const matchEl = document.getElementById('pw-match');
+      const matchIcon = document.getElementById('pw-match-icon');
+      const matchText = document.getElementById('pw-match-text');
+
+      if (!confirm) {
+        matchEl.classList.remove('visible', 'match', 'mismatch');
+        confirmInput.classList.remove('invalid');
+        return;
+      }
+
+      const isMatch = pass === confirm;
+      matchEl.classList.add('visible');
+      matchEl.classList.toggle('match', isMatch);
+      matchEl.classList.toggle('mismatch', !isMatch);
+      confirmInput.classList.toggle('invalid', !isMatch);
+      matchText.textContent = isMatch ? 'Passwords match' : 'Passwords do not match';
+      matchIcon.innerHTML = isMatch
+        ? '<polyline points="20 6 9 17 4 12" />'
+        : '<line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />';
+
+      return isMatch;
+    }
+
     async function handleCreate() {
       const fullName = document.getElementById('full-name').value.trim();
       const username = document.getElementById('username').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const phone = document.getElementById('phone').value.trim();
-      const address = document.getElementById('address').value.trim();
       const role = document.getElementById('role-select').value;
       const groupID = Number(document.getElementById('group-select').value);
       const isActive = document.getElementById('status-toggle').checked;
       const pass = document.getElementById('temp-password').value;
       const confirm = document.getElementById('confirm-password').value;
+      const status = document.getElementById('create-status');
+      const submitButton = document.getElementById('btn-create');
+      const setStatus = (message, type = 'error') => {
+        status.textContent = message;
+        status.style.color = type === 'success' ? 'var(--success)' : 'var(--danger)';
+      };
+
+      if (!groupID || !groups.some(group => Number(group.groupID) === groupID)) {
+        setStatus('Please select a valid group.');
+        InfoLinkStore.showToast(status.textContent);
+        return;
+      }
+      if (role.toUpperCase() === 'ADMIN' && !isAdminGroup(groups.find(group => Number(group.groupID) === groupID))) {
+        setStatus('Admin users must be assigned to the Admin group.');
+        InfoLinkStore.showToast(status.textContent);
+        return;
+      }
+      if (role.toUpperCase() !== 'ADMIN' && isAdminGroup(groups.find(group => Number(group.groupID) === groupID))) {
+        setStatus('Regular users cannot be assigned to the Admin group.');
+        InfoLinkStore.showToast(status.textContent);
+        return;
+      }
 
       if (!fullName || !username) {
-        InfoLinkStore.showToast('Please fill in Full Name and Username.');
+        setStatus('Please fill in Full Name and Username.');
+        InfoLinkStore.showToast(status.textContent);
         return;
       }
       if (fullName.length < 3 || fullName.length > 100 || !/^[a-zA-Z\s]+$/.test(fullName)) {
-        InfoLinkStore.showToast('Full name must be 3–100 characters and contain only letters and spaces.');
+        setStatus('Full name must be 3–100 characters and contain only letters and spaces.');
+        InfoLinkStore.showToast(status.textContent);
         return;
       }
       if (username.length < 4 || username.length > 30 || !/^[a-zA-Z0-9_.]+$/.test(username)) {
-        InfoLinkStore.showToast('Username must be 4–30 characters and contain only letters, numbers, underscores, or dots.');
+        setStatus('Username must be 4–30 characters and contain only letters, numbers, underscores, or dots.');
+        InfoLinkStore.showToast(status.textContent);
         return;
       }
 
       // National ID validation
       if (!pass) {
-        InfoLinkStore.showToast('Please enter a temporary password.');
+        setStatus('Please enter a temporary password.');
+        InfoLinkStore.showToast(status.textContent);
         return;
       }
       if (pass.length < 8 || pass.length > 16 || !/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+/.test(pass)) {
-        InfoLinkStore.showToast('Password must be 8–16 characters and include upper- and lowercase letters, a number, and a symbol.');
+        setStatus('Password must be 8–16 characters and include upper- and lowercase letters, a number, and a symbol.');
+        InfoLinkStore.showToast(status.textContent);
         return;
       }
       if (pass !== confirm) {
-        InfoLinkStore.showToast('Passwords do not match.');
+        setStatus('Passwords do not match.');
+        InfoLinkStore.showToast(status.textContent);
         return;
       }
 
       try {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Creating...';
         await InfoLinkStore.apiRequest('/users/add', {
           method: 'POST',
           body: JSON.stringify({
@@ -826,14 +995,19 @@
             password: pass,
             fullName,
             role: role.toUpperCase(),
-            groupID: role.toUpperCase() === 'ADMIN' ? null : groupID,
+            groupID,
             isActive
           })
         });
-        InfoLinkStore.showToast(`User "${fullName}" created successfully.`, 'success');
-        window.location.href = 'users.html';
+        setStatus(`User "${fullName}" created successfully.`, 'success');
+        InfoLinkStore.showToast(status.textContent, 'success');
+        setTimeout(() => { window.location.href = 'users.html'; }, 900);
       } catch (error) {
-        InfoLinkStore.showToast(error.message);
+        setStatus(error.message || 'Unable to create user.');
+        InfoLinkStore.showToast(status.textContent);
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Create User';
       }
     }
 

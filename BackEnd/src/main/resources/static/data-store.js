@@ -102,6 +102,35 @@ const InfoLinkStore = (() => {
   }
 
   // ─── API COMMUNICATION ───
+  let _refreshPromise = null;
+
+  // Ensures only one /auth/refresh call is ever in flight at a time.
+  // Concurrent 401s (e.g. Promise.all on dashboard load) all await the
+  // same refresh instead of racing to consume the single-use refresh token.
+  function refreshTokens() {
+    if (_refreshPromise) return _refreshPromise;
+
+    const refreshToken = sessionStorage.getItem('infolink_refresh_token');
+    if (!refreshToken) return Promise.resolve(false);
+
+    _refreshPromise = fetch('/auth/refresh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken })
+    })
+      .then(async (refreshResponse) => {
+        if (!refreshResponse.ok) return false;
+        const tokens = await refreshResponse.json();
+        sessionStorage.setItem('infolink_access_token', tokens.accessToken);
+        sessionStorage.setItem('infolink_refresh_token', tokens.refreshToken);
+        return true;
+      })
+      .catch(() => false)
+      .finally(() => { _refreshPromise = null; });
+
+    return _refreshPromise;
+  }
+
   async function apiFetch(path, options = {}, retry = true) {
     const headers = new Headers(options.headers || {});
     const accessToken = sessionStorage.getItem('infolink_access_token');
@@ -110,21 +139,11 @@ const InfoLinkStore = (() => {
       headers.set('Content-Type', 'application/json');
     }
     const response = await fetch(path, { ...options, headers });
-    const refreshToken = sessionStorage.getItem('infolink_refresh_token');
-    if (response.status === 401 && retry && refreshToken) {
-      try {
-        const refreshResponse = await fetch('/auth/refresh', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ refreshToken })
-        });
-        if (refreshResponse.ok) {
-          const tokens = await refreshResponse.json();
-          sessionStorage.setItem('infolink_access_token', tokens.accessToken);
-          sessionStorage.setItem('infolink_refresh_token', tokens.refreshToken);
-          return apiFetch(path, options, false);
-        }
-      } catch (_) {}
+    if (response.status === 401 && retry) {
+      const refreshed = await refreshTokens();
+      if (refreshed) {
+        return apiFetch(path, options, false);
+      }
     }
     if (response.status === 401) {
       clearSession();
@@ -210,6 +229,24 @@ const InfoLinkStore = (() => {
     });
   }
 
+  async function logout() {
+    const refreshToken = sessionStorage.getItem('infolink_refresh_token');
+    if (refreshToken) {
+      try {
+        await fetch('/auth/logout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(refreshToken)
+        });
+      } catch (_) {
+        // Best effort: still clear the local session even if the
+        // revoke call fails (e.g. network offline).
+      }
+    }
+    clearSession();
+    window.location.href = 'login.html';
+  }
+
   // Initialize on load
   function init() {
     // Ensure requests array exists
@@ -238,5 +275,6 @@ const InfoLinkStore = (() => {
     showToast,
     login,
     changePassword,
+    logout,
   };
 })();
