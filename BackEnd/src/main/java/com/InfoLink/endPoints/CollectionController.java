@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.InfoLink.model.GroupsCollections;
+import com.InfoLink.dto.CollectionGroupResponse;
 import com.InfoLink.service.GroupsCollectionsService;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -31,6 +32,11 @@ public class CollectionController {
                 .stream()
                 .map(GroupsCollections::getCollectionName)
                 .toList());
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<String>> listAllCollections() {
+        return ResponseEntity.ok(groupsCollectionsService.getAllCollectionNames());
     }
 
     private boolean isValidName(String name) {
@@ -85,7 +91,7 @@ public class CollectionController {
     }
 
     @GetMapping("/{name}/groups")
-    public ResponseEntity<List<GroupsCollections>> listGroupsForCollection(@PathVariable String name) {
+    public ResponseEntity<List<CollectionGroupResponse>> listGroupsForCollection(@PathVariable String name) {
         return ResponseEntity.ok(groupsCollectionsService.getGroupsForCollection(name));
     }
     @PostMapping(value = "/{name}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

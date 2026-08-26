@@ -158,6 +158,11 @@
       color: var(--text-primary);
       line-height: 1;
     }
+    #lastLogin {
+      font-size: 0.95rem;
+      line-height: 1.25;
+      white-space: normal;
+    }
     .stat-delta {
       font-size: 0.75rem;
       font-weight: 600;
@@ -397,15 +402,6 @@
       </a>
       <div class="nav-section-label">Tools</div>
 
-      <a href="processor.html" class="nav-item" id="nav-processor">
-        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-          <rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/>
-          <rect x="3" y="17" width="18" height="4" rx="1"/>
-          <line x1="7" y1="5" x2="17" y2="5"/><line x1="7" y1="12" x2="14" y2="12"/>
-        </svg>
-        Column Mapping
-      </a>
-
       <a href="convert.html" class="nav-item" id="nav-convert">
         <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
           <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
@@ -525,7 +521,7 @@
           <div>
             <div class="stat-label">Successful Results</div>
             <div class="stat-bottom">
-              <div class="stat-value">16</div>
+              <div class="stat-value" id="successfulResults">0</div>
               <span class="stat-delta stat-delta-up">+89%</span>
             </div>
           </div>
@@ -698,16 +694,27 @@
   document.getElementById('lastLogin').textContent     = InfoLinkStore.getLoginTime();
 
   Promise.all([
-    InfoLinkStore.apiRequest('/logs/me?page=0&size=100'),
+    InfoLinkStore.apiRequest('/logs/me?page=0&size=5'),
     InfoLinkStore.apiRequest('/logs/me/today/count'),
     InfoLinkStore.apiRequest('/logs/me/success/count')
   ])
     .then(([data, todayCount, successCount]) => {
       const userLogs = data.content || [];
       document.getElementById('searchesToday').textContent = todayCount;
-      document.querySelectorAll('.stat-value')[2] && (document.querySelectorAll('.stat-value')[2].textContent = successCount);
+      document.getElementById('successfulResults').textContent = successCount;
+      const searchList = document.getElementById('searchList');
+      searchList.innerHTML = userLogs.length ? userLogs.map(log => `
+        <div class="search-item">
+          <div class="search-icon-wrap"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+          <div class="search-info"><div class="search-keyword">${escapeHtml(log.searchKeyword || '—')}</div><div class="search-group">${escapeHtml(log.collection || '—')}</div></div>
+          <div class="search-meta"><span class="search-time">${escapeHtml(log.searchDate ? new Date(log.searchDate).toLocaleString() : '—')}</span><span class="search-results-count ${log.status ? 'text-success' : 'text-danger'}">${log.status ? 'Success' : 'Failed'}</span></div>
+        </div>`).join('') : '<div class="search-item"><div class="search-info"><div class="search-keyword">No recent searches.</div></div></div>';
     })
     .catch(error => InfoLinkStore.showToast(error.message));
+
+  function escapeHtml(value) {
+    return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
 
   // Logout handler
   function handleLogout() {

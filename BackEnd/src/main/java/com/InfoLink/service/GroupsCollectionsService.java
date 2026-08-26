@@ -10,6 +10,7 @@ import com.InfoLink.repository.GroupRepository;
 import com.InfoLink.repository.GroupsCollectionsRepository;
 import com.InfoLink.repository.SearchMappingRepository;
 import com.InfoLink.model.SearchMapping;
+import com.InfoLink.dto.CollectionGroupResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.csv.CSVFormat;
@@ -50,6 +51,10 @@ public class GroupsCollectionsService {
 
     public List<GroupsCollections> getCollectionsForGroup(Long groupId) {
         return repo.findByGroup_GroupID(groupId);
+    }
+
+    public List<String> getAllCollectionNames() {
+        return mongoTemplate.getCollectionNames().stream().sorted().toList();
     }
 
     @Transactional
@@ -99,8 +104,12 @@ public class GroupsCollectionsService {
                 .toList();
     }
 
-    public List<GroupsCollections> getGroupsForCollection(String collectionName) {
-        return repo.findByCollectionName(collectionName);
+    @Transactional(readOnly = true)
+    public List<CollectionGroupResponse> getGroupsForCollection(String collectionName) {
+        return repo.findByCollectionName(collectionName).stream()
+                .map(mapping -> new CollectionGroupResponse(
+                        mapping.getGroup().getGroupID(), mapping.getGroup().getGroupName()))
+                .toList();
     }
 
     /** Creates the Mongo collection, optionally granting one group access immediately. Rolls back the Mongo collection if the SQL insert fails. */

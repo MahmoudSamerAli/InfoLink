@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="shared.css"/>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <style>
     /* â”€â”€ Search panel â”€â”€ */
     .search-panel {
@@ -306,14 +307,6 @@
       </a>
       <div class="nav-section-label">Tools</div>
 
-      <a href="processor.html" class="nav-item" id="nav-processor">
-        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-          <rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/>
-          <rect x="3" y="17" width="18" height="4" rx="1"/>
-          <line x1="7" y1="5" x2="17" y2="5"/><line x1="7" y1="12" x2="14" y2="12"/>
-        </svg>
-        Column Mapping
-      </a>
 
       <a href="convert.html" class="nav-item" id="nav-convert">
         <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
@@ -441,6 +434,7 @@
               </svg>
               Search records
             </button>
+            <button class="btn btn-outline" id="exportBtn" type="button" disabled>Export to XLSX</button>
           </div>
         </div>
       </div>
@@ -540,6 +534,24 @@
   const displayName    = currentUser.fullname || currentUser.username || 'User';
   const displayRole    = InfoLinkStore.isAdmin() ? 'System Administrator' : 'Standard User';
   const displayInitial = displayName.charAt(0).toUpperCase();
+
+  if (InfoLinkStore.isAdmin()) {
+    document.querySelector('.sidebar-nav').innerHTML = `
+      <div class="nav-section-label">Main</div>
+      <a href="dashboard.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+      <a href="search-user.html" class="nav-item active"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Search</a>
+      <a href="search-admin.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Deep Search</a>
+      <div class="nav-section-label">Management</div>
+      <a href="users.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
+      <a href="groups.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>Groups</a>
+      <a href="logs.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Logs</a>
+      <a href="collections.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg>Collections</a>
+      <div class="nav-section-label">Settings</div>
+      <a href="change-password.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Change Password</a>
+      <div class="nav-section-label">Tools</div>
+      <a href="processor.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="17" width="18" height="4" rx="1"/></svg>Column Mapping</a>
+      <a href="convert.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Converter</a>`;
+  }
 
   document.querySelector('.sidebar-user .user-name').textContent = displayName;
   document.querySelector('.sidebar-user .user-role').textContent = displayRole;
@@ -660,6 +672,8 @@
   const searchInput = document.getElementById('searchInput');
   const resultsTitle= document.getElementById('resultsTitle');
   const resultsBody = document.getElementById('resultsBody');
+  const exportBtn  = document.getElementById('exportBtn');
+  let lastSearch = null;
 
   searchBtn.addEventListener('click', () => performSearch());
   searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') performSearch(); });
@@ -688,6 +702,8 @@
       const query = new URLSearchParams({ collection: coll, page: 0, size: 50 });
       query.set(field, kw);
       const data = await InfoLinkStore.apiRequest(`/api/search?${query}`);
+      lastSearch = { keyword: kw, collection: coll, field };
+      exportBtn.disabled = data.totalElements === 0;
 
       const collLabel = Array.from(collectionSelect.options).find(o => o.value === coll)?.text || coll;
       const resultCount = data.totalElements;
@@ -723,6 +739,40 @@
       searchBtn.innerHTML = `<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="width:16px;height:16px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Search records`;
     }
   }
+
+  async function fetchAllSearchResults(search) {
+    const pageSize = 100;
+    const allResults = [];
+    let page = 0;
+    let total = 0;
+    do {
+      const query = new URLSearchParams({ collection: search.collection, page, size: pageSize });
+      query.set(search.field, search.keyword);
+      const data = await InfoLinkStore.apiRequest(`/api/search?${query}`);
+      allResults.push(...(data.content || []));
+      total = data.totalElements || 0;
+      page += 1;
+    } while (allResults.length < total);
+    return allResults;
+  }
+
+  exportBtn.addEventListener('click', async () => {
+    if (!lastSearch) return;
+    exportBtn.disabled = true;
+    exportBtn.textContent = 'Preparing...';
+    try {
+      const results = await fetchAllSearchResults(lastSearch);
+      const rows = results.map(result => result.document || result);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(rows.length ? rows : [{ Message: 'No results' }]), 'Search Results');
+      XLSX.writeFile(workbook, `infolink-search-${new Date().toISOString().slice(0, 10)}.xlsx`);
+    } catch (error) {
+      InfoLinkStore.showToast(error.message);
+    } finally {
+      exportBtn.disabled = false;
+      exportBtn.textContent = 'Export to XLSX';
+    }
+  });
 
   function renderRecords(documents) {
     recordsSection.style.display = '';

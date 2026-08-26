@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InfoLink - Collections</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .page-intro { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; margin-bottom:20px; }
+    .page-intro h1 { font-size:1.2rem; margin-bottom:5px; }
+    .page-intro p { color:var(--text-secondary); font-size:.82rem; }
+    .create-form { display:flex; gap:10px; align-items:center; margin-bottom:20px; }
+    .create-form input { flex:1; max-width:360px; background:var(--bg-input); border:1px solid var(--border); border-radius:8px; color:var(--text-primary); padding:10px 12px; font:inherit; outline:none; }
+    .create-form input:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow); }
+    .table-wrap { overflow-x:auto; }
+    .data-table { min-width:800px; }
+    .collection-name { color:var(--text-primary); font-weight:600; }
+    .access-list { display:flex; flex-wrap:wrap; gap:6px; }
+    .access-chip { display:inline-flex; align-items:center; gap:5px; padding:4px 8px; border-radius:15px; background:var(--accent-light); color:#a78bfa; font-size:.75rem; }
+    .access-chip button { border:0; background:transparent; color:inherit; cursor:pointer; padding:0; font-size:.85rem; }
+    .row-actions { display:flex; flex-wrap:wrap; gap:7px; align-items:center; }
+    .row-actions select { max-width:150px; background:var(--bg-input); border:1px solid var(--border); border-radius:7px; color:var(--text-primary); padding:7px; font:inherit; font-size:.75rem; }
+    .btn-danger { color:var(--danger); border-color:var(--danger); }
+    .empty-state { padding:28px; text-align:center; color:var(--text-secondary); }
+    #status { min-height:20px; color:var(--text-secondary); font-size:.8rem; margin:8px 0 16px; }
+    @media (max-width:600px) { .page-intro { flex-direction:column; } .create-form { align-items:stretch; flex-direction:column; } .create-form input { max-width:none; width:100%; } }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><img src="infolink-logo.png" alt="InfoLink" /></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="dashboard.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+      <a href="search-user.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Search</a>
+      <a href="search-admin.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Deep Search</a>
+      <div class="nav-section-label">Management</div>
+      <a href="users.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
+      <a href="groups.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>Groups</a>
+      <a href="collections.html" class="nav-item active"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg>Collections</a>
+      <a href="logs.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Logs</a>
+      <div class="nav-section-label">Settings</div>
+      <a href="change-password.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Change Password</a>
+      <div class="nav-section-label">Tools</div>
+      <a href="processor.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="17" width="18" height="4" rx="1"/></svg>Column Mapping</a>
+      <a href="convert.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Converter</a>
+    </nav>
+    <div class="sidebar-user"><div class="user-avatar" id="avatar">A</div><div class="user-info"><div class="user-name" id="userName">Admin</div><div class="user-role">System Administrator</div></div></div>
+    <div style="padding:0 14px 14px"><button class="btn-logout" onclick="logout()"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout</button></div>
+  </aside>
+  <div class="main">
+    <header class="topbar"><div class="topbar-title"><h2>MongoDB Collections</h2><p>Create, upload, and manage collection access</p></div><div class="topbar-actions"><button class="theme-btn" id="themeButton" title="Toggle theme"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button></div></header>
+    <main class="page-content">
+      <div class="page-intro"><div><h1>Collection management</h1><p>Manage MongoDB collections and the groups allowed to search them.</p></div></div>
+      <section class="card">
+        <form class="create-form" id="createForm"><input id="collectionName" pattern="[A-Za-z][A-Za-z0-9_]{0,63}" maxlength="64" placeholder="New collection name" required /><select id="initialGroup" class="group-select" style="max-width:220px"><option value="">No initial group</option></select><button class="btn btn-primary" type="submit">Create collection</button></form>
+        <div id="status"></div>
+        <div class="table-wrap"><table class="data-table"><thead><tr><th>Collection</th><th>Group access</th><th>Manage access</th><th>Upload data</th><th></th></tr></thead><tbody id="collectionsBody"><tr><td colspan="5" class="empty-state">Loading collections...</td></tr></tbody></table></div>
+      </section>
+    </main>
+  </div>
+</div>
+<script src="data-store.js"></script>
+<script>
+  if (!InfoLinkStore.isLoggedIn() || !InfoLinkStore.isAdmin()) window.location.href = 'login.html';
+  const user = InfoLinkStore.getCurrentUser();
+  document.getElementById('userName').textContent = user.fullname || user.username || 'Admin';
+  document.getElementById('avatar').textContent = (user.fullname || user.username || 'A').charAt(0).toUpperCase();
+  const body = document.getElementById('collectionsBody');
+  const groupSelect = document.getElementById('initialGroup');
+  const groups = [];
+  let collectionNames = new Set();
+  function esc(value) { return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function message(text, error = false) { const status = document.getElementById('status'); status.textContent = text; status.style.color = error ? 'var(--danger)' : 'var(--success)'; }
+  async function loadCollections() {
+    try {
+      const data = await InfoLinkStore.apiRequest('/group?page=0&size=100');
+      groups.splice(0, groups.length, ...(data.content || []));
+      groupSelect.innerHTML = '<option value="">No initial group</option>' + groups.map(g => `<option value="${g.groupID}">${esc(g.groupName)}</option>`).join('');
+      collectionNames = new Set(await InfoLinkStore.apiRequest('/api/collections/all'));
+      await renderCollections();
+    } catch (error) { body.innerHTML = `<tr><td colspan="5" class="empty-state">${esc(error.message)}</td></tr>`; }
+  }
+  async function renderCollections() {
+    if (!collectionNames.size) { body.innerHTML = '<tr><td colspan="5" class="empty-state">No collections found. Create the first one above.</td></tr>'; return; }
+    const names = [...collectionNames].sort();
+    const rows = await Promise.all(names.map(async name => {
+      const access = await InfoLinkStore.apiRequest(`/api/collections/${encodeURIComponent(name)}/groups`);
+      const groupIds = new Set(access.map(item => item.group?.groupID || item.groupID));
+      return `<tr><td class="collection-name">${esc(name)}</td><td><div class="access-list">${access.length ? access.map(item => `<span class="access-chip">${esc(item.group?.groupName || item.groupName || 'Group')}<button type="button" title="Revoke access" onclick="revokeAccess('${esc(name)}', '${item.group?.groupID || item.groupID}')">&times;</button></span>`).join('') : '<span style="color:var(--text-secondary)">No groups</span>'}</div></td><td><div class="row-actions"><select id="group-${cssId(name)}"><option value="">Select group</option>${groups.filter(g => !groupIds.has(g.groupID)).map(g => `<option value="${g.groupID}">${esc(g.groupName)}</option>`).join('')}</select><button class="btn btn-outline" type="button" onclick="grantAccess('${esc(name)}')">Grant</button></div></td><td><input type="file" id="upload-${cssId(name)}" accept=".csv,.json" hidden onchange="uploadData('${esc(name)}', this.files[0])"><button class="btn btn-outline" type="button" onclick="document.getElementById('upload-${cssId(name)}').click()">Upload CSV/JSON</button></td><td><button class="btn btn-outline btn-danger" type="button" onclick="deleteCollection('${esc(name)}')">Delete</button></td></tr>`;
+    }));
+    body.innerHTML = rows.join('');
+  }
+  function cssId(name) { return name.replace(/[^A-Za-z0-9_-]/g, '_'); }
+  async function grantAccess(name) { const id = document.getElementById(`group-${cssId(name)}`).value; if (!id) return message('Select a group first.', true); await action(`/api/collections/${encodeURIComponent(name)}/groups/${id}`, { method: 'POST' }, 'Group access granted.'); }
+  async function revokeAccess(name, id) { if (confirm(`Revoke group access to ${name}?`)) await action(`/api/collections/${encodeURIComponent(name)}/groups/${id}`, { method: 'DELETE' }, 'Group access revoked.'); }
+  async function deleteCollection(name) { if (confirm(`Delete collection ${name} and all its data?`)) await action(`/api/collections/${encodeURIComponent(name)}`, { method: 'DELETE' }, 'Collection deleted.'); }
+  async function uploadData(name, file) { if (!file) return; const form = new FormData(); form.append('file', file); await action(`/api/collections/${encodeURIComponent(name)}/upload`, { method: 'POST', body: form }, 'Data uploaded.'); }
+  async function action(path, options, success) { try { await InfoLinkStore.apiRequest(path, options); message(success); await loadCollections(); } catch (error) { message(error.message, true); } }
+  document.getElementById('createForm').addEventListener('submit', async event => { event.preventDefault(); const name = document.getElementById('collectionName').value.trim(); const groupId = groupSelect.value; const query = new URLSearchParams({ name }); if (groupId) query.set('groupId', groupId); await action(`/api/collections?${query}`, { method: 'POST' }, 'Collection created.'); document.getElementById('collectionName').value = ''; });
+  document.getElementById('themeButton').addEventListener('click', () => document.body.classList.toggle('light-mode'));
+  function logout() { InfoLinkStore.clearSession(); window.location.href = 'login.html'; }
+  loadCollections();
+</script>
+</body>
+</html>

@@ -69,6 +69,8 @@ public class SecurityConfig {
                 .requestMatchers("/logs/me/**").authenticated()
                 .requestMatchers("/users/**", "/group/**", "/logs/**")
                     .hasAnyRole("ADMIN", "SYSADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/collections/all", "/api/collections/*/groups")
+                    .hasAnyRole("ADMIN", "SYSADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/collections/**").authenticated()
                 .requestMatchers("/api/collections/**")
                     .hasAnyRole("ADMIN", "SYSADMIN")

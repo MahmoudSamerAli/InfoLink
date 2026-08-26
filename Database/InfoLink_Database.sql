@@ -121,6 +121,69 @@ INSERT INTO Logs (User_Idd, Collection_Name, Search_keyword, Search_date, IP_add
 (1, 'Orders', 'shipping delays', '2024-06-02 09:12:00', '10.0.0.10', 1),  -- Rita, SysAdmin
 (5, 'Invoices', 'unauthorized access', '2024-06-02 10:05:00', '10.0.1.21', 0);  -- Miguel, HR User, cross-collection denial
 
+INSERT INTO Search_Mapping (Collection_Name, Field_Name, is_common) VALUES
+-- Contracts
+('Contracts', 'contractId',   0),
+('Contracts', 'nationalId',   1),
+('Contracts', 'contractType', 0),
+('Contracts', 'startDate',    0),
+('Contracts', 'endDate',      0),
+('Contracts', 'fileName',     1),
+('Contracts', 'createdAt',    0),
+('Contracts', 'updatedAt',    0),
+
+-- Customers
+('Customers', 'customerId',    1),
+('Customers', 'nationalId',    1),
+('Customers', 'phoneNumber1',  1),
+('Customers', 'phoneNumber2',  1),
+('Customers', 'address',       1),
+('Customers', 'customerType',  0),
+('Customers', 'fileName',      1),
+('Customers', 'createdAt',     0),
+('Customers', 'updatedAt',     0),
+
+-- Employees
+('Employees', 'nationalId',   1),
+('Employees', 'phoneNumber1', 1),
+('Employees', 'phoneNumber2', 1),
+('Employees', 'address',      1),
+('Employees', 'fileName',     1),
+('Employees', 'createdAt',    0),
+('Employees', 'updatedAt',    0),
+
+-- Invoices
+('Invoices', 'invoiceId',     0),
+('Invoices', 'customerId',    1),
+('Invoices', 'invoiceDate',   0),
+('Invoices', 'amount',        0),
+('Invoices', 'invoiceStatus', 0),
+('Invoices', 'dueDate',       0),
+('Invoices', 'fileName',      1),
+('Invoices', 'createdAt',     0),
+('Invoices', 'updatedAt',     0),
+
+-- Orders
+('Orders', 'orderId',      0),
+('Orders', 'customerId',   1),
+('Orders', 'orderDate',    0),
+('Orders', 'orderStatus',  0),
+('Orders', 'totalAmount',  0),
+('Orders', 'fileName',     1),
+('Orders', 'createdAt',    0),
+('Orders', 'updatedAt',    0),
+
+-- Payments
+('Payments', 'paymentId',      0),
+('Payments', 'customerId',     1),
+('Payments', 'paymentDate',    0),
+('Payments', 'amount',         0),
+('Payments', 'paymentMethod',  0),
+('Payments', 'paymentStatus',  0),
+('Payments', 'fileName',       1),
+('Payments', 'createdAt',      0),
+('Payments', 'updatedAt',      0);
+
 USE InfoLink;
 
 SELECT * FROM Groups;

@@ -8,6 +8,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="shared.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <style>
     /* Converter styling integrated with shared design system */
     .converter-card {
@@ -220,37 +222,21 @@
         </div>
 
         <div class="card-title">Convert your file</div>
-        <div class="card-subtitle">Provide a file path, or upload a file directly.</div>
-
-        <div class="form-field">
-          <label>Excel file path</label>
-          <div class="input-wrap">
-            <i class="fa-solid fa-folder-open"></i>
-            <input type="text" id="filePath" placeholder="Enter Excel file path">
-          </div>
-        </div>
-
-        <button class="btn btn-primary" style="width:100%" onclick="convertFile()">Convert File</button>
-
-        <div class="divider-row">
-          <div class="divider-line"></div>
-          OR
-          <div class="divider-line"></div>
-        </div>
+        <div class="card-subtitle">Upload an Excel workbook or ZIP archive containing workbooks.</div>
 
         <div class="upload-box">
           <div class="upload-icon"><i class="fa-solid fa-arrow-up-from-bracket"></i></div>
           <p>Drag &amp; drop your file here</p>
-          <small>Supports CSV, XLSX</small>
+          <small>Supports XLS, XLSX, and ZIP</small>
           <br><br>
-          <input type="file" id="archiveFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFileSelect(this)">
+          <input type="file" id="archiveFile" accept=".xlsx,.xls,.zip" style="display:none" onchange="handleFileSelect(this)">
           <button class="btn btn-outline btn-choose" type="button" onclick="document.getElementById('archiveFile').click()">
             <i class="fa-solid fa-folder"></i> &nbsp; Choose File
           </button>
           <p id="archiveName" style="margin-top:12px; color:var(--text-secondary); font-size:0.75rem;">No file chosen</p>
         </div>
 
-        <button class="btn btn-primary" style="width:100%" onclick="uploadArchive()">Upload &amp; Convert</button>
+        <button class="btn btn-primary" style="width:100%" onclick="convertSelectedFile()">Upload &amp; Convert</button>
 
         <p id="status"></p>
 
@@ -298,10 +284,11 @@
       <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       Dashboard
     </a>
-    <a href="search-admin.html" class="nav-item">
+    <a href="search-user.html" class="nav-item">
       <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       Search
     </a>
+      <a href="search-admin.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Deep Search</a>
     <div class="nav-section-label">Management</div>
     <a href="users.html" class="nav-item">
       <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -315,6 +302,7 @@
       <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
       Logs
     </a>
+    <a href="collections.html" class="nav-item">Collections</a>
     <div class="nav-section-label">Settings</div>
     <a href="change-password.html" class="nav-item">
       <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
@@ -347,10 +335,6 @@
       Change Password
     </a>
     <div class="nav-section-label">Tools</div>
-    <a href="processor.html" class="nav-item">
-      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="17" width="18" height="4" rx="1"/><line x1="7" y1="5" x2="17" y2="5"/><line x1="7" y1="12" x2="14" y2="12"/></svg>
-      Column Mapping
-    </a>
     <a href="convert.html" class="nav-item active">
       <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
       Converter
@@ -358,40 +342,69 @@
   `;
 
   document.getElementById('sidebar-nav').innerHTML = isAdmin ? adminNav : userNav;
+  if (!isAdmin) document.querySelector('#sidebar-nav a[href="processor.html"]')?.remove();
 
   function handleLogout() {
     InfoLinkStore.clearSession();
     window.location.href = 'login.html';
   }
 
-  // File Converter Logic
+  // Browser equivalent of the backend converter: first sheet to UTF-8 CSV.
   let lastResultName = "converted-file.csv";
+  let lastResultBlob = null;
 
-  function convertFile() {
-    const path = document.getElementById("filePath").value.trim();
-    const status = document.getElementById("status");
-    const downloadSection = document.getElementById("downloadSection");
+  function escapeCsv(value) {
+    const text = value == null ? '' : String(value);
+    return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+  }
 
-    if (!path) {
-      status.style.color = "var(--danger)";
-      status.textContent = "Please enter a file path.";
-      downloadSection.style.display = "none";
+  function workbookToCsv(buffer) {
+    const workbook = XLSX.read(buffer, { type: 'array', cellDates: true });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    if (!sheet) throw new Error('Excel file is empty.');
+    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, defval: '' });
+    if (!rows.length) throw new Error('Excel file is empty.');
+    return rows.map(row => row.map(escapeCsv).join(',')).join('\r\n') + '\r\n';
+  }
+
+  async function convertSelectedFile() {
+    const input = document.getElementById('archiveFile');
+    const status = document.getElementById('status');
+    const downloadSection = document.getElementById('downloadSection');
+    const file = input.files[0];
+    if (!file) {
+      status.style.color = 'var(--danger)';
+      status.textContent = 'Please choose an Excel file or ZIP archive.';
+      downloadSection.style.display = 'none';
       return;
     }
-
-    status.style.color = "var(--text-muted)";
-    status.textContent = "Converting " + path + " ...";
-    downloadSection.style.display = "none";
-
-    const baseName = path.split(/[\\/]/).pop().replace(/\.[^/.]+$/, "") || "converted-file";
-    lastResultName = baseName + "-converted.csv";
-
-    setTimeout(() => {
-      status.style.color = "var(--success)";
-      status.textContent = "Conversion complete.";
-      document.getElementById("downloadFileName").textContent = lastResultName;
-      downloadSection.style.display = "block";
-    }, 600);
+    status.style.color = 'var(--text-muted)';
+    status.textContent = `Converting ${file.name} ...`;
+    downloadSection.style.display = 'none';
+    try {
+      if (file.name.toLowerCase().endsWith('.zip')) {
+        const archive = await JSZip.loadAsync(await file.arrayBuffer());
+        const output = new JSZip();
+        const workbooks = Object.values(archive.files).filter(entry => /\.(xls|xlsx)$/i.test(entry.name) && !entry.dir);
+        if (!workbooks.length) throw new Error('The archive contains no valid Excel files.');
+        for (const entry of workbooks) {
+          const csv = workbookToCsv(await entry.async('arraybuffer'));
+          output.file(entry.name.replace(/\.(xls|xlsx)$/i, '.csv').split('/').pop(), csv);
+        }
+        lastResultBlob = await output.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+        lastResultName = file.name.replace(/\.zip$/i, '') + '-converted.zip';
+      } else {
+        lastResultBlob = new Blob([workbookToCsv(await file.arrayBuffer())], { type: 'text/csv;charset=utf-8' });
+        lastResultName = file.name.replace(/\.(xls|xlsx)$/i, '') + '-converted.csv';
+      }
+      status.style.color = 'var(--success)';
+      status.textContent = 'Conversion complete.';
+      document.getElementById('downloadFileName').textContent = lastResultName;
+      downloadSection.style.display = 'block';
+    } catch (error) {
+      status.style.color = 'var(--danger)';
+      status.textContent = error.message || 'Conversion failed.';
+    }
   }
 
   function handleFileSelect(input) {
@@ -403,38 +416,9 @@
     }
   }
 
-  function uploadArchive() {
-    const input = document.getElementById("archiveFile");
-    const status = document.getElementById("status");
-    const downloadSection = document.getElementById("downloadSection");
-
-    if (!input.files.length) {
-      status.style.color = "var(--danger)";
-      status.textContent = "Please choose a file to upload.";
-      downloadSection.style.display = "none";
-      return;
-    }
-
-    const file = input.files[0];
-    status.style.color = "var(--text-muted)";
-    status.textContent = "Uploading " + file.name + " ...";
-    downloadSection.style.display = "none";
-
-    const baseName = file.name.replace(/\.[^/.]+$/, "") || "converted-file";
-    lastResultName = baseName + "-converted.csv";
-
-    setTimeout(() => {
-      status.style.color = "var(--success)";
-      status.textContent = "Upload and conversion complete.";
-      document.getElementById("downloadFileName").textContent = lastResultName;
-      downloadSection.style.display = "block";
-    }, 600);
-  }
-
   document.getElementById("downloadBtn").addEventListener("click", function () {
-    const csvContent = "Name,Number,Address,Branch,Area,Date\n";
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
+    if (!lastResultBlob) return;
+    const url = URL.createObjectURL(lastResultBlob);
 
     const link = document.createElement("a");
     link.href = url;

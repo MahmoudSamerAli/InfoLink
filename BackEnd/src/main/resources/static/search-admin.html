@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="shared.css"/>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <style>
     /* -- Search panel -- */
     .search-panel {
@@ -234,12 +235,13 @@
         Dashboard
       </a>
 
-      <a href="search-admin.html" class="nav-item active">
+      <a href="search-user.html" class="nav-item">
         <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
         Search
       </a>
+      <a href="search-admin.html" class="nav-item active"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Deep Search</a>
 
       <div class="nav-section-label">Management</div>
 
@@ -268,6 +270,7 @@
         Logs
       </a>
 
+      <a href="collections.html" class="nav-item">Collections</a>
       <div class="nav-section-label">Settings</div>
 
       <a href="change-password.html" class="nav-item">
@@ -398,6 +401,7 @@
               </svg>
               Search records
             </button>
+            <button class="btn btn-outline" id="exportBtn" type="button" disabled>Export to XLSX</button>
           </div>
         </div>
       </div>
@@ -485,6 +489,8 @@
   const resultsBody      = document.getElementById('resultsBody');
   const recordsSection   = document.getElementById('records-section');
   const recordsContainer = document.getElementById('recordsContainer');
+  const exportBtn        = document.getElementById('exportBtn');
+  let lastSearch = null;
 
   searchBtn.addEventListener('click', () => performSearch());
   searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') performSearch(); });
@@ -511,6 +517,8 @@
         method: 'POST',
         body: JSON.stringify({ searchKeys: { [field]: kw } })
       });
+      lastSearch = { keyword: kw, field };
+      exportBtn.disabled = data.totalElements === 0;
 
       const collections = [...new Set((data.content || []).map(result => result.collectionName))];
       const resultCount = data.totalElements;
@@ -546,6 +554,41 @@
       searchBtn.innerHTML = `<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="width:16px;height:16px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Search records`;
     }
   }
+
+  async function fetchAllDeepResults(search) {
+    const pageSize = 100;
+    const allResults = [];
+    let page = 0;
+    let total = 0;
+    do {
+      const data = await InfoLinkStore.apiRequest(`/api/search/deep?page=${page}&size=${pageSize}`, {
+        method: 'POST',
+        body: JSON.stringify({ searchKeys: { [search.field]: search.keyword } })
+      });
+      allResults.push(...(data.content || []));
+      total = data.totalElements || 0;
+      page += 1;
+    } while (allResults.length < total);
+    return allResults;
+  }
+
+  exportBtn.addEventListener('click', async () => {
+    if (!lastSearch) return;
+    exportBtn.disabled = true;
+    exportBtn.textContent = 'Preparing...';
+    try {
+      const results = await fetchAllDeepResults(lastSearch);
+      const rows = results.map(result => ({ Collection: result.collectionName, ...(result.document || {}) }));
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(rows.length ? rows : [{ Message: 'No results' }]), 'Search Results');
+      XLSX.writeFile(workbook, `infolink-deep-search-${new Date().toISOString().slice(0, 10)}.xlsx`);
+    } catch (error) {
+      InfoLinkStore.showToast(error.message);
+    } finally {
+      exportBtn.disabled = false;
+      exportBtn.textContent = 'Export to XLSX';
+    }
+  });
 
   function renderRecords(results) {
     recordsSection.style.display = '';

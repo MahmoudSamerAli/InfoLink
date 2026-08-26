@@ -85,7 +85,7 @@ const InfoLinkStore = (() => {
     const t = sessionStorage.getItem('infolink_login_time');
     if (!t) return '—';
     const d = new Date(t);
-    return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+    return d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
   }
 
   function clearSession() {
@@ -106,7 +106,9 @@ const InfoLinkStore = (() => {
     const headers = new Headers(options.headers || {});
     const accessToken = sessionStorage.getItem('infolink_access_token');
     if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`);
-    if (options.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+    if (options.body && !(options.body instanceof FormData) && !headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json');
+    }
     const response = await fetch(path, { ...options, headers });
     const refreshToken = sessionStorage.getItem('infolink_refresh_token');
     if (response.status === 401 && retry && refreshToken) {

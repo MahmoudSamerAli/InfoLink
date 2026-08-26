@@ -1,878 +1,127 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>InfoLink - Column Mapping</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="shared.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="shared.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
   <style>
-    /* Column mapping styled CSS overrides */
-    .cm-upload-row {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 24px;
-      align-items: stretch;
-    }
-
-    .cm-dropzone {
-      flex: 1.6;
-      border: 2px dashed var(--border);
-      border-radius: 14px;
-      background: var(--bg-card);
-      padding: 30px;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      transition: border-color 0.18s;
-    }
-    .cm-dropzone:hover {
-      border-color: var(--accent);
-    }
-
-    .cm-upload-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: var(--accent-light);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent);
-      font-size: 1.2rem;
-      margin-bottom: 8px;
-    }
-
-    .cm-dropzone p {
-      font-size: 0.88rem;
-      color: var(--text-primary);
-    }
-
-    .cm-or {
-      font-size: 0.8rem;
-      color: var(--text-secondary);
-      margin: 4px 0;
-    }
-
-    .cm-upload-btn {
-      height: 38px;
-      padding: 0 20px;
-      border: none;
-      border-radius: 6px;
-      background: var(--accent);
-      color: #fff;
-      font-family: inherit;
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.18s;
-    }
-    .cm-upload-btn:hover {
-      background: var(--accent-hover);
-    }
-
-    .cm-supported {
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-      margin-top: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .cm-format-chip {
-      background: var(--bg-input);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 2px 8px;
-      font-size: 0.7rem;
-      color: var(--text-muted);
-    }
-
-    .cm-fileinfo {
-      flex: 1.3;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 16px;
-    }
-
-    .cm-fileinfo-top {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .cm-filetype-badge {
-      width: 36px;
-      height: 36px;
-      border-radius: 6px;
-      background: rgba(16, 185, 129, 0.12);
-      color: var(--success);
-      font-size: 0.8rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .cm-filename {
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .cm-check {
-      color: var(--success);
-      font-size: 1rem;
-      flex-shrink: 0;
-    }
-
-    .cm-fileinfo-meta {
-      display: flex;
-      gap: 24px;
-    }
-
-    .cm-fileinfo-meta div {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .cm-fileinfo-meta label {
-      font-size: 0.72rem;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .cm-fileinfo-meta span {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    .cm-automap {
-      flex: 1;
-      border-radius: 14px;
-      background: var(--accent-light);
-      border: 1px solid var(--accent);
-      color: var(--accent);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      gap: 4px;
-      cursor: pointer;
-      padding: 20px;
-      transition: all 0.2s;
-    }
-    .cm-automap:hover {
-      background: var(--accent);
-      color: #fff;
-    }
-    .cm-automap strong {
-      font-size: 0.95rem;
-      font-weight: 700;
-    }
-    .cm-automap span {
-      font-size: 0.72rem;
-      opacity: 0.85;
-    }
-
-    .cm-map-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 24px;
-      margin-bottom: 24px;
-    }
-
-    .cm-map-toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 18px;
-    }
-
-    .cm-map-toolbar-left {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .cm-map-title {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    .cm-toggle {
-      position: relative;
-      width: 38px;
-      height: 20px;
-      border-radius: 10px;
-      background: var(--border);
-      cursor: pointer;
-      transition: background 0.2s;
-      flex-shrink: 0;
-      border: none;
-      outline: none;
-    }
-    .cm-toggle::after {
-      content: "";
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: var(--text-secondary);
-      transition: left 0.2s, background 0.2s;
-    }
-    .cm-toggle.on {
-      background: var(--accent);
-    }
-    .cm-toggle.on::after {
-      left: 20px;
-      background: #fff;
-    }
-
-    .cm-toggle-label {
-      font-size: 0.82rem;
-      color: var(--text-secondary);
-    }
-
-    .cm-clear-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      border: 1px solid rgba(239, 68, 68, 0.4);
-      color: var(--danger);
-      background: transparent;
-      border-radius: 8px;
-      padding: 6px 14px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.18s;
-    }
-    .cm-clear-btn:hover {
-      background: var(--danger-bg);
-      border-color: var(--danger);
-    }
-
-    .cm-table-wrap {
-      overflow-x: auto;
-    }
-    .cm-table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 900px;
-    }
-    .cm-table th {
-      text-align: left;
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--border);
-    }
-    .cm-table td {
-      padding: 12px 14px;
-      font-size: 0.85rem;
-      color: var(--text-primary);
-      border-bottom: 1px solid var(--border);
-      vertical-align: middle;
-    }
-    .cm-table tr:last-child td {
-      border-bottom: none;
-    }
-
-    .cm-type-badge {
-      display: inline-block;
-      padding: 2px 10px;
-      border-radius: 4px;
-      font-size: 0.72rem;
-      font-weight: 600;
-    }
-    .cm-type-text  { background: rgba(59, 130, 246, 0.12); color: var(--info); }
-    .cm-type-email { background: rgba(16, 185, 129, 0.12); color: var(--success); }
-    .cm-type-phone { background: rgba(168, 85, 247, 0.12); color: #c084fc; }
-    .cm-type-date  { background: rgba(245, 158, 11, 0.12); color: var(--warning); }
-
-    .cm-select {
-      width: 100%;
-      max-width: 200px;
-      height: 36px;
-      background: var(--bg-input);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text-primary);
-      font-family: inherit;
-      font-size: 0.82rem;
-      padding: 0 10px;
-      outline: none;
-    }
-    .cm-select.placeholder {
-      color: var(--text-secondary);
-    }
-    .cm-select:focus {
-      border-color: var(--accent);
-    }
-
-    .cm-action-btn {
-      width: 32px;
-      height: 32px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: background 0.18s;
-    }
-    .cm-action-btn:hover {
-      background: var(--bg-row-hover);
-      color: var(--text-primary);
-    }
-
-    .cm-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.78rem;
-      font-weight: 600;
-    }
-    .cm-status.mapped { color: var(--success); }
-    .cm-status.unmapped { color: var(--warning); }
-
-    .cm-preview-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 0;
-      overflow: hidden;
-    }
-    .cm-preview-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 18px 24px;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    .cm-preview-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .cm-preview-table th {
-      text-align: left;
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 12px 18px;
-      border-bottom: 1px solid var(--border);
-    }
-    .cm-preview-table td {
-      padding: 12px 18px;
-      font-size: 0.85rem;
-      color: var(--text-primary);
-      border-bottom: 1px solid var(--border);
-    }
-    .cm-preview-table tr:last-child td {
-      border-bottom: none;
-    }
-    .cm-preview-table .cm-idx {
-      color: var(--text-secondary);
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-
-    .cm-preview-pill {
-      display: inline-block;
-      padding: 2px 10px;
-      border-radius: 4px;
-      font-size: 0.78rem;
-      font-weight: 500;
-    }
-    .cm-pill-blue   { background: rgba(59, 130, 246, 0.12); color: var(--info); }
-    .cm-pill-teal   { background: rgba(20, 184, 166, 0.12); color: #2dd4bf; }
-    .cm-pill-purple { background: var(--accent-light); color: var(--accent); }
-    .cm-pill-amber  { background: rgba(245, 158, 11, 0.12); color: var(--warning); }
-    .cm-pill-green  { background: rgba(16, 185, 129, 0.12); color: var(--success); }
-    .cm-pill-red    { background: rgba(239, 68, 68, 0.12); color: var(--danger); }
-
-    .cm-pill-editing {
-      outline: 1px solid var(--accent);
-    }
-
-    @media (max-width: 1100px) {
-      .cm-upload-row {
-        flex-direction: column;
-      }
-    }
+    .mapping-header { margin-bottom: 20px; }
+    .mapping-header h1 { font-size: 1.2rem; color: var(--text-primary); margin-bottom: 5px; }
+    .mapping-header p { color: var(--text-secondary); font-size: .82rem; }
+    .mapping-card { max-width: 1100px; }
+    .upload-box { border: 1px dashed var(--border-light); border-radius: 12px; background: var(--bg-input); padding: 28px; text-align: center; margin-bottom: 24px; transition: border-color .18s, background .18s; }
+    .upload-box.dragging, .upload-box:hover { border-color: var(--accent); background: var(--accent-light); }
+    .upload-icon { color: var(--accent); font-size: 1.5rem; margin-bottom: 10px; }
+    .upload-box p { color: var(--text-primary); font-size: .88rem; margin-bottom: 5px; }
+    .upload-box small, #fileName { color: var(--text-secondary); font-size: .76rem; }
+    #fileName { min-height: 18px; margin-top: 12px; }
+    .mapping-section-title { color: var(--text-primary); font-size: .95rem; font-weight: 600; margin-bottom: 15px; }
+    .field-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .mapping-field label { display: block; color: var(--text-muted); font-size: .78rem; font-weight: 600; margin-bottom: 7px; }
+    .mapping-actions { display: flex; align-items: center; gap: 14px; margin-top: 24px; }
+    #status { color: var(--text-secondary); font-size: .8rem; }
+    .choices { margin-bottom: 0; }
+    .choices__inner { min-height: 42px; padding: 6px 8px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-size: .8rem; }
+    .is-focused .choices__inner, .is-open .choices__inner { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .choices__list--dropdown, .choices__list[aria-expanded] { background: var(--bg-card); border-color: var(--border); color: var(--text-primary); z-index: 20; }
+    .choices__item--choice.is-highlighted { background: var(--accent-light); }
+    .choices__input { background: var(--bg-input); border-color: var(--border); color: var(--text-primary); }
+    @media (max-width: 800px) { .field-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 520px) { .field-grid { grid-template-columns: 1fr; } .mapping-actions { align-items: flex-start; flex-direction: column; } }
   </style>
 </head>
 <body>
 <div class="app">
-
-  <!-- -- SIDEBAR -- -->
   <aside class="sidebar">
-    <div class="sidebar-logo">
-      <img src="infolink-logo.png" alt="InfoLink" class="sidebar-logo-img" style="height:38px;object-fit:contain;max-width:160px;">
-    </div>
-
-    <nav class="sidebar-nav" id="sidebar-nav">
-      <!-- Injected by JS -->
+    <div class="sidebar-logo"><img src="infolink-logo.png" alt="InfoLink" /></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a href="dashboard.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+      <a href="search-user.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Search</a>
+      <a href="search-admin.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Deep Search</a>
+      <div class="nav-section-label">Management</div>
+      <a href="users.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</a>
+      <a href="groups.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>Groups</a>
+      <a href="logs.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Logs</a>
+      <a href="collections.html" class="nav-item">Collections</a>
+      <div class="nav-section-label">Settings</div>
+      <a href="change-password.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Change Password</a>
+      <div class="nav-section-label">Tools</div>
+      <a href="processor.html" class="nav-item active"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="17" width="18" height="4" rx="1"/><line x1="7" y1="5" x2="17" y2="5"/><line x1="7" y1="12" x2="14" y2="12"/></svg>Column Mapping</a>
+      <a href="convert.html" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Converter</a>
     </nav>
-
-    <div class="sidebar-user">
-      <div class="user-avatar" id="sb-avatar">A</div>
-      <div class="user-info">
-        <div class="user-name" id="sb-name">Admin</div>
-        <div class="user-role" id="sb-role">System Administrator</div>
-      </div>
-    </div>
-    <div style="padding:0 14px 14px;">
-      <button class="btn-logout" id="logoutBtn" onclick="handleLogout()">
-        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-          <polyline points="16 17 21 12 16 7"/>
-          <line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
-        Logout
-      </button>
-    </div>
+    <div class="sidebar-user"><div class="user-avatar" id="side-avatar">A</div><div class="user-info"><div class="user-name" id="side-name">Admin</div><div class="user-role" id="side-role">System Administrator</div></div></div>
+    <div style="padding:0 14px 14px"><button class="btn-logout" onclick="handleLogout()"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout</button></div>
   </aside>
-
-  <!-- -- MAIN -- -->
   <div class="main">
-
-    <!-- Topbar -->
-    <header class="topbar">
-      <div class="topbar-title">
-        <h2 id="top-title">Column Mapping</h2>
-        <p id="top-subtitle">Import a file, map columns, and review import data</p>
-      </div>
-      <div class="topbar-actions">
-        <button class="theme-btn" id="themeButton" title="Toggle theme">
-          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-          </svg>
-        </button>
-        <div class="profile-chip">
-          <div class="avatar" id="top-avatar">A</div>
-          <div>
-            <div class="name" id="top-name">Admin</div>
-            <div class="role" id="top-role">System Administrator</div>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <!-- Page Content -->
+    <header class="topbar"><div class="topbar-title"><h2>Column Mapping</h2><p>Map uploaded spreadsheet columns to InfoLink fields</p></div><div class="topbar-actions"><button class="theme-btn" id="themeButton" title="Toggle theme"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button><div class="profile-chip"><div class="avatar" id="top-avatar">A</div><div><div class="name" id="top-name">Admin</div><div class="role" id="top-role">System Administrator</div></div></div></div></header>
     <main class="page-content">
-      <!-- Upload Row -->
-      <section class="cm-upload-row">
-        <!-- Dropzone -->
-        <div class="cm-dropzone" id="dropArea">
-          <div class="cm-upload-icon"><i class="fa-solid fa-arrow-up-from-bracket"></i></div>
-          <p>Drag &amp; drop your file here</p>
-          <div class="cm-or">or</div>
-          <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" hidden>
-          <button class="cm-upload-btn" type="button" onclick="document.getElementById('fileInput').click()">Upload File</button>
-          <div class="cm-supported">
-            Supported files
-            <span class="cm-format-chip">CSV</span>
-            <span class="cm-format-chip">Excel</span>
-            <span class="cm-format-chip">XLSX</span>
-          </div>
-        </div>
-
-        <!-- File Info -->
-        <div class="cm-fileinfo">
-          <div class="cm-fileinfo-top">
-            <div class="cm-filetype-badge">CSV</div>
-            <div class="cm-filename" id="cmFileName">users_import_may_2025.csv</div>
-            <i class="fa-solid fa-circle-check cm-check"></i>
-          </div>
-          <div class="cm-fileinfo-meta">
-            <div>
-              <label>File Size</label>
-              <span id="cmFileSize">2.45 MB</span>
-            </div>
-            <div>
-              <label>Rows</label>
-              <span id="cmFileRows">1,248</span>
-            </div>
-            <div>
-              <label>Sheet</label>
-              <span id="cmFileSheet">Sheet1</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Auto-Map -->
-        <button class="cm-automap" id="autoMapBtn" type="button">
-          <strong>Auto-Map</strong>
-          <span>Automatically map columns</span>
-        </button>
-      </section>
-
-      <!-- Mapping Table -->
-      <section class="cm-map-card card">
-        <div class="cm-map-toolbar">
-          <div class="cm-map-toolbar-left">
-            <span class="cm-map-title">Map Columns</span>
-            <button class="cm-toggle" id="requiredToggle" type="button"></button>
-            <span class="cm-toggle-label">Show required only</span>
-          </div>
-
-          <button class="cm-clear-btn" id="clearMappingBtn" type="button">
-            <i class="fa-solid fa-trash"></i>
-            <span>Clear Mapping</span>
-          </button>
-        </div>
-
-        <div class="cm-table-wrap">
-          <table class="cm-table" id="mappingTable">
-            <thead>
-              <tr>
-                <th>Source File Column</th>
-                <th>Sample Data</th>
-                <th>Detected Type</th>
-                <th>Map To InfoLink Field</th>
-                <th>Transform</th>
-                <th>Column Actions</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- Injected by JS -->
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- Import Preview -->
-      <section class="cm-preview-card card">
-        <div class="cm-preview-header">
-          <i class="fa-regular fa-rectangle-list"></i>
-          <span>Import Preview</span>
-        </div>
-
-        <div class="cm-table-wrap">
-          <table class="cm-preview-table" id="previewTable">
-            <thead>
-              <tr id="previewHeadRow">
-                <th>#</th>
-              </tr>
-            </thead>
-            <tbody id="previewBody">
-              <!-- Injected by JS -->
-            </tbody>
-          </table>
-        </div>
+      <section class="card mapping-card">
+        <div class="mapping-header"><h1>Upload and map columns</h1><p>Choose an Excel workbook, then assign its headers to the output fields.</p></div>
+        <div class="upload-box" id="dropArea"><div class="upload-icon">&#8593;</div><p>Drag and drop your workbook here</p><small>Supports XLS and XLSX files</small><br /><input type="file" id="fileInput" accept=".xls,.xlsx" hidden /><label for="fileInput" class="btn btn-primary" style="display:inline-flex;margin-top:14px;cursor:pointer">Choose file</label><div id="fileName">No file chosen</div></div>
+        <div class="mapping-section-title">Output field mapping</div>
+        <div class="field-grid" id="mappingGrid"></div>
+        <div class="mapping-actions"><button class="btn btn-primary" id="runButton" type="button">Run mapping</button><span id="status">Upload a workbook to load its headers.</span></div>
       </section>
     </main>
-
   </div>
 </div>
-
 <script src="data-store.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 <script>
-  // Auth guard
-  if (!InfoLinkStore.isLoggedIn()) {
-    window.location.href = 'login.html';
-  }
-
+  if (!InfoLinkStore.isLoggedIn() || !InfoLinkStore.isAdmin()) window.location.href = 'login.html';
   const currentUser = InfoLinkStore.getCurrentUser();
-  const isAdmin     = InfoLinkStore.isAdmin();
-  const displayName = currentUser.fullname || currentUser.username || 'User';
-  const displayRole = isAdmin ? 'System Administrator' : 'Standard User';
-  const displayInit = displayName.charAt(0).toUpperCase();
-
-  // Set user info
-  document.getElementById('sb-avatar').textContent   = displayInit;
-  document.getElementById('sb-name').textContent     = displayName;
-  document.getElementById('sb-role').textContent     = displayRole;
-  document.getElementById('top-avatar').textContent  = displayInit;
-  document.getElementById('top-name').textContent    = displayName;
-  document.getElementById('top-role').textContent    = displayRole;
-
-  // Build adaptive sidebar nav
-  const adminNav = `
-    <div class="nav-section-label">Main</div>
-    <a href="dashboard.html" class="nav-item">
-      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      Dashboard
-    </a>
-    <a href="search-admin.html" class="nav-item">
-      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      Search
-    </a>
-    <div class="nav-section-label">Management</div>
-    <a href="users.html" class="nav-item">
-      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      Users
-    </a>
-    <a href="groups.html" class="nav-item">
-      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-      Groups
-    </a>
-    <a href="logs.html" class="nav-item">
-      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      Logs
-    </a>
-    <div class="nav-section-label">Settings</div>
-    <a href="change-password.html" class="nav-item">
-      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-      Change Password
-    </a>
-    <div class="nav-section-label">Tools</div>
-    <a href="processor.html" class="nav-item active">
-      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="17" width="18" height="4" rx="1"/><line x1="7" y1="5" x2="17" y2="5"/><line x1="7" y1="12" x2="14" y2="12"/></svg>
-      Column Mapping
-    </a>
-    <a href="convert.html" class="nav-item">
-      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-      Converter
-    </a>
-  `;
-
-  const userNav = `
-    <div class="nav-section-label">Main</div>
-    <a href="dashboard-user.html" class="nav-item">
-      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      Dashboard
-    </a>
-    <a href="search-user.html" class="nav-item">
-      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      Search
-    </a>
-    <div class="nav-section-label">Settings</div>
-    <a href="change-password.html" class="nav-item">
-      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-      Change Password
-    </a>
-    <div class="nav-section-label">Tools</div>
-    <a href="processor.html" class="nav-item active">
-      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="17" width="18" height="4" rx="1"/><line x1="7" y1="5" x2="17" y2="5"/><line x1="7" y1="12" x2="14" y2="12"/></svg>
-      Column Mapping
-    </a>
-    <a href="convert.html" class="nav-item">
-      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-      Converter
-    </a>
-  `;
-
-  document.getElementById('sidebar-nav').innerHTML = isAdmin ? adminNav : userNav;
-
-  function handleLogout() {
-    InfoLinkStore.clearSession();
-    window.location.href = 'login.html';
-  }
-
-  // Toggle theme button
-  document.getElementById("themeButton").addEventListener("click", function () {
-    document.body.classList.toggle("light-mode");
+  const displayName = currentUser.fullname || currentUser.username || 'Admin';
+  const displayInitial = displayName.charAt(0).toUpperCase();
+  document.querySelectorAll('#side-name, #top-name').forEach(el => el.textContent = displayName);
+  document.querySelectorAll('#side-avatar, #top-avatar').forEach(el => el.textContent = displayInitial);
+  const fields = ['Name', 'Number', 'No.2', 'Address', 'Branch', 'Area', 'Date', 'Identity ID', 'Last Order', 'Building No.', 'Apartment No.'];
+  const choices = [];
+  const mappingGrid = document.getElementById('mappingGrid');
+  fields.forEach((field, index) => {
+    const id = `map-field-${index}`;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'mapping-field';
+    wrapper.innerHTML = `<label for="${id}">${field}</label><select id="${id}" multiple></select>`;
+    mappingGrid.appendChild(wrapper);
+    choices.push(new Choices(`#${id}`, { removeItemButton: true, searchEnabled: true, shouldSort: false, placeholder: true, placeholderValue: 'Select source column' }));
   });
-
-  /* ===================== DATA ===================== */
-
-  const mappingRows = [
-    { source: "Full Name",     sample: "John Michael Doe",             type: "Text",  field: "full_name",      transform: "Normalize Text", mapped: true },
-    { source: "Email Address", sample: "john.doe@example.com",         type: "Email", field: "email",          transform: "Lowercase",      mapped: true },
-    { source: "Phone",         sample: "+1 (555) 123-4567",            type: "Phone", field: "phone_number",   transform: "Normalize Phone", mapped: true },
-    { source: "National ID",   sample: "98765432101234",               type: "Text",  field: "national_id",    transform: "Trim Spaces",    mapped: true },
-    { source: "Group Name",    sample: "Sales",                        type: "Text",  field: "assigned_group", transform: "None",           mapped: true },
-    { source: "Collection Name", sample: "Customers",                  type: "Text",  field: "collection_name",transform: "None",           mapped: true },
-    { source: "Status",        sample: "Active",                       type: "Text",  field: "account_status", transform: "Title Case",     mapped: true },
-    { source: "Created Date",  sample: "2025-05-12",                   type: "Date",  field: "created_at",     transform: "Parse Date",     mapped: true },
-    { source: "Last Login",    sample: "2025-05-11 09:15:22",          type: "DateTime", field: "last_login",  transform: "Parse DateTime",  mapped: true },
-    { source: "Country",       sample: "United States",                type: "Text",  field: null,             transform: "Ignore Column",  mapped: false },
-    { source: "Notes",         sample: "Preferred contact via email",  type: "Text",  field: null,             transform: "Set Default / Ignore", mapped: false }
-  ];
-
-  const previewColumns = [
-    "full_name", "email", "phone_number", "national_id",
-    "assigned_group", "collection_name", "account_status",
-    "created_at", "last_login"
-  ];
-
-  const previewRows = [
-    { full_name: "John Michael Doe",     email: "john.doe@example.com",     phone_number: "+1 (555) 123-4567", national_id: "98765432101234", assigned_group: "Sales",     collection_name: "Customers", account_status: "Active",   created_at: "2025-05-12", last_login: "2025-05-11 09:15" },
-    { full_name: "Jane Elizabeth Smith", email: "jane.smith@example.com",   phone_number: "+1 (555) 234-5678", national_id: "87654321098765", assigned_group: "Marketing", collection_name: "Leads",     account_status: "Active",   created_at: "2025-05-12", last_login: "2025-05-11 14:02" },
-    { full_name: "Robert James Brown",   email: "robert.brown@example.com", phone_number: "+1 (555) 345-6789", national_id: "76543210987654", assigned_group: "Support",   collection_name: "Customers", account_status: "Inactive", created_at: "2025-05-11", last_login: "2025-05-09 08:47", editing: "full_name" },
-    { full_name: "Emily Grace Wilson",   email: "emily.wilson@example.com", phone_number: "+1 (555) 456-7890", national_id: "65432109876543", assigned_group: "Sales",     collection_name: "Partners",  account_status: "Active",   created_at: "2025-05-11", last_login: "2025-05-10 17:23" },
-    { full_name: "Michael Anthony Davis",email: "michael.davis@example.com",phone_number: "+1 (555) 567-8901", national_id: "54321098765432", assigned_group: "Operations",collection_name: "Vendors",   account_status: "Active",   created_at: "2025-05-10", last_login: "2025-05-10 11:05" }
-  ];
-
-  const typeClass = {
-    Text: "cm-type-text",
-    Email: "cm-type-email",
-    Phone: "cm-type-phone",
-    Date: "cm-type-date",
-    DateTime: "cm-type-date"
-  };
-
-  const pillClass = {
-    full_name: "cm-pill-blue",
-    email: "cm-pill-blue",
-    phone_number: "cm-pill-teal",
-    national_id: "cm-pill-purple",
-    assigned_group: "cm-pill-amber",
-    collection_name: "cm-pill-teal",
-    created_at: null,
-    last_login: null
-  };
-
-  function escapeHtml(str) {
-    const div = document.createElement("div");
-    div.textContent = str;
-    return div.innerHTML;
-  }
-
-  /* ===================== RENDER MAPPING TABLE ===================== */
-
-  function renderMappingTable() {
-    const tbody = document.querySelector("#mappingTable tbody");
-    tbody.innerHTML = "";
-
-    mappingRows.forEach(row => {
-      const tr = document.createElement("tr");
-
-      const fieldSelectHtml = row.mapped
-        ? `<select class="cm-select">
-                <option>${escapeHtml(row.field)}</option>
-           </select>`
-        : `<select class="cm-select placeholder">
-                <option>Select target field</option>
-           </select>`;
-
-      const transformSelectHtml = `<select class="cm-select">
-                <option>${escapeHtml(row.transform)}</option>
-           </select>`;
-
-      const statusHtml = row.mapped
-        ? `<span class="cm-status mapped"><i class="fa-solid fa-circle-check"></i> Mapped</span>`
-        : `<span class="cm-status unmapped"><i class="fa-solid fa-circle-exclamation"></i> Unmapped</span>`;
-
-      tr.innerHTML = `
-        <td>${escapeHtml(row.source)}</td>
-        <td>${escapeHtml(row.sample)}</td>
-        <td><span class="cm-type-badge ${typeClass[row.type]}">${row.type}</span></td>
-        <td>${fieldSelectHtml}</td>
-        <td>${transformSelectHtml}</td>
-        <td><button class="cm-action-btn" type="button"><i class="fa-solid fa-ellipsis"></i></button></td>
-        <td>${statusHtml}</td>
-      `;
-
-      tbody.appendChild(tr);
+  function loadHeaders(headers) {
+    choices.forEach(instance => {
+      instance.clearChoices();
+      instance.setChoices(headers.map(header => ({ value: String(header), label: String(header) })), 'value', 'label', true);
     });
+    document.getElementById('status').textContent = `${headers.length} source columns loaded.`;
   }
-
-  /* ===================== RENDER PREVIEW TABLE ===================== */
-
-  function renderPreviewTable() {
-    const headRow = document.getElementById("previewHeadRow");
-    // Clear existing besides first '#'
-    headRow.innerHTML = "<th>#</th>";
-    previewColumns.forEach(col => {
-      const th = document.createElement("th");
-      th.textContent = col.replace('_', ' ');
-      headRow.appendChild(th);
-    });
-
-    const body = document.getElementById("previewBody");
-    body.innerHTML = "";
-
-    previewRows.forEach((row, i) => {
-      const tr = document.createElement("tr");
-      let cells = `<td class="cm-idx">${i + 1}</td>`;
-
-      previewColumns.forEach(col => {
-        const value = row[col] || "";
-        const cls = pillClass[col];
-        const editing = row.editing === col ? " cm-pill-editing" : "";
-
-        if (col === "account_status") {
-          const statusCls = value === "Active" ? "cm-pill-green" : "cm-pill-red";
-          cells += `<td><span class="cm-preview-pill ${statusCls}${editing}">${escapeHtml(value)}</span></td>`;
-        } else if (cls) {
-          cells += `<td><span class="cm-preview-pill ${cls}${editing}">${escapeHtml(value)}</span></td>`;
-        } else {
-          cells += `<td>${escapeHtml(value)}</td>`;
-        }
-      });
-
-      tr.innerHTML = cells;
-      body.appendChild(tr);
-    });
-  }
-
-  renderMappingTable();
-  renderPreviewTable();
-
-  /* ===================== INTERACTIONS ===================== */
-
-  document.getElementById("fileInput").addEventListener("change", function (e) {
-    const file = e.target.files[0];
+  function handleFile(file) {
     if (!file) return;
-    document.getElementById("cmFileName").textContent = file.name;
-    document.getElementById("cmFileSize").textContent = (file.size / (1024 * 1024)).toFixed(2) + " MB";
-  });
-
-  document.getElementById("requiredToggle").addEventListener("click", function () {
-    this.classList.toggle("on");
-  });
-
-  document.getElementById("clearMappingBtn").addEventListener("click", function () {
-    mappingRows.forEach(row => {
-      row.mapped = false;
-      row.field = null;
-    });
-    renderMappingTable();
-  });
-
-  document.getElementById("autoMapBtn").addEventListener("click", function () {
-    mappingRows.forEach(row => {
-      if (!row.mapped && row.source !== "Country" && row.source !== "Notes") {
-        row.mapped = true;
+    document.getElementById('fileName').textContent = file.name;
+    const reader = new FileReader();
+    reader.onload = eventData => {
+      try {
+        const workbook = XLSX.read(new Uint8Array(eventData.target.result), { type: 'array' });
+        const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1, defval: '' });
+        if (!rows.length) throw new Error('The workbook is empty.');
+        loadHeaders(rows[0].filter(header => String(header).trim()));
+      } catch (error) {
+        document.getElementById('status').textContent = error.message || 'Unable to read workbook.';
       }
-    });
-    renderMappingTable();
-  });
+    };
+    reader.readAsArrayBuffer(file);
+  }
+  document.getElementById('fileInput').addEventListener('change', event => handleFile(event.target.files[0]));
+  const dropArea = document.getElementById('dropArea');
+  dropArea.addEventListener('dragover', event => { event.preventDefault(); dropArea.classList.add('dragging'); });
+  dropArea.addEventListener('dragleave', () => dropArea.classList.remove('dragging'));
+  dropArea.addEventListener('drop', event => { event.preventDefault(); dropArea.classList.remove('dragging'); handleFile(event.dataTransfer.files[0]); });
+  document.getElementById('runButton').addEventListener('click', () => { document.getElementById('status').textContent = 'Mapping is ready to run.'; });
+  document.getElementById('themeButton').addEventListener('click', () => document.body.classList.toggle('light-mode'));
+  function handleLogout() { InfoLinkStore.clearSession(); window.location.href = 'login.html'; }
 </script>
-<script src="3d-effects.js"></script>
 </body>
 </html>

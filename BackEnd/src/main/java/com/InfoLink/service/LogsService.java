@@ -27,7 +27,7 @@ public class LogsService {
 
     @Transactional(readOnly = true)
     public PagedResponse<LogResponse> getLogs(Pageable pageable) {
-        Page<Log> logPage = logRepository.findAll(pageable);
+        Page<Log> logPage = logRepository.findAllByOrderBySearchDateDescLogIDDesc(pageable);
 
         List<LogResponse> content = logPage.getContent()
                 .stream()
@@ -73,7 +73,7 @@ public class LogsService {
 
         @Transactional(readOnly = true)
         public PagedResponse<LogResponse> getCurrentUserLogs(String username, Pageable pageable) {
-                Page<Log> logPage = logRepository.findByUser_Username(username, pageable);
+                Page<Log> logPage = logRepository.findByUser_UsernameOrderBySearchDateDescLogIDDesc(username, pageable);
                 return toResponse(logPage);
         }
 
